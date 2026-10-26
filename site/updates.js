@@ -5,6 +5,24 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.16',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Auto-Publish (new)',
+        text: 'Posts in your announcement channels are published automatically, so every server that follows them gets them straight away. Pick channels, or leave it to publish in all of them.' },
+      { title: 'Role Menus: emoji reactions',
+        text: 'Role menus have a third style, Emoji reactions: members react to get a role and remove the reaction to lose it. Pick an emoji for each role, or BEV uses 🇦 🇧 🇨. One-at-a-time sets still swap.' },
+      { title: '/fun roleplay actions',
+        text: 'New: pat, kiss, slap, cuddle, poke, bite, tickle, feed, handhold, punch, wave, cry, dance and laugh, each with a random anime GIF. Hugs and high-fives get GIFs too.' },
+      { title: '/fun meme',
+        text: 'Posts a random safe-for-work meme from Reddit, with a button for another.' },
+      { title: '/image',
+        text: "Fun picture edits of anyone's avatar: a Wanted poster, jail bars, a gravestone, WASTED and pixel art." },
+      { title: 'Vote & Bump Rewards (new)',
+        text: 'Members get coins for voting for BEV on top.gg (double at weekends) and for bumping your server with Disboard. /vote shows the reward and when they can vote again.' },
+    ],
+  },
+  {
     id: '4.15',
     date: '26 October 2026',
     changes: [

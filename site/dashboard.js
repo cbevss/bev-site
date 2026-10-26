@@ -1397,9 +1397,15 @@
         top.append(remove);
         row.append(top);
         var grid = el('div', 'igrid');
+        // Role menus: the reaction emojis only matter for the reactions style, the layout only for buttons.
+        function menuFieldShown(key) {
+          var style = ((get() || [])[index] || {}).style || 'buttons';
+          return key === 'emojis' ? style === 'reactions' : key === 'layout' ? style === 'buttons' : true;
+        }
         (s.fields || []).forEach(function (f) {
           if (s.key === 'role_menus' && (f.key === 'roles' || f.key === 'swap_roles')) return;     // shown as groups below
           var cell = el('div', 'icell k-' + f.kind);
+          if (s.key === 'role_menus') { cell.setAttribute('data-field', f.key); cell.hidden = !menuFieldShown(f.key); }
           var fid = 's-' + s.key + '-' + index + '-' + f.key;
           var lab = el('label', 'flabel sm' + (compact && index ? ' sr' : ''), f.label);
           lab.htmlFor = fid;
@@ -1410,6 +1416,9 @@
             if (!now[index]) return;
             now[index][f.key] = v;
             put(now);
+            if (s.key === 'role_menus' && f.key === 'style') {
+              grid.querySelectorAll('[data-field]').forEach(function (c) { c.hidden = !menuFieldShown(c.getAttribute('data-field')); });
+            }
           }));
           grid.append(cell);
         });
