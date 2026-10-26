@@ -827,6 +827,73 @@
   $('crun').addEventListener('click', runCheck);
   $('irefresh').addEventListener('click', loadInbox);
 
+  /* ---------- Dashboard settings: a switch per feature, for every server ---------- */
+  var owner = { features: [], categories: [], busy: {} };
+  function drawOwner() {
+    var box = $('flist');
+    box.replaceChildren();
+    var q = ($('ffind').value || '').trim().toLowerCase();
+    var off = owner.features.filter(function (f) { return f.off; }).length;
+    $('fstate').textContent = off ? off + ' switched off' : 'Everything on';
+    $('fstate').className = 'stat' + (off ? ' warnstat' : ' here');
+    var shown = 0;
+    owner.categories.forEach(function (cat) {
+      var feats = owner.features.filter(function (f) { return f.category === cat.key && (!q || (f.name + ' ' + f.about).toLowerCase().indexOf(q) !== -1); });
+      if (!feats.length) return;
+      var group = make('div', 'ofgroup');
+      group.append(make('h3', 'ofcat', cat.icon + ' ' + cat.name));
+      var ul = make('ul', 'oflist2');
+      feats.forEach(function (f) {
+        shown++;
+        var li = make('li', 'ofrow' + (f.off ? ' isoff' : ''));
+        li.setAttribute('data-key', f.key);
+        var text = make('div', 'oftext');
+        text.append(make('b', null, f.icon + ' ' + f.name), make('span', 'ofabout', f.about));
+        var sw = make('button', 'ofswitch' + (f.off ? '' : ' on'), f.off ? 'Off for everyone' : 'On');
+        sw.type = 'button';
+        sw.setAttribute('aria-pressed', f.off ? 'false' : 'true');
+        sw.setAttribute('aria-label', f.name + ': ' + (f.off ? 'switched off for every server' : 'on'));
+        sw.disabled = !!owner.busy[f.key];
+        sw.addEventListener('click', function () { setOwner(f, !f.off, sw); });
+        li.append(text, sw);
+        ul.append(li);
+      });
+      group.append(ul);
+      box.append(group);
+    });
+    $('fcount').textContent = shown + ' of ' + owner.features.length + ' features';
+  }
+  function setOwner(f, off, button) {
+    if (off && !root.confirm('Switch ' + f.name + ' off for every server? It disappears from every dashboard and its commands leave Discord.')) return;
+    owner.busy[f.key] = true;
+    button.disabled = true;
+    $('fnote').textContent = (off ? 'Switching off ' : 'Switching on ') + f.name + '…';
+    call('/api/admin/features/set', { key: f.key, off: off }).then(function (res) {
+      delete owner.busy[f.key];
+      if (!res.ok) { $('fnote').textContent = 'That didn\u2019t save (' + (res.data.error || res.status) + '). Try again.'; drawOwner(); return; }
+      owner.features = res.data.features || owner.features;
+      owner.categories = res.data.categories || owner.categories;
+      $('fnote').textContent = f.name + (off ? ' is now off for every server.' : ' is back on. Servers have what they had before.');
+      say($('fnote').textContent);
+      drawOwner();
+    }, function () { delete owner.busy[f.key]; $('fnote').textContent = 'Saving failed. Check your connection.'; drawOwner(); });
+  }
+  function loadOwner() {
+    call('/api/admin/features').then(function (res) {
+      if (!res.ok) {
+        $('fstate').textContent = 'Not available';
+        $('fnote').textContent = res.data.error === 'bot_outdated' ? 'The bot needs updating before this works.' : 'BEV didn\u2019t answer, so the switches can\u2019t be shown. Try again in a minute.';
+        return;
+      }
+      owner.features = res.data.features || [];
+      owner.categories = res.data.categories || [];
+      $('fnote').textContent = '';
+      drawOwner();
+    }, function () { $('fstate').textContent = 'Not available'; });
+  }
+  $('ffind').addEventListener('input', drawOwner);
+  loadOwner();
+
   var resizeTimer = null;
   root.addEventListener('resize', function () {
     root.clearTimeout(resizeTimer);

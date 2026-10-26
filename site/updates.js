@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.21',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Admin: Dashboard settings',
+        text: 'Site admins get a new section on the Admin page with a switch for every feature. Switching one off takes it off every server\'s dashboard and out of Discord\'s command list, and BEV treats it as off everywhere. Switching it back on restores what each server had.' },
+    ],
+  },
+  {
     id: '4.20',
     date: '26 October 2026',
     changes: [

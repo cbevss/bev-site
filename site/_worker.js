@@ -783,7 +783,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=b64ab38237">
+<link rel="stylesheet" href="/styles.css?v=5b34ad3a92">
 </head>
 <body class="notice">
 <div class="hero">
@@ -986,6 +986,7 @@ async function adminPage(request, env, ctx, secure, s) {
 const ADMIN_ROUTES = {
   '/api/admin/state': 'GET', '/api/admin/maintenance': 'POST', '/api/admin/banner': 'POST', '/api/admin/check': 'POST',
   '/api/admin/alert': 'GET', '/api/admin/alert/send': 'POST', '/api/admin/inbox': 'GET', '/api/admin/inbox/mark': 'POST',
+  '/api/admin/features': 'GET', '/api/admin/features/set': 'POST',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1302,6 +1303,7 @@ async function adminApi(request, env, c, url, secure, s) {
   if (path.startsWith('/api/admin/alert')) return alertApi(request, c, s, path);
   if (path === '/api/admin/inbox') return json(await inboxState(env, c));
   if (path === '/api/admin/inbox/mark') return markInbox(request, env, s);
+  if (path === '/api/admin/features' || path === '/api/admin/features/set') return ownerFeatures(request, c, s, path);
 
   const body = await readJson(request, 20000);
   if (!body) return json({ error: 'bad_request' }, 400);
@@ -1350,6 +1352,36 @@ async function updatesApi(request, env, url, s) {
   } catch {
     return json({ ok: true, saved: false });
   }
+}
+
+/* ---------- Dashboard settings: switch a feature off for every server (site admins only) ---------- */
+
+function cleanOwnerFeatures(d) {
+  const list = Array.isArray(d && d.features) ? d.features : [];
+  return {
+    features: list.slice(0, 200).filter((f) => f && KEY_RE.test(String(f.key))).map((f) => ({
+      key: String(f.key), name: str(f.name, 60), icon: str(f.icon, 12), category: KEY_RE.test(String(f.category)) ? String(f.category) : 'other',
+      about: str(f.about, 400), off: f.off === true, since: Number.isFinite(f.since) ? f.since : null,
+    })),
+    categories: (Array.isArray(d && d.categories) ? d.categories : []).slice(0, 20).filter((c) => c && KEY_RE.test(String(c.key)))
+      .map((c) => ({ key: String(c.key), icon: str(c.icon, 12), name: str(c.name, 40) })),
+  };
+}
+
+async function ownerFeatures(request, c, s, path) {
+  let res;
+  if (path === '/api/admin/features/set') {
+    const body = await readJson(request, 2000);
+    if (!body || typeof body.key !== 'string' || !KEY_RE.test(body.key) || typeof body.off !== 'boolean') return json({ error: 'bad_request' }, 400);
+    res = await bot(c, '/api/owner-features', { method: 'POST', body: JSON.stringify({ key: body.key, off: body.off, by: `${s.session.user.name} (${s.session.user.id})` }) });
+  } else {
+    res = await bot(c, '/api/owner-features');
+  }
+  if (res.error) return json({ error: res.error }, 503);
+  if (res.status === 404) return json({ error: 'bot_outdated' }, 501);
+  if (res.status === 400) return json({ error: 'bad_request' }, 400);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
+  return json(cleanOwnerFeatures(res.data));
 }
 
 /* ---------- entry ---------- */
