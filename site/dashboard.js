@@ -457,6 +457,7 @@
       box.append(sum);
       var fields = el('div', 'fields');
       var making = (f.actions || []).find(function (a) { return a && a.key === 'level_roles'; });
+      if (f.key === 'jail' && Array.isArray(f.jailed)) fields.append(jailList(f));
       f.settings.forEach(function (s) {
         if (making && s.key === 'level_rewards') fields.append(levelRolesBox(making));
         fields.append(fieldFor(s));
@@ -467,6 +468,63 @@
       card.append(el('p', 'fnone', 'No extra settings: just switch it on or off.'));
     }
     return card;
+  }
+
+  // Jail: everyone in jail, each with a Free button.
+  function jailList(f) {
+    var box = el('div', 'jlist');
+    box.id = 'jlist';
+    var head = el('p', 'flabel');
+    var list = el('ul', 'jitems');
+    var note = el('p', 'fnote');
+    note.setAttribute('role', 'status');
+    note.hidden = true;
+    box.append(head, list, note);
+    function draw(people) {
+      f.jailed = people;
+      head.textContent = 'In jail now (' + people.length + ')';
+      list.replaceChildren();
+      if (!people.length) { list.append(el('li', 'jempty', 'Nobody is in jail.')); return; }
+      people.forEach(function (p) {
+        var li = el('li', 'jitem');
+        li.setAttribute('data-id', p.id);
+        li.append(avatarNode(p.avatar, p.display || p.id, 'av sm'));
+        var who = el('div', 'jwho');
+        who.append(el('b', null, p.display || 'Someone who left the server'));
+        var bits = [];
+        if (p.name) bits.push('@' + p.name);
+        if (p.since) bits.push('jailed ' + new Date(p.since * 1000).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }));
+        bits.push(p.until ? 'freed automatically ' + new Date(p.until * 1000).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : 'until staff free them');
+        who.append(el('span', 'jmeta', bits.join(' • ')));
+        if (p.reason) who.append(el('span', 'jmeta', 'Reason: ' + p.reason));
+        var b = el('button', 'mini jfree', '🕊️ Free');
+        b.type = 'button';
+        b.setAttribute('aria-label', 'Free ' + (p.display || p.id));
+        b.addEventListener('click', function () {
+          if (!root.confirm('Free ' + (p.display || 'this member') + ' from jail?')) return;
+          b.disabled = true;
+          var guild = state.guild;
+          request('/api/action', {
+            method: 'POST',
+            headers: { accept: 'application/json', 'content-type': 'application/json' },
+            body: JSON.stringify({ guild_id: guild, owner: 'jail', action: 'free', values: { member: p.id } })
+          }).then(function (r) {
+            if (guild !== state.guild) return;
+            b.disabled = false;
+            var ok = r.status === 200 && r.data && r.data.ok;
+            note.hidden = false;
+            note.className = 'fnote ' + (ok ? 'ok' : 'no');
+            note.textContent = ok ? (r.data.note || 'Done.') : ((r.data && r.data.message) || errorText(r));
+            if (ok && Array.isArray(r.data.data)) draw(r.data.data);
+            if (ok) say(note.textContent);
+          });
+        });
+        li.append(who, b);
+        list.append(li);
+      });
+    }
+    draw(f.jailed);
+    return box;
   }
 
   // The few facts a card shows, like "Current number: 37" or "Saved backups: 3".
@@ -1363,6 +1421,29 @@
   var BOX_PARTS = ['author', 'title', 'description', 'image', 'thumbnail', 'footer'];
   var designer = { pick: 0, armed: null, timer: null, note: null };
 
+  /* ---------- Message Designer: mild swearing only (the same check as the bot's b11_message_language.py) ---------- */
+
+  var EXTREME_WORDS = [['fuck', true], ['fuk', true], ['fck', true], ['motherfuck', true], ['cunt', true], ['nigger', true], ['nigga', true], ['coon', false], ['paki', false], ['chink', false], ['gook', false], ['spic', false], ['spick', false], ['wetback', true], ['kike', false], ['raghead', true], ['towelhead', true], ['beaner', false], ['gyppo', false], ['gypo', false], ['faggot', true], ['fag', false], ['dyke', false], ['tranny', false], ['trannies', false], ['shemale', true], ['retard', false], ['retarded', false], ['spastic', false], ['spaz', false], ['rape', false], ['raped', false], ['raping', false], ['rapist', true], ['cocksucker', true], ['whore', true], ['slut', true], ['kys', false]];
+  var EXTREME_PHRASES = ['kill (?:your ?self|yo ?self|ur ?self|yourselves)', 'sieg heil', 'heil hitler'];
+  var LOOKALIKES = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', '$': 's', '!': 'i', '|': 'i', '+': 't' };
+  var EXTREME_RE = new RegExp('(?<![a-z])(?:' + EXTREME_WORDS.map(function (w) {
+    return w[0].split('').map(function (c) { return c + '+'; }).join('') + (w[1] ? '[a-z]*' : '(?:e?s|z)?');
+  }).join('|') + ')(?![a-z])|(?<![a-z])(?:' + EXTREME_PHRASES.join('|') + ')(?![a-z])');
+  var LANGUAGE_PARTS = [['text', 'Text above the box'], ['author', 'Small heading'], ['title', 'Title'], ['description', 'Main text'],
+    ['footer', 'Footer'], ['button_label', 'Button text'], ['link', 'Title link'], ['button_link', 'Button link'], ['image', 'Big picture'],
+    ['thumbnail', 'Small picture']];
+
+  function languageText(text) {
+    var t = String(text || '').replace(/<(?:@[!&]?|#)\d+>|<a?:(\w+):\d+>/g, function (m, name) { return name || ' '; });
+    t = t.normalize('NFKD').replace(/[^\x00-\x7f]/g, '').toLowerCase();
+    t = t.replace(/[013457@$!|+]/g, function (c) { return LOOKALIKES[c]; });
+    t = t.replace(/[^a-z]+/g, ' ');
+    t = t.replace(/(?<![a-z])(?:[a-z] ){2,}[a-z](?![a-z])/g, function (m) { return m.replace(/ /g, ''); });
+    return t.split(' ').filter(Boolean).join(' ');
+  }
+  function isExtreme(text) { return EXTREME_RE.test(languageText(text)); }
+  function extremeParts(t) { return LANGUAGE_PARTS.filter(function (p) { return isExtreme(t[p[0]] || ''); }).map(function (p) { return p[1]; }); }
+
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
@@ -1632,7 +1713,8 @@
       var update = el('button', 'mini mupdate', designer.armed === 'update' ? 'Click again to update it' : 'Update the copy sent before');
       update.type = 'button';
       update.id = 'mupdate';
-      var blocked = dirty || !on || !t.id || state.saving;
+      var rude = extremeParts(t);
+      var blocked = dirty || !on || !t.id || state.saving || rude.length > 0;
       send.disabled = blocked || !channel;
       update.disabled = blocked || !post;
       if (designer.armed === 'send') send.classList.add('armed');
@@ -1645,7 +1727,10 @@
       var status = el('p', 'note mstatus');
       status.id = 'mstatus';
       status.setAttribute('aria-live', 'polite');
-      if (designer.note) status.textContent = designer.note;
+      if (rude.length) {
+        status.textContent = '⛔ BEV won’t send this: it has strong swearing, a slur or a threat in ' + rude.join(', ') + '. Mild words like damn or crap are fine.';
+        status.classList.add('mrude');
+      } else if (designer.note) status.textContent = designer.note;
       else if (dirty || !t.id) status.textContent = 'Save your changes first, then you can send this version.';
       else if (!on) status.textContent = 'Switch the Message Designer on and save, then you can send it.';
       else if (!channel) status.textContent = 'Pick a channel in Where it goes.';
@@ -2258,7 +2343,7 @@
   var exported = { clone: clone, same: same, changes: changes, valuesOf: valuesOf, wordsFrom: wordsFrom, newItem: newItem, inviteFor: inviteFor,
                    iconUrl: iconUrl, avatarUrl: avatarUrl, initials: initials, channelLabel: channelLabel, searchText: searchText, ERRORS: ERRORS,
                    mdToHtml: mdToHtml, validUrl: validUrl, validColour: validColour, boxLength: boxLength, inOrder: inOrder, madeLabel: madeLabel,
-                   plural: plural };
+                   plural: plural, isExtreme: isExtreme, extremeParts: extremeParts };
   if (typeof module === 'object' && module.exports) module.exports = exported;
   if (doc && doc.getElementById('guild')) wire();
 })(typeof window !== 'undefined' ? window : globalThis);

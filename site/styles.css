@@ -847,3 +847,15 @@ button.mini.abtn[aria-expanded="true"]{background:rgba(37,99,235,.32)}
 .imark,.iundo{min-height:38px;padding:0 14px;font-size:14px;cursor:pointer;font-family:inherit}
 button.mini.imark{background:var(--ac);border-color:var(--ac)}
 .idone{margin-top:18px}
+.mstatus.mrude{color:#FFC4C4;font-weight:600}
+/* Jail: who's in jail, with Free buttons */
+.jlist{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:rgba(4,6,12,.55)}
+.jitems{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto}
+.jitem{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 10px;border:1px solid rgba(110,160,255,.14);border-radius:10px;background:rgba(9,15,32,.7)}
+.jwho{display:flex;flex-direction:column;min-width:0}
+.jwho b{color:#fff;font-size:15px;overflow-wrap:anywhere}
+.jmeta{font-size:13px;color:var(--mut);overflow-wrap:anywhere}
+.jempty{color:var(--mut);font-size:14.5px}
+button.mini.jfree{min-height:38px;padding:0 14px;font-size:14px;cursor:pointer;font-family:inherit;border-color:rgba(110,220,150,.6)}
+button.mini.jfree:hover{background:rgba(20,120,60,.6);box-shadow:none}
+@media(max-width:420px){.jitem{grid-template-columns:32px minmax(0,1fr)}.jitem .jfree{grid-column:1/-1}}
