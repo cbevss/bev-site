@@ -53,7 +53,7 @@ const PAGES = { '/': 'Home', '/features': 'Features', '/support': 'Support', '/s
 // Link previews, crawlers, uptime monitors and scripts don't count as visits.
 const NOT_A_PERSON = /bot|crawl|spider|slurp|preview|monitor|uptime|curl|wget|python|httpclient|headless|lighthouse|facebookexternalhit|embedly|whatsapp/i;
 const STATIC_FILE = /^\/[\w.-]+\.(?:css|js|png|jpe?g|gif|svg|ico|webp|txt|xml|webmanifest|woff2?)$/;
-const DASHBOARD_PATHS = new Set(['/dashboard', '/dashboard/', '/dashboard.html']);
+const DASHBOARD_PATHS = new Set(['/dashboard', '/dashboard/', '/dashboard.html', '/jail-requests', '/jail-requests/', '/jail-requests.html']);
 const ADMIN_PATHS = new Set(['/admin', '/admin/', '/admin.html']);
 const BANNER_STYLES = ['info', 'warning', 'success'];
 
@@ -738,7 +738,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=e290b6e66b">
+<link rel="stylesheet" href="/styles.css?v=4c105ac3d1">
 </head>
 <body class="notice">
 <div class="hero">

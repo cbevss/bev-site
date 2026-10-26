@@ -5,6 +5,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.13',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Jail: requests to be freed',
+        text: "People in jail can ask to be freed by sending one message in the jail channel. BEV deletes it straight away and keeps it for the staff, and anything else they send there is deleted. Only their first message counts. If they're denied, they can ask again after 7 days." },
+      { title: 'Requests to be freed (dashboard)',
+        text: "A new button on the Jail card opens a window listing everyone who asked, newest first, with their picture, display name and @username. Pick someone to read their message, then Approve (they're freed and told by DM) or Deny (they stay, and are told in the jail channel)." },
+      { title: 'Jail reflection message',
+        text: "The reflection message now explains how to ask to be freed. It's still posted in a box, with the jail role's ping just above it so everyone in jail is notified." },
+      { title: 'Let people in jail ask to be freed (setting)',
+        text: 'A new Jail setting, on by default. Turn it off and people in jail can chat in the jail channel as normal.' },
+    ],
+  },
+  {
     id: '4.12',
     date: '26 October 2026',
     changes: [

@@ -444,6 +444,7 @@
     if (f.problem) meta.append(el('p', 'miss', '⚠️ ' + f.problem));
     if (f.info && f.info.length) meta.append(infoList(f.info));
     if (f.buttons && f.buttons.length) meta.append(actionRow(f.key, f.buttons));
+    if (f.key === 'jail' && f.enabled && f.pleas_on) meta.append(pleaButton(f));
     if (meta.childNodes.length) main.append(meta);
     var templates = f.key === 'custom_messages' && (f.settings || []).find(function (s) { return s.key === 'message_templates'; });
     if (templates) {
@@ -468,6 +469,26 @@
       card.append(el('p', 'fnone', 'No extra settings: just switch it on or off.'));
     }
     return card;
+  }
+
+  // Jail: requests to be freed open in their own window, with a count of the ones waiting.
+  function pleaButton(f) {
+    var n = Array.isArray(f.pleas) ? f.pleas.length : 0;
+    var url = '/jail-requests?guild=' + encodeURIComponent(state.guild);
+    var a = el('a', 'mini jreq', '📨 Requests to be freed');
+    a.id = 'jreq';
+    a.href = url;
+    a.target = '_blank';
+    var badge = el('span', 'jrn' + (n ? '' : ' zero'), String(n));
+    badge.setAttribute('aria-label', n === 1 ? '1 waiting' : n + ' waiting');
+    a.append(badge);
+    a.addEventListener('click', function (e) {
+      var w = root.open(url, 'bev-jail-requests', 'popup,width=1000,height=760');
+      if (w) { e.preventDefault(); try { w.focus(); } catch (err) { /* another window */ } }
+    });
+    var row = el('div', 'row');
+    row.append(a);
+    return row;
   }
 
   // Jail: everyone in jail, each with a Free button.
