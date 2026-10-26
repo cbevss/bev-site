@@ -664,11 +664,44 @@
           closeForm();
           show(r.data.note || 'Done.', true);
           if (extra.onResult) extra.onResult(r.data);
+          if (owner === 'backup' && b.key === 'history' && Array.isArray(r.data.data)) drawBackupHistory(r.data.data);
           if (r.data.reload) refreshAfterAction(owner, r.data.note || 'Done.', show);
           return;
         }
         show((r.data && r.data.message) || errorText(r), false);
       });
+    }
+    // Server Backups → History: the last 5 backups with when each was saved, each with its own Restore button.
+    var hist = null;
+    function drawBackupHistory(items) {
+      if (!hist) { hist = el('ol', 'bhist'); hist.id = 'bhist'; box.append(hist); }
+      hist.replaceChildren();
+      var restore = buttons.find(function (x) { return x.key === 'restore'; });
+      items.forEach(function (it, i) {
+        var li = el('li', 'bhitem');
+        var when = new Date(it.created * 1000);
+        var head = el('b', null, when.toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+        var meta = el('span', 'bhmeta', 'Backup #' + it.id + (i === 0 ? ' • newest' : '') + ' • ' + ago(it.created) + (it.label ? ' • ' + it.label : '') +
+          ' • ' + it.roles + ' role' + (it.roles === 1 ? '' : 's') + ', ' + it.channels + ' channel' + (it.channels === 1 ? '' : 's'));
+        var who = el('div', 'bhwho');
+        who.append(head, meta);
+        li.append(who);
+        if (restore) {
+          var go = el('button', 'mini danger', '♻️ Restore this one');
+          go.type = 'button';
+          go.setAttribute('aria-label', 'Restore backup #' + it.id + ' from ' + head.textContent);
+          go.addEventListener('click', function () { run(restore, { backup: it.id }); });
+          li.append(go);
+        }
+        hist.append(li);
+      });
+      if (!items.length) hist.append(el('li', 'bhempty', 'No backups yet. Press Back up now to make one.'));
+    }
+    function ago(t) {
+      var s = Math.max(0, Math.round(Date.now() / 1000 - t));
+      if (s < 3600) return Math.max(1, Math.round(s / 60)) + ' min ago';
+      if (s < 86400) { var h = Math.round(s / 3600); return h + ' hour' + (h === 1 ? '' : 's') + ' ago'; }
+      var d = Math.round(s / 86400); return d + ' day' + (d === 1 ? '' : 's') + ' ago';
     }
     return box;
   }

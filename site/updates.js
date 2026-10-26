@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.17',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Server Backups: History',
+        text: "A new History button on the Server Backups card shows your last 5 backups with the day, date and time each was saved and what's in it. If your server was damaged without you noticing, pick the backup from before it happened and press Restore this one." },
+    ],
+  },
+  {
     id: '4.16',
     date: '26 October 2026',
     changes: [
