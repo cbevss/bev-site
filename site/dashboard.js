@@ -864,6 +864,11 @@
       line('Coins', Number(d.wallet).toLocaleString() + ' in their wallet, ' + Number(d.bank).toLocaleString() + ' in the bank');
       line('Warnings', String(d.warnings) + (d.jailed ? ' • in jail right now' : ''));
       if (d.verified !== null && d.verified !== undefined) line('Verified', d.verified ? 'Yes' : 'Not yet');
+      if (d.ladder && typeof d.ladder === 'object') {
+        var NEXT = { timeout: 'a timeout', jail: 'jail', ban: 'a ban' };
+        line('Punishment Ladder', d.ladder.offences + ' offence' + (d.ladder.offences === 1 ? '' : 's') + ' • next: ' + (NEXT[d.ladder.next] || d.ladder.next)
+          + ' • starts again ' + new Date(d.ladder.resets * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' if nothing else happens');
+      }
       summary.append(facts);
       var temp = Array.isArray(d.temp_roles) ? d.temp_roles : [];
       if (temp.length) {
