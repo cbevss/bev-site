@@ -48,7 +48,7 @@ const DURATIONS = [0, 15, 30, 60, 120, 240, 480, 720, 1440]; // maintenance leng
 const DEFAULT_MESSAGE = "We're carrying out scheduled maintenance to improve bevbotdiscord.com, so the website is temporarily unavailable. "
   + "The BEV bot isn't affected and keeps running in Discord as normal. Thank you for your patience. We'll be back shortly.";
 // The pages visits are counted for, with the names the admin page shows.
-const PAGES = { '/': 'Home', '/features': 'Features', '/support': 'Support', '/status': 'Bot status', '/leaderboard': 'Leaderboard',
+const PAGES = { '/discover': 'Find a server', '/': 'Home', '/features': 'Features', '/support': 'Support', '/status': 'Bot status', '/leaderboard': 'Leaderboard',
   '/servers': 'My servers', '/dashboard': 'Dashboard', '/terms': 'Terms of Service', '/privacy': 'Privacy Policy' };
 // Link previews, crawlers, uptime monitors and scripts don't count as visits.
 const NOT_A_PERSON = /bot|crawl|spider|slurp|preview|monitor|uptime|curl|wget|python|httpclient|headless|lighthouse|facebookexternalhit|embedly|whatsapp/i;
@@ -406,8 +406,30 @@ function cleanSave(body, guildId, actor) {
 
 let statusCache = { at: 0, body: null };
 
+let directoryCache = { at: 0, body: null };
+const INVITE_RE = /^https:\/\/discord\.gg\/[A-Za-z0-9-]{2,32}$/;
+
+// Find a server: only servers that switched on Server Listing. Cached for a minute, and every field is checked.
+async function directoryApi(c) {
+  if (directoryCache.body && Date.now() - directoryCache.at < 60000) return json(directoryCache.body);
+  const res = await bot(c, '/api/directory');
+  if (res.status !== 200 || !res.data || !Array.isArray(res.data.servers)) {
+    if (directoryCache.body) return json(directoryCache.body);
+    return json({ error: 'bot_unreachable' }, 503);
+  }
+  const servers = res.data.servers.slice(0, 300).map((s) => ({
+    id: ID_RE.test(String(s && s.id)) ? String(s.id) : '', name: str(s && s.name, 100), icon: /^https:\/\/cdn\.discordapp\.com\//.test(str(s && s.icon, 300)) ? str(s.icon, 300) : null,
+    members: Number(s && s.members) || 0, online: Number(s && s.online) || 0, description: str(s && s.description, 300),
+    tags: (Array.isArray(s && s.tags) ? s.tags : []).slice(0, 5).map((t) => str(t, 20).toLowerCase()).filter(Boolean),
+    invite: INVITE_RE.test(str(s && s.invite, 60)) ? s.invite : null, bumped: Number(s && s.bumped) || 0,
+  })).filter((s) => s.id && s.name && s.invite);
+  directoryCache = { at: Date.now(), body: { servers } };
+  return json(directoryCache.body);
+}
+
 async function publicApi(request, c, url) {
   if (request.method !== 'GET') return json({ error: 'method_not_allowed' }, 405);
+  if (url.pathname === '/api/directory') return directoryApi(c);
   if (url.pathname === '/api/status') {
     if (statusCache.body && Date.now() - statusCache.at < 30000) return json(statusCache.body);
     const res = await bot(c, '/api/status');
@@ -444,7 +466,7 @@ const PRIVATE = { '/api/me': ['GET'], '/api/servers': ['GET'], '/api/config': ['
 
 async function api(request, c, url, secure, s) {
   const path = url.pathname;
-  if (path === '/api/status' || path === '/api/leaderboard') return publicApi(request, c, url);
+  if (path === '/api/status' || path === '/api/leaderboard' || path === '/api/directory') return publicApi(request, c, url);
   if (!Object.prototype.hasOwnProperty.call(PRIVATE, path)) return json({ error: 'not_found' }, 404);
   if (!PRIVATE[path].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
   if (!c.sessionSecret || !c.clientSecret) return json({ error: 'not_configured' }, 503);
@@ -761,7 +783,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=f7e7579ecb">
+<link rel="stylesheet" href="/styles.css?v=b64ab38237">
 </head>
 <body class="notice">
 <div class="hero">

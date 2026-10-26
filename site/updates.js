@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.20',
+    date: '26 October 2026',
+    changes: [
+      { title: '/music (Music Player)',
+        text: 'Play songs in voice: search SoundCloud by name or paste a SoundCloud or audio file link. Queue, skip, pause, loop, shuffle, volume and remove, with an optional DJ role. YouTube and Spotify can\'t be played, because their rules forbid bots. Switch it on in the Utility section.' },
+      { title: 'Server Listing and /bump',
+        text: 'List your server on BEV\'s new Find a server page (bevbotdiscord.com/discover) with a description and tags. /bump moves it back to the top every 2 hours, and gives bump coins if Vote & Bump Rewards is on.' },
+      { title: 'Find a server (website)',
+        text: 'A new public page to discover servers that use BEV, with search and tags. It\'s linked at the bottom of every page.' },
+    ],
+  },
+  {
     id: '4.19',
     date: '26 October 2026',
     changes: [

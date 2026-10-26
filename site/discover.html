@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<title>BEV | Find a server</title>
+<meta name="description" content="Find a Discord server to join: communities that use BEV, newest bumps first.">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=b64ab38237">
+</head>
+<body class="disc">
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Find a server</div>
+<h1 class="disp rise d1">Find a <span class="bevword">server</span> to join</h1>
+<p class="lead rise d2">Communities that use BEV and chose to be listed. The most recently bumped are at the top: members bump their server with <b>/bump</b> every 2 hours. Want yours here? Switch on <b>Server Listing</b> on the dashboard.</p>
+<div class="findbar rise d3"><input class="field" id="dfind" type="search" placeholder="Search, like gaming or anime" aria-label="Search servers" autocomplete="off"><span class="stat" id="dcount" aria-live="polite"></span></div>
+<nav class="jump rise d3" id="dtags" aria-label="Popular tags"></nav>
+</div>
+</div>
+
+<main class="wrap sec">
+<noscript><div class="panel deny"><h2 class="disp">JavaScript is off</h2><p>This page needs JavaScript to load the servers.</p></div></noscript>
+<section id="dbusy" class="panel" role="status"><span class="spin" aria-hidden="true"></span><h2 class="disp">Loading servers</h2></section>
+<section id="derr" class="panel deny" hidden><h2 class="disp">Couldn't load the servers</h2><p id="derrmsg">BEV didn't answer. Try again in a minute.</p></section>
+<ul class="dgrid" id="dgrid" hidden></ul>
+<p class="dnone" id="dnone" hidden>No servers match that. Try another search or tag.</p>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/updates.js?v=aae20a5ee1" defer></script>
+<script src="/nav.js?v=9f240af849" defer></script>
+<script src="/discover.js?v=27beb1411e" defer></script>
+</body>
+</html>

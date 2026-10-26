@@ -975,3 +975,21 @@ a.mini.jreq,button.mini.jreq{cursor:pointer;font-family:inherit;border-color:rgb
 .bhmeta{color:var(--mut);font-size:13.5px;overflow-wrap:anywhere}
 .bhitem .mini{min-height:38px;cursor:pointer;font-family:inherit}
 .bhempty{color:var(--mut);font-size:14.5px}
+/* Find a server */
+.dgrid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.dcard{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:16px;background:rgba(9,15,32,.7)}
+.dtop{display:flex;align-items:center;gap:12px;min-width:0}
+.dicon{width:56px;height:56px;border-radius:16px;object-fit:cover;flex:0 0 auto;display:inline-grid;place-items:center;background:#1E3A8A;color:#fff;font-weight:700}
+.dwho{min-width:0}
+.dwho h2{margin:0;font-size:1.05rem;color:#fff;overflow-wrap:anywhere}
+.dstats{margin:2px 0 0;color:var(--mut);font-size:13.5px}
+.ddesc{margin:0;color:var(--ink);font-size:14.5px;line-height:1.5;overflow-wrap:anywhere;white-space:pre-line}
+.dtaglist{display:flex;flex-wrap:wrap;gap:6px}
+.dtag{cursor:pointer;font:inherit;font-size:13px;min-height:30px;padding:0 10px}
+.pill.on{background:rgba(37,99,235,.35);border-color:var(--ac2)}
+.dfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
+.dwhen{color:var(--mut);font-size:13px}
+.djoin{min-width:0;flex:0 0 auto;min-height:40px;padding:0 22px;text-decoration:none;display:inline-flex;align-items:center}
+.dnone{color:var(--mut);text-align:center;margin:24px 0}
+#dtags button.pill{cursor:pointer;font:inherit}
+@media(max-width:420px){.dgrid{grid-template-columns:minmax(0,1fr)}}
