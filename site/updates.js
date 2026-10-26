@@ -5,6 +5,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.18',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Custom Commands (new)',
+        text: 'Make your own commands like !rules or !apply on the dashboard. Each can reply (pick randomly from several answers), give, take or swap a role, or DM the member, with a cooldown, a role needed to use it and an option to delete the command message.' },
+      { title: '/profile, /bio, /marry, /divorce, /rep',
+        text: 'Profile cards with a bio, level, coins, rep points, badges and partner. Propose with /marry (they have to accept), and give one rep point a day with /rep.' },
+      { title: 'Achievements & Badges (new)',
+        text: "Members unlock badges for milestones like their first message, level 10, 10,000 coins or getting married. /achievements shows progress, and you can add your own badges that give a role." },
+      { title: 'Daily Quests (new)',
+        text: '3 random quests a day for every member, paying coins and XP, with a streak bonus for finishing all 3 on days in a row. /quests shows them.' },
+    ],
+  },
+  {
     id: '4.17',
     date: '26 October 2026',
     changes: [
