@@ -5,6 +5,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.11',
+    date: '26 October 2026',
+    changes: [
+      { title: '/star',
+        text: 'A new Starboard command. Reply to any message with !star and BEV gives it a star, then tidies the !star away. Using /star on its own privately explains how, because Discord never sends slash commands as replies.' },
+      { title: 'Star message (Apps menu)',
+        text: 'Right-click a message (or hold it on your phone), then pick Apps → Star message to star it. These stars count together with ⭐ reactions, and nobody is counted twice.' },
+    ],
+  },
+  {
     id: '4.10',
     date: '26 October 2026',
     changes: [
