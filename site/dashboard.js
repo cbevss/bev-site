@@ -1149,7 +1149,8 @@
         chips.append(chip);
       });
       if (adder && adder.tagName === 'SELECT') {
-        var options = (kind === 'channel' ? channelChoices(s.channel_types) : roleChoices()).filter(function (o) { return values.indexOf(o.value) === -1; });
+        var taken = typeof s.exclude === 'function' ? s.exclude() : [];
+        var options = (kind === 'channel' ? channelChoices(s.channel_types) : roleChoices()).filter(function (o) { return values.indexOf(o.value) === -1 && taken.indexOf(o.value) === -1; });
         optionsFor(adder, options, '', kind === 'channel' ? 'Add a channel…' : 'Add a role…');
         adder.disabled = values.length >= (s.max_items || 25);
       }
@@ -1187,6 +1188,87 @@
     return box;
   }
 
+  /* ---------- role menus: groups of roles that don't affect each other ---------- */
+
+  var MENU_GROUPS_MAX = 5;
+  var MENU_ROLES_MAX = 20;
+
+  // A menu's groups, or (for a menu saved before groups) its one-at-a-time roles and the rest.
+  function menuGroupsOf(menu) {
+    if (menu && Array.isArray(menu.groups) && menu.groups.length) {
+      return menu.groups.map(function (g) { return { roles: (g.roles || []).map(String), one: !!g.one, note: g.note || '' }; });
+    }
+    var roles = ((menu && menu.roles) || []).map(String);
+    var swap = ((menu && menu.swap_roles) || []).map(String);
+    var out = [];
+    var one = roles.filter(function (r) { return swap.indexOf(r) !== -1; });
+    var free = roles.filter(function (r) { return swap.indexOf(r) === -1; });
+    if (one.length) out.push({ roles: one, one: true, note: '' });
+    if (free.length || !out.length) out.push({ roles: free, one: false, note: '' });
+    return out;
+  }
+
+  function menuGroups(get, put, index) {
+    var box = el('div', 'mgroups');
+    var head = el('div', 'mghelp');
+    head.append(el('span', 'flabel sm', 'Roles in the menu'),
+      el('p', 'help sm', 'Each group works on its own, so picking a role never removes one from another group. In a One at a time group, picking another role swaps it. On the menu, groups are split by a line.'));
+    var list = el('div', 'mglist');
+    var add = el('button', 'mini add', '＋ New group');
+    add.type = 'button';
+    box.append(head, list, add);
+    function menu() { return (get() || [])[index]; }
+    function save(groups) {
+      var now = clone(get() || []);
+      if (!now[index]) return;
+      var all = [];
+      groups.forEach(function (g) { g.roles.forEach(function (r) { if (all.indexOf(r) === -1) all.push(r); }); });
+      now[index].groups = groups;
+      now[index].roles = all;
+      now[index].swap_roles = all.filter(function (r) { return groups.some(function (g) { return g.one && g.roles.indexOf(r) !== -1; }); });
+      put(now);
+    }
+    function draw() {
+      list.replaceChildren();
+      var groups = menuGroupsOf(menu());
+      var total = groups.reduce(function (n, g) { return n + g.roles.length; }, 0);
+      groups.forEach(function (g, gi) {
+        var card = el('div', 'mgroup');
+        var top = el('div', 'mgtop');
+        top.append(el('b', null, 'Group ' + (gi + 1)));
+        var kind = el('select', 'field mgkind');
+        kind.setAttribute('aria-label', 'How group ' + (gi + 1) + ' works');
+        optionsFor(kind, [{ value: 'one', label: 'One at a time' }, { value: 'any', label: 'Pick as many as you like' }], g.one ? 'one' : 'any');
+        kind.addEventListener('change', function () { groups[gi].one = kind.value === 'one'; save(groups); });
+        top.append(kind);
+        if (groups.length > 1) {
+          var remove = el('button', 'mini danger', 'Remove group');
+          remove.type = 'button';
+          remove.addEventListener('click', function () { groups.splice(gi, 1); save(groups); draw(); });
+          top.append(remove);
+        }
+        card.append(top);
+        var picker = { kind: 'roles', max_items: MENU_ROLES_MAX - (total - g.roles.length),
+          exclude: function () { var used = []; groups.forEach(function (o, oi) { if (oi !== gi) used = used.concat(o.roles); }); return used; } };
+        card.append(pickList(picker, 's-rm-' + index + '-g' + gi, function () { return groups[gi].roles; },
+          function (v) { groups[gi].roles = v.map(String); save(groups); draw(); }));
+        var note = el('input', 'field mgnote');
+        note.type = 'text';
+        note.maxLength = 150;
+        note.placeholder = 'Optional note, shown in small writing under this group';
+        note.value = g.note || '';
+        note.setAttribute('aria-label', 'Note under group ' + (gi + 1));
+        note.addEventListener('input', function () { groups[gi].note = note.value; save(groups); });
+        card.append(note);
+        list.append(card);
+      });
+      add.disabled = groups.length >= MENU_GROUPS_MAX || total >= MENU_ROLES_MAX;
+      add.onclick = function () { groups.push({ roles: [], one: true, note: '' }); save(groups); draw(); };
+    }
+    draw();
+    return box;
+  }
+
   // Lists of things (shop items, streamers, menus…): a small card per item, a remove button and Add.
   function listEditor(s, get, put, wrap) {
     // Items with one or two fields (level rewards, XP boosts) get one compact line each, so long lists stay short.
@@ -1213,6 +1295,7 @@
         row.append(top);
         var grid = el('div', 'igrid');
         (s.fields || []).forEach(function (f) {
+          if (s.key === 'role_menus' && (f.key === 'roles' || f.key === 'swap_roles')) return;     // shown as groups below
           var cell = el('div', 'icell k-' + f.kind);
           var fid = 's-' + s.key + '-' + index + '-' + f.key;
           var lab = el('label', 'flabel sm' + (compact && index ? ' sr' : ''), f.label);
@@ -1228,6 +1311,7 @@
           grid.append(cell);
         });
         row.append(grid);
+        if (s.key === 'role_menus') row.append(menuGroups(get, put, index));
         box.append(row);
       });
       var add = el('button', 'mini add', 'Add a ' + (s.item || 'item'));
@@ -2348,7 +2432,7 @@
   var exported = { clone: clone, same: same, changes: changes, valuesOf: valuesOf, wordsFrom: wordsFrom, newItem: newItem, inviteFor: inviteFor,
                    iconUrl: iconUrl, avatarUrl: avatarUrl, initials: initials, channelLabel: channelLabel, searchText: searchText, ERRORS: ERRORS,
                    mdToHtml: mdToHtml, validUrl: validUrl, validColour: validColour, boxLength: boxLength, inOrder: inOrder, madeLabel: madeLabel,
-                   plural: plural, isExtreme: isExtreme, extremeParts: extremeParts };
+                   plural: plural, isExtreme: isExtreme, extremeParts: extremeParts, menuGroupsOf: menuGroupsOf };
   if (typeof module === 'object' && module.exports) module.exports = exported;
   if (doc && doc.getElementById('guild')) wire();
 })(typeof window !== 'undefined' ? window : globalThis);
