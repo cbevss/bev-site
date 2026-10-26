@@ -311,7 +311,7 @@ async function callback(request, c, url, secure) {
     const user = await discord('/users/@me', 'Bearer ' + token.access_token);
     if (!user || !ID_RE.test(String(user.id))) return fail('discord');
     const session = await seal({
-      user: { id: user.id, name: String(user.global_name || user.username || 'Discord user').slice(0, 64), avatar: user.avatar || null },
+      user: { id: user.id, name: String(user.global_name || user.username || 'Discord user').slice(0, 64), username: String(user.username || '').slice(0, 64) || null, avatar: user.avatar || null },
       tok: token.access_token,
       exp: Date.now() + SESSION_TTL * 1000,
     }, c.sessionSecret);
@@ -660,7 +660,8 @@ async function previewApi(request, c, session, allowed) {
   if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
   const res = await bot(c, '/api/preview', {
     method: 'POST',
-    body: JSON.stringify({ guild_id: guildId, feature, item: item || null, draft: draft || {}, actor_id: session.user.id, ...allowed.viewer(guildId) }),
+    body: JSON.stringify({ guild_id: guildId, feature, item: item || null, draft: draft || {}, actor_id: session.user.id,
+                          actor_name: str(session.user.username || session.user.name, 64) || null, ...allowed.viewer(guildId) }),
   });
   if (res.status === 404 && res.data && typeof res.data.error === 'string' && !/server/i.test(res.data.error)) return json({ error: 'invalid', message: str(res.data.error) }, 400);
   return botAnswer(res) || json(cleanPreview(res.data));
@@ -821,7 +822,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=d83de504e5">
+<link rel="stylesheet" href="/styles.css?v=42e6f4b18e">
 </head>
 <body class="notice">
 <div class="hero">

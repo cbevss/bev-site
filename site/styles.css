@@ -1063,3 +1063,20 @@ dialog.askbox.pvbox:not([open]){display:none}
 .pvbox p.pvmeta{margin:0;color:#B9D0FF;font-size:13.5px}
 .pvbtn{white-space:nowrap}
 @media(max-width:520px){.pvfields{grid-template-columns:minmax(0,1fr)}.pvsection{flex-wrap:wrap}.pvlist{gap:14px}}
+/* Searchable dropdowns (computers only): a text box over the real list, which stays for the page's own code */
+.ssel{position:relative;display:block;width:100%;max-width:340px;min-width:0}
+.ssel.big{max-width:none;flex:1}
+.fld .ssel,.pick .ssel{max-width:none}
+.pick .ssel{flex:1 1 220px}
+.ssel .field.ssin{display:block;width:100%;max-width:none;padding-right:40px;cursor:text;text-overflow:ellipsis}
+.ssel .ssnative{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none;z-index:-1}
+.sscaret{position:absolute;right:15px;top:50%;width:8px;height:8px;margin-top:-6px;border-right:2px solid var(--ac2);border-bottom:2px solid var(--ac2);transform:rotate(45deg);pointer-events:none;transition:transform .15s}
+.ssel.open .sscaret{transform:rotate(-135deg);margin-top:-2px}
+.sslist{position:fixed;z-index:1000;margin:0;padding:6px;list-style:none;overflow:auto;overscroll-behavior:contain;border:1px solid var(--ac2);border-radius:12px;background:#0B1226;box-shadow:0 18px 50px -12px rgba(0,0,0,.8)}
+.ssopt{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:36px;padding:6px 10px;border-radius:8px;color:#E6ECFF;font-size:15px;cursor:pointer;overflow-wrap:anywhere}
+.ssopt.act{background:rgba(88,101,242,.28)}
+.ssopt.on{font-weight:700;color:#fff}
+.ssopt.on::after{content:"✓";color:var(--ac2);margin-left:auto}
+.ssopt.off{opacity:.45;cursor:default}
+.ssgroup{flex:none;font-size:12px;color:var(--mut)}
+.ssnone{padding:10px;color:var(--mut);font-size:14.5px}

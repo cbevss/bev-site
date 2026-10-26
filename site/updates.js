@@ -5,6 +5,24 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.23',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Server Lockdown: roles',
+        text: 'For servers where roles give access to channels: pick roles to lock too, or have BEV lock every role that’s allowed to type in a channel (staff roles are never locked). Ending the lockdown puts every role in every channel back exactly as it was.' },
+      { title: 'Server Lockdown: where the message goes',
+        text: 'Pick where the lockdown message is posted: the server’s main channel, a channel you pick, every text channel, or nowhere.' },
+      { title: 'Roles to ping',
+        text: 'Every “Role to ping” setting now takes several roles: bump reminders, Question of the Day, giveaways, events, stream alerts, reports, modmail, BEV Status Alerts and designed messages. A role you picked before is kept.' },
+      { title: 'Searchable dropdowns',
+        text: 'On a computer you can type in any dropdown on the dashboard to find a channel, role or option quickly. Use the arrow keys and Enter, or click. Phones keep their own pickers.' },
+      { title: 'Warnings',
+        text: 'The DM someone gets when they’re warned now says “You have been warned by” and the name of the moderator who warned them.' },
+      { title: 'Previews',
+        text: 'Previews show your own Discord username where a message mentions the member.' },
+    ],
+  },
+  {
     id: '4.22',
     date: '26 October 2026',
     changes: [

@@ -1739,7 +1739,10 @@
 
   function pingLead(t) {
     if (t.ping === 'here' || t.ping === 'everyone') return '@' + t.ping;
-    if (t.ping === 'role' && t.ping_role) return '@' + nameFor('role', t.ping_role);
+    if (t.ping === 'role' && t.ping_role) {
+      var ids = Array.isArray(t.ping_role) ? t.ping_role : [t.ping_role];
+      return ids.filter(Boolean).map(function (id) { return '@' + nameFor('role', String(id)); }).join(' ');
+    }
     return '';
   }
 
@@ -2861,7 +2864,185 @@
       else if (want && !builder.open && state.config && panel === 'board') openBuilder(true);
     });
     watchLayout();
+    watchSelects();
     boot();
+  }
+
+  /* ---------- searchable dropdowns: type to find a channel, role or option (computers only) ---------- */
+  // Phones and tablets keep their own built-in pickers, which work better with touch.
+  function touchDevice() {
+    var nav = root.navigator || {};
+    var ua = nav.userAgent || '';
+    if (/Android|iPhone|iPad|iPod|Mobile|Silk|Kindle|BlackBerry|Opera Mini|IEMobile/i.test(ua)) return true;
+    if (/Macintosh/.test(ua) && (nav.maxTouchPoints || 0) > 1) return true;
+    return !!(root.matchMedia && root.matchMedia('(hover: none) and (pointer: coarse)').matches);
+  }
+  var SEARCHABLE = !touchDevice();
+  var searchCount = 0;
+  var VALUE_PROP = root.HTMLSelectElement ? Object.getOwnPropertyDescriptor(root.HTMLSelectElement.prototype, 'value') : null;
+  var INDEX_PROP = root.HTMLSelectElement ? Object.getOwnPropertyDescriptor(root.HTMLSelectElement.prototype, 'selectedIndex') : null;
+
+  function searchable(sel) {
+    if (sel.multiple || sel.getAttribute('data-ss') || !sel.parentNode) return;
+    sel.setAttribute('data-ss', '1');
+    var n = ++searchCount;
+    var wrap = el('span', 'ssel');
+    if (sel.classList.contains('big')) wrap.classList.add('big');
+    sel.parentNode.insertBefore(wrap, sel);
+    var input = el('input', sel.className + ' ssin');
+    input.type = 'text';
+    input.id = (sel.id || 'ss' + n) + '-find';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-expanded', 'false');
+    var list = el('ul', 'sslist');
+    list.id = 'sslist-' + n;
+    list.setAttribute('role', 'listbox');
+    list.hidden = true;
+    input.setAttribute('aria-controls', list.id);
+    wrap.append(input, el('span', 'sscaret'), list);
+    wrap.append(sel);
+    sel.classList.add('ssnative');
+    sel.tabIndex = -1;
+    sel.setAttribute('aria-hidden', 'true');
+    if (sel.id) {
+      var label = doc.querySelector('label[for="' + sel.id + '"]');
+      if (label) label.htmlFor = input.id;
+      else if (sel.getAttribute('aria-label')) input.setAttribute('aria-label', sel.getAttribute('aria-label'));
+    } else if (sel.getAttribute('aria-label')) input.setAttribute('aria-label', sel.getAttribute('aria-label'));
+    var shown = [];
+    var active = -1;
+    var open = false;
+
+    function sync() {
+      var o = sel.options[sel.selectedIndex];
+      if (!open) input.value = o ? o.textContent : '';
+      input.placeholder = o ? '' : 'Type to search…';
+      input.disabled = sel.disabled;
+      input.title = sel.title || '';
+    }
+    if (VALUE_PROP && INDEX_PROP) {      // code that sets the value directly still updates the box
+      Object.defineProperty(sel, 'value', { configurable: true, get: function () { return VALUE_PROP.get.call(this); },
+                                            set: function (v) { VALUE_PROP.set.call(this, v); sync(); } });
+      Object.defineProperty(sel, 'selectedIndex', { configurable: true, get: function () { return INDEX_PROP.get.call(this); },
+                                                    set: function (v) { INDEX_PROP.set.call(this, v); sync(); } });
+    }
+    function words(t) { return String(t || '').toLowerCase().replace(/^[#@\s]+/, ''); }
+    function draw(query) {
+      var q = words(query);
+      list.replaceChildren();
+      shown = [];
+      Array.prototype.forEach.call(sel.options, function (o) {
+        if (o.hidden) return;
+        var text = o.textContent;
+        var group = o.parentNode && o.parentNode.tagName === 'OPTGROUP' ? o.parentNode.label : '';
+        if (q && words(text).indexOf(q) === -1 && text.toLowerCase().indexOf(q) === -1 && words(group).indexOf(q) === -1) return;
+        var li = el('li', 'ssopt' + (o.disabled ? ' off' : '') + (o.selected ? ' on' : ''));
+        li.id = list.id + '-' + shown.length;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', o.selected ? 'true' : 'false');
+        li.append(el('span', null, text));
+        if (group) li.append(el('span', 'ssgroup', group));
+        li.addEventListener('mousedown', function (e) { e.preventDefault(); if (!o.disabled) choose(o); });
+        list.append(li);
+        shown.push({ o: o, li: li });
+      });
+      if (!shown.length) list.append(el('li', 'ssnone', 'Nothing matches “' + query + '”'));
+      var current = shown.findIndex(function (x) { return x.o.selected; });
+      move(q ? shown.findIndex(function (x) { return !x.o.disabled; }) : current);
+    }
+    function move(i) {
+      if (active >= 0 && shown[active]) shown[active].li.classList.remove('act');
+      active = i;
+      if (active >= 0 && shown[active]) {
+        shown[active].li.classList.add('act');
+        input.setAttribute('aria-activedescendant', shown[active].li.id);
+        var li = shown[active].li;
+        if (li.offsetTop < list.scrollTop) list.scrollTop = li.offsetTop;
+        else if (li.offsetTop + li.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = li.offsetTop + li.offsetHeight - list.clientHeight;
+      } else input.removeAttribute('aria-activedescendant');
+    }
+    function place() {
+      var r = input.getBoundingClientRect();
+      var below = root.innerHeight - r.bottom;
+      var room = Math.max(below, r.top) - 12;
+      list.style.left = Math.max(8, r.left) + 'px';
+      list.style.width = Math.min(r.width, root.innerWidth - 16) + 'px';
+      list.style.maxHeight = Math.max(120, Math.min(300, room)) + 'px';
+      if (below < 200 && r.top > below) { list.style.top = ''; list.style.bottom = (root.innerHeight - r.top + 4) + 'px'; }
+      else { list.style.bottom = ''; list.style.top = (r.bottom + 4) + 'px'; }
+    }
+    function openList() {
+      if (open || sel.disabled) return;
+      open = true;
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+      wrap.classList.add('open');
+      draw('');
+      place();
+      input.select();
+    }
+    function closeList() {
+      if (!open) return;
+      open = false;
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      wrap.classList.remove('open');
+      sync();
+    }
+    function choose(o) {
+      var changed = !o.selected;
+      o.selected = true;
+      closeList();
+      if (changed) {
+        sel.dispatchEvent(new root.Event('input', { bubbles: true }));
+        sel.dispatchEvent(new root.Event('change', { bubbles: true }));
+      }
+      sync();
+    }
+    input.addEventListener('focus', openList);
+    input.addEventListener('mousedown', function () { if (doc.activeElement === input && !open) openList(); });
+    input.addEventListener('blur', closeList);
+    input.addEventListener('input', function () { if (!open) openList(); draw(input.value); place(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!open) return openList();
+        var step = e.key === 'ArrowDown' ? 1 : -1;
+        var i = active;
+        for (var k = 0; k < shown.length; k++) {
+          i = (i + step + shown.length) % shown.length;
+          if (!shown[i].o.disabled) break;
+        }
+        move(i);
+      } else if (e.key === 'Enter') {
+        if (open) { e.preventDefault(); e.stopPropagation(); if (active >= 0 && shown[active] && !shown[active].o.disabled) choose(shown[active].o); else closeList(); }
+      } else if (e.key === 'Escape') {
+        if (open) { e.preventDefault(); e.stopPropagation(); closeList(); input.select(); }
+      } else if (e.key === 'Tab') closeList();
+    });
+    sel.addEventListener('change', sync);
+    new root.MutationObserver(sync).observe(sel, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
+    root.addEventListener('scroll', function (e) { if (open && !list.contains(e.target)) place(); }, true);
+    root.addEventListener('resize', function () { if (open) place(); });
+    sync();
+  }
+
+  function makeSearchable(node) {
+    if (!SEARCHABLE || !node || !node.querySelectorAll) return;
+    if (node.tagName === 'SELECT') return searchable(node);
+    Array.prototype.forEach.call(node.querySelectorAll('select'), searchable);
+  }
+
+  function watchSelects() {
+    if (!SEARCHABLE || !root.MutationObserver) return;
+    makeSearchable(doc.body);
+    new root.MutationObserver(function (records) {
+      records.forEach(function (r) { Array.prototype.forEach.call(r.addedNodes, function (nd) { if (nd.nodeType === 1) makeSearchable(nd); }); });
+    }).observe(doc.body, { childList: true, subtree: true });
   }
 
   var exported = { clone: clone, same: same, changes: changes, valuesOf: valuesOf, wordsFrom: wordsFrom, newItem: newItem, inviteFor: inviteFor,
