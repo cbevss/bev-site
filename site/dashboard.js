@@ -595,6 +595,25 @@
 
     function run(b, values) {
       if (busy) return;
+      // A role menu too long for one box: ask before posting it as several.
+      if (owner === 'role_menus' && b.key === 'post' && !values.split) {
+        var rm = (state.config.features || []).find(function (x) { return x.key === 'role_menus'; });
+        var boxes = rm && rm.menu_boxes ? Number(rm.menu_boxes[values.menu]) || 1 : 1;
+        if (boxes > 1) {
+          askDialog({
+            title: 'This menu will be split into ' + boxes + ' boxes',
+            text: 'Discord limits how much one message can hold, and this list is too long to fit in one box. BEV will post it as ' + boxes
+              + ' boxes, one straight under the other: the title in the first box and the tip at the end of the last. Every role button still works.',
+            hint: 'To keep it in one box, change the menu’s Layout to Buttons in rows, or use fewer roles.',
+            ok: 'Post in ' + boxes + ' boxes',
+            cancel: 'Go back'
+          }).then(function (yes) {
+            if (yes) run(b, Object.assign({}, values, { split: 'yes' }));
+            else show('Not posted. Nothing was sent.', null);
+          });
+          return;
+        }
+      }
       if (b.confirm && !root.confirm(b.confirm)) return;
       busy = true;
       made.forEach(function (m) { m.disabled = true; });
@@ -619,6 +638,42 @@
       });
     }
     return box;
+  }
+
+  // A pop-up question with two clearly named answers. Resolves true for ok, false for cancel (Escape cancels too).
+  function askDialog(o) {
+    return new Promise(function (resolve) {
+      if (typeof root.HTMLDialogElement !== 'function') { resolve(root.confirm(o.title + '\n\n' + o.text)); return; }
+      var d = el('dialog', 'askbox');
+      var hid = 'ask-' + (++formCount);
+      d.setAttribute('aria-labelledby', hid);
+      var h = el('h2', 'disp', o.title);
+      h.id = hid;
+      d.append(h, el('p', null, o.text));
+      if (o.hint) d.append(el('p', 'askhint', o.hint));
+      var row = el('div', 'row askrow');
+      var no = el('button', 'mini', o.cancel);
+      var yes = el('button', 'act save', o.ok);
+      no.type = yes.type = 'button';
+      no.id = 'askno';
+      yes.id = 'askyes';
+      row.append(no, ' ', yes);
+      d.append(row);
+      var answered = false;
+      function done(value) {
+        if (answered) return;
+        answered = true;
+        if (d.open) d.close();
+        d.remove();
+        resolve(value);
+      }
+      yes.addEventListener('click', function () { done(true); });
+      no.addEventListener('click', function () { done(false); });
+      d.addEventListener('cancel', function (e) { e.preventDefault(); done(false); });
+      doc.body.append(d);
+      d.showModal();
+      yes.focus();
+    });
   }
 
   function buildForm(form, b, fields, submit) {
