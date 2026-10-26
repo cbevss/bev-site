@@ -5,6 +5,26 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.22',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Preview buttons (dashboard)',
+        text: 'Every card whose feature posts something (welcome messages, the jail reflection message, level-ups, panels, role menus, logs and more) has a 👀 Preview button. It shows the message exactly as it will look in Discord, using the settings on the card even before you save. Nothing is sent and nobody is pinged.' },
+      { title: 'AI Moderation (new)',
+        text: 'BEV reads messages for meaning, not just bad words, and catches harassment, hate, threats, scams and sexual content. It can also check pictures. It can flag messages to staff, delete them, or delete them and time the member out or warn them. If someone seems to be struggling, they get support privately instead of a punishment. Switch it on in the Security section.' },
+      { title: 'Advanced AutoMod Rules (new)',
+        text: 'Write your own patterns (regular expressions) to catch, with an action for each one. A rule can wait for several matches in a few minutes before acting, and skip roles you pick.' },
+      { title: 'Alt Account Detection (new)',
+        text: 'New members get a suspicion score from their account age, profile picture, name and whether their name is like someone banned recently. Suspicious joins are reported to staff and can be timed out or kicked automatically.' },
+      { title: 'Ban Sync (new)',
+        text: 'A ban in one of your servers is copied to your other servers that have Ban Sync on, and so are unbans. Only servers with the same owner share bans.' },
+      { title: 'Server Builder: start from scratch',
+        text: "A new option deletes every channel and category in the server before building. Ticking it shows a warning, and you have to type the server's name before anything is deleted. BEV saves a backup of the old layout first." },
+      { title: 'Website on phones',
+        text: "The Windows app's download button and section are hidden on phones and tablets, since it can't be installed there." },
+    ],
+  },
+  {
     id: '4.21',
     date: '26 October 2026',
     changes: [

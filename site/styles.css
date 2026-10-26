@@ -822,7 +822,7 @@ button.mini.abtn[aria-expanded="true"]{background:rgba(37,99,235,.32)}
 .appsteps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;color:var(--ink)}
 .appsteps b,.appcopy .note b{color:#fff}
 @media(max-width:620px){.appsec{grid-template-columns:minmax(0,1fr)}.appico{width:72px;height:72px;border-radius:18px}}
-.inapp .appdl{display:none!important}
+.inapp .appdl,.mobile .appdl{display:none!important}
 .flinks .appdl{display:contents}
 /* Admin inbox: what still needs setting up */
 .irefresh{margin-left:auto;min-height:38px;padding:0 14px;font-size:14px;cursor:pointer;font-family:inherit}
@@ -1007,3 +1007,59 @@ a.mini.jreq,button.mini.jreq{cursor:pointer;font-family:inherit;border-color:rgb
 .ofswitch:disabled{opacity:.6;cursor:wait}
 .warnstat{color:#FCD34D}
 @media(max-width:420px){.oflist2{grid-template-columns:minmax(0,1fr)}}
+/* Server Builder: delete everything first */
+.bwipew .chk.danger{border-color:rgba(248,113,113,.55);background:rgba(127,29,29,.28)}
+.bwipew .chk.danger:has(input:checked){border-color:#F87171;background:rgba(185,28,28,.45)}
+#bgo.danger{background:#DC2626}
+#bgo.danger:hover{background:#B91C1C}
+/* Preview buttons: a feature's messages drawn like Discord */
+dialog.askbox.pvbox{width:min(720px,calc(100vw - 24px));max-width:none;max-height:min(88vh,900px);padding:0;overflow:hidden;display:flex;flex-direction:column}
+dialog.askbox.pvbox:not([open]){display:none}
+.pvtop{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:clamp(16px,3vw,24px) clamp(16px,3vw,24px) 0}
+.pvtop h2.disp{margin:0}
+.pvclose{flex:none;min-width:40px;min-height:40px;padding:0;justify-content:center;font-size:16px}
+.pvbox .pvsub{margin:8px clamp(16px,3vw,24px) 12px;font-size:14.5px}
+.pvlist{overflow:auto;overscroll-behavior:contain;padding:0 clamp(12px,3vw,24px) clamp(16px,3vw,24px);display:flex;flex-direction:column;gap:18px}
+.pvwait{color:var(--mut)}
+.pvitem{display:flex;flex-direction:column;gap:8px}
+.pvh{margin:0;font-size:15px;color:#fff;letter-spacing:.01em}
+.pvbox p.pvnote{margin:0;padding:10px 12px;border-radius:10px;background:rgba(127,166,255,.08);border:1px solid rgba(127,166,255,.22);color:#C9D7F5;font-size:14.5px}
+.pvmsg{display:flex;flex-direction:column;gap:6px}
+.pvbox p.pvwhere{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;color:#B5BAC1;font-size:13px;font-weight:600}
+.pvpin{color:#80848E}
+.pvlabel{padding:1px 8px;border-radius:999px;background:#2B2D31;color:#DBDEE1;font-weight:600}
+.pvprev{border-style:solid;border-color:#1E1F22}
+.pvbox p.pvreply{margin:0 0 2px;color:#949BA4;font-size:13px}
+.pvbox .dprev p{margin:0;color:inherit;font-size:inherit;line-height:inherit}
+.pvbox .dprev p.dfoot,.pvbox .dprev p.dhead{font-size:12px;color:#949BA4}
+.pvbox .dprev .dhead b{color:#F2F3F5}
+.pvembed{margin-top:4px}
+.pvauthor{display:flex;align-items:center;gap:8px}
+.pvaicon{width:24px;height:24px;border-radius:50%;object-fit:cover}
+.pvfields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 12px}
+.pvfield{grid-column:1/-1;min-width:0}
+.pvfield.inline{grid-column:auto}
+.pvfname{font-weight:600;color:#F2F3F5;font-size:14px;overflow-wrap:anywhere}
+.pvrow{margin-top:6px}
+.pvb{gap:6px;cursor:default}
+.pvb.blurple{background:#5865F2}
+.pvb.green{background:#248046}
+.pvb.red{background:#DA373C}
+.pvb.grey{background:#4E5058}
+.pvb.off{opacity:.5}
+.pvemoji{font-size:16px;line-height:1}
+.pvselect{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:420px;min-height:40px;margin-top:6px;padding:0 12px;border-radius:4px;background:#1E1F22;border:1px solid #1E1F22;color:#949BA4;font-size:14px}
+.pvcaret{font-size:18px;color:#B5BAC1}
+.pvcont{display:flex;flex-direction:column;gap:8px;max-width:560px;margin-top:4px;padding:14px 16px;border-radius:8px;border-left:4px solid #4E5058;background:#2B2D31}
+.pvsection{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pvstext{min-width:0;flex:1 1 auto}
+.pvacc{flex:none}
+.pvsep{height:1px;background:#3F4147;margin:2px 0}
+.pvgap{height:6px}
+.pvgallery{display:flex;flex-wrap:wrap;gap:6px}
+.pvreacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pvreact{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:8px;background:#2B2D31;border:1px solid #3F4147;color:#DBDEE1;font-size:14px}
+.pvfile{color:#00A8FC}
+.pvbox p.pvmeta{margin:0;color:#B9D0FF;font-size:13.5px}
+.pvbtn{white-space:nowrap}
+@media(max-width:520px){.pvfields{grid-template-columns:minmax(0,1fr)}.pvsection{flex-wrap:wrap}.pvlist{gap:14px}}

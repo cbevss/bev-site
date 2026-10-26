@@ -216,6 +216,8 @@
     var token = ++state.token;
     builder.picked = {};
     builder.changed = false;
+    builder.wipe = false;
+    if ($('bwipe')) $('bwipe').checked = false;
     $('bnote').hidden = true;
     designer.pick = 0;
     designer.note = null;
@@ -457,6 +459,7 @@
     if (f.info && f.info.length) meta.append(infoList(f.info));
     if (f.buttons && f.buttons.length) meta.append(actionRow(f.key, f.buttons));
     if (f.key === 'jail' && f.enabled && f.pleas_on) meta.append(pleaButton(f));
+    if (f.previews && f.previews.length) meta.append(previewButton(f));
     if (meta.childNodes.length) main.append(meta);
     var templates = f.key === 'custom_messages' && (f.settings || []).find(function (s) { return s.key === 'message_templates'; });
     if (templates) {
@@ -1685,10 +1688,14 @@
   function validColour(c) { var m = /^#?([0-9a-f]{6})$/i.exec(String(c || '').trim()); return m ? '#' + m[1].toUpperCase() : null; }
   function hasBox(t) { return BOX_PARTS.some(function (k) { return String(t[k] || '').trim(); }); }
   function boxLength(t) { return ['author', 'title', 'description', 'footer'].reduce(function (n, k) { return n + String(t[k] || '').length; }, 0); }
+  var pvNames = {};          // names for the members, roles and channels a preview mentions (from the bot)
   function nameFor(kind, id) {
     var list = state.config ? (kind === 'role' ? state.config.roles : state.config.channels) : null;
     var found = (list || []).find(function (x) { return x.id === id; });
-    return found ? found.name : (kind === 'role' ? 'deleted-role' : 'deleted-channel');
+    if (found) return found.name;
+    var extra = kind === 'role' ? (pvNames.roles || {})[id] : (pvNames.channels || {})[id];
+    if (extra) return typeof extra === 'string' ? extra : extra.name;
+    return kind === 'role' ? 'deleted-role' : 'deleted-channel';
   }
 
   // Discord-style formatting for the preview. Everything is escaped first, so only these tags can appear.
@@ -1701,7 +1708,7 @@
       .replace(/\|\|([^|\n]+)\|\|/g, '<span class="mspoil">$1</span>');
     s = s.replace(/&lt;@&amp;(\d{5,25})&gt;/g, function (_, id) { return '<span class="dmention">@' + esc(nameFor('role', id)) + '</span>'; })
       .replace(/&lt;#(\d{5,25})&gt;/g, function (_, id) { return '<span class="dmention">#' + esc(nameFor('channel', id)) + '</span>'; })
-      .replace(/&lt;@!?(\d{5,25})&gt;/g, '<span class="dmention">@member</span>')
+      .replace(/&lt;@!?(\d{5,25})&gt;/g, function (_, id) { return '<span class="dmention">@' + esc((pvNames.users || {})[id] || 'member') + '</span>'; })
       .replace(/(^|[^\w])@(everyone|here)\b/g, '$1<span class="dmention">@$2</span>');
     return s.replace(/\u0000(\d+)\u0000/g, function (_, i) { return '<code>' + codes[Number(i)] + '</code>'; });
   }
@@ -1804,6 +1811,257 @@
     if (!lead && !text && !hasBox(t)) body.append(el('p', 'mempty', 'Nothing to show yet. Write some text or fill in the box.'));
     wrap.append(av, body);
     return wrap;
+  }
+
+  /* ---------- Preview buttons: what a feature posts, drawn like Discord. Nothing is sent. ---------- */
+  function previewButton(f) {
+    var btn = el('button', 'mini abtn pvbtn', '👀 Preview');
+    btn.type = 'button';
+    btn.setAttribute('data-preview', f.key);
+    btn.setAttribute('aria-haspopup', 'dialog');
+    btn.title = 'See what ' + f.name + ' posts, using the settings on this card. Nothing is sent.';
+    btn.addEventListener('click', function () { openPreview(f); });
+    return btn;
+  }
+
+  function cardDraft(f) {
+    var out = {};
+    var changed = false;
+    (f.settings || []).forEach(function (s) {
+      if (!state.draft || !Object.prototype.hasOwnProperty.call(state.draft.settings, s.key)) return;
+      out[s.key] = state.draft.settings[s.key];
+      if (state.original && !same(state.draft.settings[s.key], state.original.settings[s.key])) changed = true;
+    });
+    return { values: out, changed: changed };
+  }
+
+  function openPreview(f) {
+    var draft = cardDraft(f);
+    var d = el('dialog', 'askbox pvbox');
+    var hid = 'pv-' + (++formCount);
+    d.setAttribute('aria-labelledby', hid);
+    var h = el('h2', 'disp', '👀 Preview: ' + f.name);
+    h.id = hid;
+    var close = el('button', 'mini pvclose', '✕');
+    close.type = 'button';
+    close.id = 'pvclose';
+    close.setAttribute('aria-label', 'Close the preview');
+    var top = el('div', 'pvtop');
+    top.append(h, close);
+    var sub = el('p', 'pvsub', 'This is how BEV’s messages will look' + (draft.changed ? ', including the changes you haven’t saved yet' : '') +
+      '. Nothing is sent and nobody is pinged.');
+    var body = el('div', 'pvlist');
+    body.setAttribute('aria-live', 'polite');
+    body.append(el('p', 'pvwait', 'Building the preview…'));
+    d.append(top, sub, body);
+    function done() { if (d.open) d.close(); d.remove(); }
+    close.addEventListener('click', done);
+    d.addEventListener('cancel', function (e) { e.preventDefault(); done(); });
+    d.addEventListener('click', function (e) { if (e.target === d) done(); });
+    doc.body.append(d);
+    if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+    close.focus();
+    var guild = state.guild;
+    request('/api/preview', {
+      method: 'POST',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({ guild_id: guild, feature: f.key, draft: draft.values })
+    }).then(function (r) {
+      body.replaceChildren();
+      if (!(r.status === 200 && r.data && Array.isArray(r.data.items))) {
+        body.append(el('p', 'fnote no', (r.data && r.data.message) || errorText(r)));
+        return;
+      }
+      pvNames = r.data.names || {};
+      (r.data.notes || []).forEach(function (n) { body.append(el('p', 'fnote', '⚠️ ' + n)); });
+      r.data.items.forEach(function (item) {
+        var sec = el('section', 'pvitem');
+        sec.setAttribute('data-item', item.key);
+        sec.append(el('h3', 'pvh', item.label));
+        if (item.note) sec.append(el('p', 'pvnote', item.note));
+        (item.messages || []).forEach(function (m) { sec.append(previewMessage(m, item.label)); });
+        if (!(item.messages || []).length && !item.note) sec.append(el('p', 'pvnote', 'Nothing to show yet.'));
+        body.append(sec);
+      });
+    });
+  }
+
+  // A picture in a preview: one that can't load (an expired avatar link, say) is just left out.
+  function pvPicture(url, cls) {
+    var img = el('img', cls);
+    img.src = url;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    img.addEventListener('error', function () { img.remove(); });
+    return img;
+  }
+
+  function colourHex(n) {
+    return typeof n === 'number' && n > 0 ? '#' + ('000000' + n.toString(16)).slice(-6) : '';
+  }
+
+  function emojiText(e) {
+    if (!e) return '';
+    return e.id ? ':' + (e.name || 'emoji') + ':' : (e.name || '');
+  }
+
+  function fileUrl(url, files) {
+    if (typeof url !== 'string') return '';
+    if (url.indexOf('attachment://') === 0) {
+      var name = url.slice(13);
+      var f = (files || []).find(function (x) { return x.name === name && x.data; });
+      return f ? f.data : '';
+    }
+    return /^https:\/\//.test(url) ? url : '';
+  }
+
+  function textBlock(text, cls) {
+    var d = el('div', 'mtext' + (cls ? ' ' + cls : ''));
+    d.innerHTML = mdToHtml(text || '');
+    return d;
+  }
+
+  function embedNode(e, files, used) {
+    var box = el('div', 'dembed membed pvembed');
+    box.style.borderLeftColor = colourHex(e.color) || '#1E1F22';
+    var main = el('div', 'mmain');
+    if (e.author && e.author.name) {
+      var au = el('p', 'mauthor pvauthor');
+      var aicon = fileUrl(e.author.icon_url, files);
+      if (aicon) { var ai = pvPicture(aicon, 'pvaicon'); au.append(ai); }
+      au.append(doc.createTextNode(e.author.name));
+      main.append(au);
+    }
+    if (e.title) {
+      var t = el('div', 'dtitle');
+      if (e.url && /^https:\/\//.test(e.url)) {
+        var a = el('a', null, e.title);
+        a.href = e.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        t.append(a);
+      } else t.innerHTML = mdToHtml(e.title).replace(/^<p>|<\/p>$/g, '');
+      main.append(t);
+    }
+    if (e.description) main.append(textBlock(e.description, 'mdesc'));
+    if (Array.isArray(e.fields) && e.fields.length) {
+      var grid = el('div', 'pvfields');
+      e.fields.forEach(function (fd) {
+        var cell = el('div', 'pvfield' + (fd.inline ? ' inline' : ''));
+        var name = el('div', 'pvfname');
+        name.innerHTML = mdToHtml(fd.name || '').replace(/^<p>|<\/p>$/g, '');
+        cell.append(name, textBlock(fd.value || ''));
+        grid.append(cell);
+      });
+      main.append(grid);
+    }
+    var img = e.image && fileUrl(e.image.url, files);
+    if (img) { main.append(pvPicture(img, 'mimage')); used[e.image.url] = true; }
+    if ((e.footer && e.footer.text) || e.timestamp) {
+      var parts = [];
+      if (e.footer && e.footer.text) parts.push(e.footer.text);
+      if (e.timestamp) parts.push('Today at ' + new Date(e.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      main.append(el('p', 'dfoot', parts.join(' • ')));
+    }
+    box.append(main);
+    var th = e.thumbnail && fileUrl(e.thumbnail.url, files);
+    if (th) { box.append(pvPicture(th, 'mthumb')); used[e.thumbnail.url] = true; }
+    return box;
+  }
+
+  var BUTTON_STYLES = { 1: 'blurple', 2: 'grey', 3: 'green', 4: 'red', 5: 'grey', 6: 'blurple' };
+  function componentNode(c, files) {
+    if (!c || typeof c !== 'object') return null;
+    var node;
+    switch (c.type) {
+      case 1:
+        node = el('div', 'mbtns pvrow');
+        (c.components || []).forEach(function (x) { var n = componentNode(x, files); if (n) node.append(n); });
+        return node;
+      case 2:
+        node = el('span', 'mbtn pvb ' + (BUTTON_STYLES[c.style] || 'grey') + (c.disabled ? ' off' : ''));
+        if (c.emoji) node.append(el('span', 'pvemoji', emojiText(c.emoji)));
+        if (c.label) node.append(el('span', null, c.label));
+        if (c.style === 5) node.append(el('span', 'mext', '↗'));
+        return node;
+      case 3: case 5: case 6: case 7: case 8:
+        node = el('div', 'pvselect' + (c.disabled ? ' off' : ''));
+        node.append(el('span', null, c.placeholder || 'Make a selection'), el('span', 'pvcaret', '⌄'));
+        return node;
+      case 9:
+        node = el('div', 'pvsection');
+        var texts = el('div', 'pvstext');
+        (c.components || []).forEach(function (x) { var n = componentNode(x, files); if (n) texts.append(n); });
+        node.append(texts);
+        var acc = componentNode(c.accessory, files);
+        if (acc) { acc.classList.add('pvacc'); node.append(acc); }
+        return node;
+      case 10:
+        return textBlock(c.content || '', 'pvtext');
+      case 11:
+        var u = fileUrl(c.media && c.media.url, files);
+        return u ? pvPicture(u, 'mthumb') : null;
+      case 12:
+        node = el('div', 'pvgallery');
+        (c.items || []).forEach(function (it) { var g = fileUrl(it.media && it.media.url, files); if (g) node.append(pvPicture(g, 'mimage')); });
+        return node;
+      case 14:
+        return el('div', c.divider === false ? 'pvgap' : 'pvsep');
+      case 17:
+        node = el('div', 'pvcont');
+        var ac = colourHex(c.accent_color);
+        if (ac) node.style.borderLeftColor = ac;
+        (c.components || []).forEach(function (x) { var n = componentNode(x, files); if (n) node.append(n); });
+        return node;
+      default:
+        return null;
+    }
+  }
+
+  function previewMessage(m, itemLabel) {
+    var outer = el('div', 'pvmsg');
+    var where = el('p', 'pvwhere');
+    var w = String(m.where || '');
+    var isChannel = w.charAt(0) === '#';
+    where.append(el('span', 'pvpin', isChannel ? '#' : w.indexOf('DM to') === 0 ? '✉️' : '⚠️'), ' ', doc.createTextNode(isChannel ? w.slice(1) : w));
+    if (m.label && m.label !== itemLabel) where.append(el('span', 'pvlabel', m.label));
+    outer.append(where);
+    var wrap = el('div', 'dprev mprev pvprev');
+    var av = el('img', 'dav');
+    av.src = '/bev-avatar.png'; av.alt = ''; av.width = 40; av.height = 40;
+    var body = el('div', 'dbody');
+    if (m.reply) body.append(el('p', 'pvreply', '↪ Replying to a member’s message'));
+    var head = el('p', 'dhead');
+    var now = new Date();
+    head.append(el('b', null, 'BEV'), ' ', el('span', 'dapp', 'APP'), ' ',
+      el('span', 'dtime', 'Today at ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')));
+    body.append(head);
+    if (m.content) body.append(textBlock(m.content, 'mcontent'));
+    var used = {};
+    (m.embeds || []).forEach(function (e) { body.append(embedNode(e, m.files, used)); });
+    (m.components || []).forEach(function (c) { var n = componentNode(c, m.files); if (n) body.append(n); });
+    (m.files || []).forEach(function (f) {
+      if (used['attachment://' + f.name]) return;
+      if (f.data) body.append(pvPicture(f.data, 'mimage'));
+      else body.append(el('p', 'pvfile', '📎 ' + f.name));
+    });
+    if ((m.reactions || []).length) {
+      var rr = el('div', 'pvreacts');
+      m.reactions.forEach(function (r) { rr.append(el('span', 'pvreact', r + ' 1')); });
+      body.append(rr);
+    }
+    wrap.append(av, body);
+    outer.append(wrap);
+    var notes = [];
+    if ((m.pings || []).length) {
+      notes.push('🔔 Pings ' + m.pings.map(function (p) {
+        var x = /^<@&(\d+)>$/.exec(p); if (x) return '@' + nameFor('role', x[1]);
+        x = /^<@!?(\d+)>$/.exec(p); if (x) return '@' + ((pvNames.users || {})[x[1]] || 'member');
+        return p;
+      }).join(', '));
+    }
+    if (m.deletes) notes.push('🧹 Deletes itself after a few seconds');
+    if (notes.length) outer.append(el('p', 'pvmeta', notes.join('   ·   ')));
+    return outer;
   }
 
   function designerBox(f, s) {
@@ -2225,7 +2483,8 @@
   var ACCESS_MARK = { 'public': '🌐', readonly: '📖', staff: '🔒' };
 
   function builderData() { return (state.config && state.config.builder && Array.isArray(state.config.builder.sets)) ? state.config.builder : null; }
-  function freshIn(s) { return s.channels.filter(function (c) { return !c.exists; }).length; }
+  // With "delete everything first" ticked, every channel in a ticked set gets made again.
+  function freshIn(s) { return builder.wipe ? s.channels.length : s.channels.filter(function (c) { return !c.exists; }).length; }
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); }
   function setTitle(s) { return String(s.name).replace(/^\S+\s+/, ''); }
 
@@ -2358,9 +2617,9 @@
       if (!fresh) return;
       keys.push(s.key);
       chans += fresh;
-      if (!s.category_exists) cats++;
+      if (!s.category_exists || builder.wipe) cats++;
     });
-    return { keys: keys, cats: cats, chans: chans, room: data ? data.limit - data.count : 0 };
+    return { keys: keys, cats: cats, chans: chans, room: data ? (builder.wipe ? data.limit : data.limit - data.count) : 0 };
   }
 
   function builderSummary() {
@@ -2376,7 +2635,8 @@
       : 'Your server has ' + data.count + ' of ' + data.limit + ' channels.';
     $('bcount').classList.toggle('no', over);
     $('bgo').disabled = builder.busy || !plan.keys.length || over || data.can === false;
-    $('bgo').textContent = builder.busy ? 'Building…' : 'Add to server';
+    $('bgo').textContent = builder.busy ? 'Building…' : builder.wipe ? 'Delete everything and build' : 'Add to server';
+    $('bgo').classList.toggle('danger', !!builder.wipe);
   }
 
   function pickSets(keys) {
@@ -2398,22 +2658,33 @@
     var plan = builderPlan();
     if (builder.busy || !plan.keys.length) return;
     var what = [plan.cats ? plural(plan.cats, 'category', 'categories') : '', plural(plan.chans, 'channel')].filter(Boolean).join(' and ');
-    if (!root.confirm('Add ' + what + ' to ' + state.config.guild.name + '? Nothing that’s already in the server is changed.')) return;
+    var typed = '';
+    if (builder.wipe) {
+      typed = root.prompt('This deletes EVERY channel and category in ' + state.config.guild.name + ' (' + builderData().count + ' now), then adds ' + what +
+        '.\n\nType the server’s name to confirm:') || '';
+      if (typed.trim().replace(/\s+/g, ' ').toLowerCase() !== String(state.config.guild.name).trim().replace(/\s+/g, ' ').toLowerCase()) {
+        builderNote(typed ? 'That isn’t the server’s name, so nothing was deleted.' : 'Cancelled. Nothing was deleted.', false);
+        return;
+      }
+    } else if (!root.confirm('Add ' + what + ' to ' + state.config.guild.name + '? Nothing that’s already in the server is changed.')) return;
     builder.busy = true;
-    builderNote('BEV is building. Big picks can take up to a minute…', null);
+    builderNote(builder.wipe ? 'BEV is deleting the old channels, then building. This can take a few minutes…' : 'BEV is building. Big picks can take up to a minute…', null);
     drawBuilder();
     var guild = state.guild;
     request('/api/action', {
       method: 'POST',
       headers: { accept: 'application/json', 'content-type': 'application/json' },
       body: JSON.stringify({ guild_id: guild, owner: 'builder', action: 'build',
-                             values: { sets: plan.keys.join(','), staff_role: $('bstaff').value || '', hook: $('bhook').checked ? 'yes' : 'no' } })
+                             values: { sets: plan.keys.join(','), staff_role: $('bstaff').value || '', hook: $('bhook').checked ? 'yes' : 'no',
+                                       wipe: builder.wipe ? 'yes' : 'no', confirm_name: typed } })
     }).then(function (r) {
       builder.busy = false;
       if (guild !== state.guild) return;
       if (r.status === 200 && r.data && r.data.ok) {
         builder.changed = true;
         builder.picked = {};
+        builder.wipe = false;             // deleting everything is a one-off: it never stays ticked for the next build
+        if ($('bwipe')) $('bwipe').checked = false;
         if (r.data.data && Array.isArray(r.data.data.sets)) state.config.builder = r.data.data;
         builderNote(r.data.note || 'Done.', true);
         drawBuilder();
@@ -2564,6 +2835,23 @@
     $('bopen').addEventListener('click', function () { openBuilder(false); });
     $('bback').addEventListener('click', function () { closeBuilder(false); });
     $('bgo').addEventListener('click', buildNow);
+    $('bwipe').addEventListener('change', function () {
+      var box = this;
+      if (!box.checked) { builder.wipe = false; drawBuilder(); return; }
+      box.checked = false;
+      askDialog({
+        title: '⚠️ Delete every channel and category?',
+        text: 'When you build, BEV will first delete ALL of ' + state.config.guild.name + '’s channels and categories, including every message in them. '
+          + 'Messages can’t be brought back. BEV saves a backup of the channel and role layout first, so the layout itself can be restored from Server Backups.',
+        hint: 'You’ll be asked to type the server’s name before anything is deleted.',
+        ok: 'Yes, delete everything',
+        cancel: 'Keep my channels'
+      }).then(function (yes) {
+        box.checked = !!yes;
+        builder.wipe = !!yes;
+        drawBuilder();
+      });
+    });
     $('bstarter').addEventListener('click', function () { pickSets(STARTER); });
     $('ball').addEventListener('click', function () { pickSets((builderData() || { sets: [] }).sets.map(function (s) { return s.key; })); });
     $('bnone').addEventListener('click', function () { pickSets([]); });

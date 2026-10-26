@@ -462,7 +462,7 @@ async function publicApi(request, c, url) {
 }
 
 const PRIVATE = { '/api/me': ['GET'], '/api/servers': ['GET'], '/api/config': ['GET', 'POST'], '/api/level-roles': ['GET', 'POST'], '/api/messages': ['POST'],
-                  '/api/action': ['POST'], '/api/members': ['GET'] };
+                  '/api/action': ['POST'], '/api/members': ['GET'], '/api/preview': ['POST'] };
 
 async function api(request, c, url, secure, s) {
   const path = url.pathname;
@@ -503,6 +503,7 @@ async function api(request, c, url, secure, s) {
   if (path === '/api/level-roles') return levelRoles(request, c, url, session, allowed);
   if (path === '/api/messages') return sendMessage(request, c, session, allowed);
   if (path === '/api/action') return webAction(request, c, session, allowed);
+  if (path === '/api/preview') return previewApi(request, c, session, allowed);
   if (path === '/api/members') return findMembers(c, url, allowed);
 
   if (request.method === 'GET') {
@@ -626,6 +627,43 @@ function cleanData(v, depth = 0) {
     return out;
   }
   return null;
+}
+
+// Preview buttons: the bot builds a feature's messages (with the card's unsaved settings) without sending them.
+const PICTURE_DATA_RE = /^data:image\/(png|gif|jpeg|webp);base64,[A-Za-z0-9+/=]+$/;
+function cleanPreview(v, depth = 0, key = '') {
+  if (v === null || typeof v === 'boolean') return v;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string') {
+    if (key === 'data') return v.length <= 2100000 && PICTURE_DATA_RE.test(v) ? v : null;
+    return v.slice(0, 6000);
+  }
+  if (depth > 12) return null;
+  if (Array.isArray(v)) return v.slice(0, 100).map((x) => cleanPreview(x, depth + 1));
+  if (typeof v === 'object') {
+    const out = {};
+    for (const [k, x] of Object.entries(v).slice(0, 60)) if (KEY_RE.test(k)) out[k] = cleanPreview(x, depth + 1, k);
+    return out;
+  }
+  return null;
+}
+
+async function previewApi(request, c, session, allowed) {
+  const body = await readJson(request, 150000);
+  const guildId = body && body.guild_id;
+  const feature = body && body.feature;
+  const item = body && body.item;
+  const draft = body && body.draft;
+  if (typeof guildId !== 'string' || !ID_RE.test(guildId) || typeof feature !== 'string' || !KEY_RE.test(feature)
+      || (item !== undefined && item !== null && (typeof item !== 'string' || !KEY_RE.test(item)))
+      || (draft !== undefined && (draft === null || typeof draft !== 'object' || Array.isArray(draft)))) return json({ error: 'bad_request' }, 400);
+  if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
+  const res = await bot(c, '/api/preview', {
+    method: 'POST',
+    body: JSON.stringify({ guild_id: guildId, feature, item: item || null, draft: draft || {}, actor_id: session.user.id, ...allowed.viewer(guildId) }),
+  });
+  if (res.status === 404 && res.data && typeof res.data.error === 'string' && !/server/i.test(res.data.error)) return json({ error: 'invalid', message: str(res.data.error) }, 400);
+  return botAnswer(res) || json(cleanPreview(res.data));
 }
 
 async function webAction(request, c, session, allowed) {
@@ -783,7 +821,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=5b34ad3a92">
+<link rel="stylesheet" href="/styles.css?v=d83de504e5">
 </head>
 <body class="notice">
 <div class="hero">

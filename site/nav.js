@@ -20,6 +20,13 @@
 
   // Inside the BEV Windows app: hide the "Install the app" buttons.
   if (/\bBEVDesktop\//.test((root.navigator && root.navigator.userAgent) || '')) doc.documentElement.classList.add('inapp');
+  // On phones and tablets: hide the Windows app download too, since it can't be installed there.
+  (function () {
+    var nav = root.navigator || {};
+    var ua = nav.userAgent || '';
+    var ipadAsMac = /Macintosh/.test(ua) && (nav.maxTouchPoints || 0) > 1;
+    if (/Android|iPhone|iPad|iPod|Mobile|Silk|Kindle|BlackBerry|Opera Mini|IEMobile/i.test(ua) || ipadAsMac) doc.documentElement.classList.add('mobile');
+  })();
 
   var FLAG = /(?:^|;\s*)bev_in=1(?:;|$)/;
   var secure = root.location.protocol === 'https:' ? '; Secure' : '';
