@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<title>BEV | Leaderboard</title>
+<meta name="description" content="A Discord server's BEV leaderboard: the most active members by level and XP.">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=8de753af28">
+</head>
+<body class="lb">
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Leaderboard</div>
+<div class="lbtitle rise d1"><span class="av big" id="gicon" aria-hidden="true"></span><h1 class="disp" id="title">Server leaderboard</h1></div>
+<p class="lead rise d2" id="sub">The most active members, by level and XP. Members earn XP by chatting and talking in voice.</p>
+</div>
+</div>
+
+<main class="wrap sec">
+<noscript><div class="panel deny"><h2 class="disp">JavaScript is off</h2><p>The leaderboard needs JavaScript to load.</p></div></noscript>
+<section id="busy" class="panel" role="status"><span class="spin" aria-hidden="true"></span><h2 class="disp">Loading the leaderboard</h2></section>
+<section id="err" class="panel deny" hidden><h2 class="disp" id="errh">Leaderboard not available</h2><p id="errmsg"></p><a class="mini" href="/">BEV home</a></section>
+<div class="lbtabs" id="lbtabs" hidden><div class="seg" role="group" aria-label="Which leaderboard"><button type="button" data-view="all" aria-pressed="true">All time</button><button type="button" data-view="week" aria-pressed="false">This week</button></div></div>
+<ol class="board" id="board" hidden></ol>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/nav.js?v=6dc2e996f1" defer></script>
+<script src="/leaderboard.js?v=7dfc525e15" defer></script>
+</body>
+</html>

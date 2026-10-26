@@ -1,0 +1,1 @@
+{"version": 1, "include": ["/*"], "exclude": ["/styles.css", "/nav.js", "/features.js", "/servers.js", "/dashboard.js", "/leaderboard.js", "/status.js", "/admin.js", "/maintenance.js", "/bev-icon.png", "/bev-avatar.png"]}

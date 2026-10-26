@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<title>BEV | Admin</title>
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=8de753af28">
+</head>
+<body class="admin">
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/dashboard" data-dash data-static>Dashboard</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<span class="tab on" aria-current="page" data-admin data-static>Admin</span>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login" hidden>Sign in with Discord</a> <div class="acct" id="acct"><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Admin</div>
+<h1 class="disp rise d1">Run the <span class="bevword">BEV</span> website</h1>
+<p class="lead rise d2">Maintenance mode, a Discord alert, the announcement banner, visit numbers and a connection check. Only the site admins listed at the bottom can open this page.</p>
+</div>
+</div>
+
+<main class="wrap sec" id="main">
+
+<noscript><div class="panel deny"><h2 class="disp">JavaScript is off</h2><p>The admin tools need JavaScript.</p></div></noscript>
+
+<div class="bar">
+<div class="me"><span class="av sm" id="meav" aria-hidden="true"></span><p>Signed in as <strong id="who">a site admin</strong></p></div>
+<nav class="jump" aria-label="Sections"><a class="pill" href="#maint">Maintenance</a> <a class="pill" href="#alert">Discord alert</a> <a class="pill" href="#bann">Banner</a> <a class="pill" href="#visits">Visits</a> <a class="pill" href="#check">Connection</a> <a class="pill" href="#admins">Admins</a></nav>
+</div>
+
+<p class="toast" id="toast" role="alert" hidden></p>
+<p class="sr" id="live" role="status" aria-live="polite"></p>
+
+<section id="busy" class="panel" role="status">
+<span class="spin" aria-hidden="true"></span>
+<h2 class="disp">Loading the admin tools</h2>
+</section>
+
+<section id="err" class="panel deny" hidden>
+<h2 class="disp" id="errh">Something went wrong</h2>
+<p id="errmsg"></p>
+<button class="mini" id="retry" type="button">Try again</button>
+</section>
+
+<section id="nodb" class="panel deny" hidden>
+<h2 class="disp">Connect the site database</h2>
+<p>Maintenance mode, the banner and visit counts are saved in a small Cloudflare database that isn't connected yet. Everything else on the site works.</p>
+<ol class="steps2">
+<li>In Cloudflare, open <b>D1 SQL database</b> (under <b>Storage &amp; databases</b> in the sidebar) and press <b>Create Database</b>. Any name works, like <code>bev-site</code>.</li>
+<li>Open <b>Workers &amp; Pages →</b> this site <b>→ Settings → Bindings → Add → D1 database</b>. Set the variable name to <code>SITE_DB</code> and pick the database.</li>
+<li>Upload the site again under <b>Deployments → Create deployment</b>, because Cloudflare only applies bindings to new uploads.</li>
+</ol>
+</section>
+
+<div id="board" hidden>
+
+<section class="asec" id="inbox" aria-labelledby="inbox-h">
+<div class="ahead"><h2 class="disp" id="inbox-h">Inbox</h2><span class="stat" id="istate">Checking</span><button class="mini irefresh" id="irefresh" type="button">Check again</button></div>
+<p class="adesc">Things BEV and this website still need setting up. Fix one, then press <b>Mark as done</b>. Ticks are saved for every site admin.</p>
+<p class="note" id="inote" aria-live="polite">Checking what needs setting up…</p>
+<ul class="ilist" id="ilist"></ul>
+<details class="fset idone" id="idone" hidden><summary id="idonesum">Done</summary><ul class="ilist" id="idonelist"></ul></details>
+</section>
+
+<section class="asec" id="maint" aria-labelledby="maint-h">
+<div class="ahead"><h2 class="disp" id="maint-h">Maintenance mode</h2><span class="stat" id="mstate">Off</span></div>
+<p class="adesc">Everyone except site admins sees a "Temporarily down for maintenance" page instead of the website. You can still use the whole site, and BEV keeps working in Discord.</p>
+<div class="agrid">
+<div class="aform">
+<div class="fld"><label class="flabel" for="mmsg">Message for visitors</label>
+<div class="tbox"><textarea class="field ta" id="mmsg" maxlength="600" rows="5"></textarea><span class="count" id="mcount"></span></div>
+<button class="mini add" id="mreset" type="button">Use the standard message</button></div>
+<div class="fld"><label class="flabel" for="mdur">How long</label><select class="field" id="mdur"></select>
+<p class="help">It switches itself off when the time is up. Choose "Until I turn it off" to end it yourself.</p></div>
+<label class="chk"><input type="checkbox" id="mshow" checked> Show visitors when the site will be back</label>
+<div class="row"><button class="act save" id="mon" type="button">Turn on maintenance</button> <button class="act save" id="msave" type="button" hidden>Save changes</button> <button class="act stop" id="moff" type="button" hidden>Turn off maintenance</button></div>
+<p class="note" id="mlast"></p>
+</div>
+<div class="aprev">
+<p class="lab mono">What visitors will see</p>
+<div class="mprev"><span class="tag mono">Maintenance</span><h3 class="disp">Temporarily down for maintenance</h3><p id="mprevtext"></p><p class="backat" id="mprevback" hidden><span class="dot" aria-hidden="true"></span><span id="mprevbacktext"></span></p></div>
+</div>
+</div>
+</section>
+
+<section class="asec" id="alert" aria-labelledby="alert-h">
+<div class="ahead"><h2 class="disp" id="alert-h">Discord alert</h2><span class="stat" id="astate">Checking</span></div>
+<p class="adesc">Posts a notice in every Discord server that has switched on <b>BEV Status Alerts</b>, in the channel it picked and with the ping it chose, like @everyone. Send it just before you restart or update BEV. Servers switch alerts on in the dashboard under <b>Utility</b>.</p>
+<div class="agrid">
+<div class="aform">
+<div class="fld"><label class="flabel" for="amsg">Message</label>
+<div class="tbox"><textarea class="field ta" id="amsg" maxlength="1000" rows="5"></textarea><span class="count" id="acount"></span></div>
+<button class="mini add" id="areset" type="button">Use the standard message</button></div>
+<p class="reach" id="areach" aria-live="polite">Checking which servers have alerts switched on…</p>
+<p class="toast" id="aerr" role="alert" hidden></p>
+<div class="row"><button class="act save" id="asend" type="button" disabled>Send the alert</button> <button class="mini" id="arefresh" type="button">Check again</button></div>
+<div class="aprog" id="aprog" hidden><div class="abar" aria-hidden="true"><span id="abarfill"></span></div><p class="note" id="aprogtext"></p></div>
+<p class="note" id="alast"></p>
+<ul class="clist" id="afail" hidden></ul>
+</div>
+<div class="aprev">
+<p class="lab mono">What servers will see</p>
+<div class="dprev">
+<img class="dav" src="/bev-avatar.png?v=7d7dbb208c" alt="" width="40" height="40">
+<div class="dbody">
+<p class="dhead"><b>BEV</b> <span class="dapp">APP</span> <span class="dtime" id="atime">Today</span></p>
+<p class="dping"><span class="dmention">@everyone</span></p>
+<div class="dembed">
+<p class="dtitle">🛠️ BEV maintenance</p>
+<p class="dtext" id="aprevtext"></p>
+<p class="dfoot">From the BEV team • Turn these off at bevbotdiscord.com/dashboard</p>
+</div>
+</div>
+</div>
+<p class="note">Each server gets its own ping: @everyone, @here, a role, or none at all.</p>
+</div>
+</div>
+</section>
+
+<section class="asec" id="bann" aria-labelledby="bann-h">
+<div class="ahead"><h2 class="disp" id="bann-h">Announcement banner</h2><span class="stat" id="bstate">Hidden</span></div>
+<p class="adesc">A strip across the top of every page. Visitors can close it, and it comes back for them when you change its text, link or colour.</p>
+<div class="agrid">
+<div class="aform">
+<div class="fld"><label class="flabel" for="btext">Text</label>
+<div class="tbox"><input class="field" id="btext" type="text" maxlength="200" placeholder="BEV is getting an update tonight at 8pm."><span class="count" id="bcount"></span></div></div>
+<div class="twoc">
+<div class="fld"><label class="flabel" for="blink">Link (optional)</label><input class="field" id="blink" type="text" maxlength="300" placeholder="https://discord.gg/cbevs or /status" autocomplete="off" spellcheck="false">
+<p class="help">An https:// address, or a page on this site like /status.</p></div>
+<div class="fld"><label class="flabel" for="blinktext">Link text</label><input class="field" id="blinktext" type="text" maxlength="40" placeholder="Find out more"></div>
+</div>
+<div class="fld"><span class="flabel" id="bstyle-l">Colour</span>
+<div class="seg styles" role="group" aria-labelledby="bstyle-l"><button type="button" data-style="info" aria-pressed="true">Blue (news)</button> <button type="button" data-style="warning" aria-pressed="false">Amber (warning)</button> <button type="button" data-style="success" aria-pressed="false">Green (good news)</button></div></div>
+<p class="ferr" id="berr" hidden></p>
+<div class="row"><button class="act save" id="bon" type="button">Show the banner</button> <button class="act save" id="bsave" type="button" hidden>Save changes</button> <button class="act stop" id="boff" type="button" hidden>Hide the banner</button></div>
+<p class="note" id="blast"></p>
+</div>
+<div class="aprev">
+<p class="lab mono">Preview</p>
+<div class="bprev" id="bprev"></div>
+</div>
+</div>
+</section>
+
+<section class="asec" id="visits" aria-labelledby="visits-h">
+<div class="ahead"><h2 class="disp" id="visits-h">Visits</h2></div>
+<p class="adesc" id="vnote">A visit is someone arriving from another website, an app or a typed address. Page views count every page they open. Counted without cookies; bots and site admins aren't counted. Days follow UK time.</p>
+<p class="panel gap" id="verr" hidden>The visit numbers couldn't be loaded. Try again in a minute.</p>
+<div id="vbody">
+<div class="tiles" id="tiles"></div>
+<div class="chartbar"><h3 id="ctitle">Visits per day, last 30 days</h3>
+<div class="seg" role="group" aria-label="What the chart shows"><button type="button" data-metric="visits" aria-pressed="true">Visits</button> <button type="button" data-metric="views" aria-pressed="false">Page views</button></div></div>
+<div class="chart" id="chart" tabindex="0" role="img" aria-describedby="chelp"><div class="tip" id="tip" hidden></div></div>
+<p class="note" id="chelp">Point at a day, or use the arrow keys, to see its numbers. The same numbers are in the table below.</p>
+<details class="fset gap"><summary>Show the last 30 days as a table</summary><div class="vtwrap"><table class="vtable" id="dtable"><thead><tr><th scope="col">Day</th><th scope="col" class="n">Visits</th><th scope="col" class="n">Page views</th></tr></thead><tbody></tbody></table></div></details>
+<div class="pages"><h3>Most viewed pages, last 30 days</h3><div class="vtwrap"><table class="vtable" id="ptable"><thead><tr><th scope="col">Page</th><th scope="col" class="n">Visits</th><th scope="col" class="n">Page views</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+</section>
+
+<section class="asec" id="check" aria-labelledby="check-h">
+<div class="ahead"><h2 class="disp" id="check-h">Connection check</h2></div>
+<p class="adesc">Tests every link between this website and BEV: the sign-in settings, the bot token, the bot's address, the shared key and the site database. If something on the site isn't working, start here.</p>
+<div class="row gap"><button class="act save" id="crun" type="button">Run the check</button><span class="note" id="cnote"></span></div>
+<ul class="clist" id="clist" hidden></ul>
+</section>
+
+<section class="asec" id="admins" aria-labelledby="admins-h">
+<div class="ahead"><h2 class="disp" id="admins-h">Site admins</h2></div>
+<p class="adesc" id="anote"></p>
+<ul class="alist" id="alist"></ul>
+</section>
+
+</div>
+
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/nav.js?v=6dc2e996f1" defer></script>
+<script src="/admin.js?v=590829dedc" defer></script>
+</body>
+</html>

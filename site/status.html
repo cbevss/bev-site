@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<title>BEV | Status</title>
+<meta name="description" content="Is BEV online? Live status of the BEV Discord bot.">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=8de753af28">
+</head>
+<body class="status">
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<span class="tab on" aria-current="page" data-status>Status</span>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Status</div>
+<h1 class="disp rise d1">Is <span class="bevword">BEV</span> online?</h1>
+<div class="bigstat rise d2" id="state" role="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="statetext">Checking…</span></div>
+</div>
+</div>
+
+<main class="wrap sec">
+<div class="cards" id="facts">
+<div class="card"><div class="lab mono">Servers</div><p class="fig" id="servers">…</p></div>
+<div class="card"><div class="lab mono">Ping to Discord</div><p class="fig" id="ping">…</p></div>
+<div class="card"><div class="lab mono">Online for</div><p class="fig" id="uptime">…</p></div>
+<div class="card"><div class="lab mono">Commands</div><p class="fig" id="commands">…</p></div>
+</div>
+<p class="note gap" id="checked">This page checks again every 30 seconds.</p>
+<p class="note">If BEV is offline for more than a few minutes, tell us in the <a class="inl" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">BEV Discord</a>.</p>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/nav.js?v=6dc2e996f1" defer></script>
+<script src="/status.js?v=3bdc638f82" defer></script>
+</body>
+</html>

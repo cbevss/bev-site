@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<title>BEV | Dashboard</title>
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=8de753af28">
+</head>
+<body class="dash">
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<span class="tab on" aria-current="page" data-dash data-static>Dashboard</span>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login" hidden>Sign in with Discord</a> <div class="acct" id="acct"><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Dashboard</div>
+<h1 class="disp rise d1">Set up <span class="bevword">BEV</span></h1>
+<p class="lead rise d2">Pick one of your servers, switch features on or off, change any setting, then press <b>Save changes</b> at the bottom. Changes only affect the server you picked.</p>
+</div>
+</div>
+
+<main class="wrap sec" id="main">
+
+<noscript><div class="panel deny"><h2 class="disp">JavaScript is off</h2><p>The dashboard needs JavaScript. Switch it on for this site, then reload the page.</p></div></noscript>
+
+<div class="bar">
+<div class="me"><span class="av sm" id="meav" aria-hidden="true"></span><p>Signed in as <strong id="who">your account</strong></p></div>
+<a class="mini" href="/servers.html">My servers</a>
+</div>
+
+<div class="pick" id="pick" hidden>
+<label for="guild">Server</label>
+<div class="selwrap"><span class="av sm" id="gicon" aria-hidden="true"></span><select class="field big" id="guild"></select></div>
+<button class="mini" id="reload" type="button">Reload</button>
+</div>
+
+<p class="toast" id="toast" role="alert" hidden></p>
+<p class="sr" id="live" role="status" aria-live="polite"></p>
+
+<section id="busy" class="panel" role="status">
+<span class="spin" aria-hidden="true"></span>
+<h2 class="disp" id="busyh">Loading your servers</h2>
+<p id="slow" hidden>Still waiting. If the bot has just restarted (for example after an update), it can take up to a minute to answer.</p>
+</section>
+
+<section id="err" class="panel deny" hidden>
+<h2 class="disp" id="errh">Something went wrong</h2>
+<p id="errmsg" role="alert"></p>
+<button class="mini" id="retry" type="button">Try again</button>
+</section>
+
+<section id="addbev" class="panel" hidden>
+<h2 class="disp">BEV isn't in <span id="addname"></span> yet</h2>
+<p>Add BEV to this server first. Then come back and press <b>I've added it</b> to load its settings.</p>
+<div class="row"><a class="mini" id="addlink" href="#" target="_blank" rel="noopener noreferrer">Add BEV to this server</a> <button class="mini" id="added" type="button">I've added it</button></div>
+</section>
+
+<div id="board" hidden>
+<section class="bentry" id="bentry" aria-labelledby="bentryh">
+<span class="bico" aria-hidden="true">🏗️</span>
+<div class="btext">
+<p class="lab">New server setup</p>
+<h2 class="disp" id="bentryh">Server Builder</h2>
+<p>Add ready-made categories to your server, like Information, Community, Voice Chat and Staff, each with the channels it needs. You pick which ones and BEV builds them.</p>
+<p class="bstat" id="bentrystat"></p>
+</div>
+<button class="act save bopen" id="bopen" type="button">Open server editor <span aria-hidden="true">→</span></button>
+<p class="fnote no" id="bentrynote" role="status" hidden></p>
+</section>
+<div class="tools">
+<input class="field" id="find" type="search" placeholder="Find a feature or setting" aria-label="Find a feature or setting" autocomplete="off">
+<span class="stat here" id="oncount"></span>
+</div>
+<nav class="jump" id="cats" aria-label="Sections"></nav>
+<div id="sections"></div>
+<p class="panel gap" id="nofind" hidden>Nothing matches that search.</p>
+</div>
+
+<section id="builder" class="builder" aria-labelledby="bh" hidden>
+<div><button class="mini" id="bback" type="button"><span aria-hidden="true">←</span>&nbsp;Back to the dashboard</button></div>
+<div class="btop">
+<div>
+<p class="lab">Server editor</p>
+<h2 class="disp" id="bh" tabindex="-1">Build <span id="bname">your server</span></h2>
+<p class="bintro">Tick the categories you want. BEV creates each one with the channels listed in it. Anything already in your server stays as it is: channels that are there already are skipped, and nothing is renamed or deleted.</p>
+</div>
+<div class="bquick" role="group" aria-label="Quick picks">
+<button class="pill" id="bstarter" type="button">⭐ Starter pack</button>
+<button class="pill" id="ball" type="button">Tick all</button>
+<button class="pill" id="bnone" type="button">Clear</button>
+</div>
+</div>
+<p class="toast" id="bperm" hidden>BEV needs the <b>Manage Channels</b> permission to add channels. Give BEV’s role that permission in Server Settings → Roles, then press Reload.</p>
+<div class="bsets" id="bsets"></div>
+<div class="bopts">
+<div class="fld"><label class="flabel" for="bstaff">Staff role <span class="opt">(optional)</span></label><select class="field" id="bstaff"></select><p class="help">This role can see the Staff category and post in read-only channels. Server admins always can.</p></div>
+<div class="bhookw"><label class="chk"><input type="checkbox" id="bhook" checked> Let BEV’s features use the new channels</label><p class="help">For example, Welcome Messages posts in 👋-welcome. Only fills a feature’s channel when none is picked yet, and doesn’t switch any feature on.</p></div>
+</div>
+<div class="bbar" id="bbar">
+<div class="bsum"><p id="bsum">Nothing ticked yet</p><p class="bcount" id="bcount"></p></div>
+<button class="act save" id="bgo" type="button" disabled>Add to server</button>
+<p class="fnote" id="bnote" role="status" hidden></p>
+</div>
+</section>
+
+</main>
+
+<div class="savebar" id="savebar" hidden>
+<div class="wrap sbin">
+<div class="smsg"><p id="dirty">No changes yet</p><ul class="notes" id="notes" aria-label="What happened when you saved" hidden></ul></div>
+<div class="row"><button class="mini ghost" id="dismiss" type="button" title="Hide this bar until you change something">Dismiss</button> <button class="mini" id="discard" type="button" disabled>Discard</button> <button class="act save" id="save" type="button" disabled>Save changes</button></div>
+</div>
+</div>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/nav.js?v=6dc2e996f1" defer></script>
+<script src="/dashboard.js?v=92e0e8cb8c" defer></script>
+</body>
+</html>

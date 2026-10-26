@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<title>BEV | My servers</title>
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=8de753af28">
+</head>
+<body class="servers">
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">My servers</div>
+<h1 class="disp rise d1">Add <span class="bevword">BEV</span> to a server you manage</h1>
+<p class="lead rise d2">Sign in with Discord to see the servers where you are an administrator. Open the dashboard for the ones that have BEV, and add BEV to the rest with one click.</p>
+<ol class="flow rise d3" aria-label="Steps">
+<li id="f1"><span class="n">1</span>Sign in</li>
+<li id="f2"><span class="n">2</span>Your servers</li>
+<li id="f3"><span class="n">3</span>Dashboard</li>
+</ol>
+</div>
+</div>
+
+<main class="wrap sec">
+
+<noscript><div class="panel deny"><h2 class="disp">JavaScript is off</h2><p>This page needs JavaScript to show your servers. You can still add BEV from the Add to server button at the top of the page.</p></div></noscript>
+
+<section id="busy" class="panel" role="status" hidden>
+<span class="spin" aria-hidden="true"></span>
+<h2 class="disp">Checking your sign-in</h2>
+<p>This takes a moment.</p>
+</section>
+
+<section id="out" class="panel" hidden>
+<h2 class="disp">Sign in to see your servers</h2>
+<p>BEV asks Discord for your username and your server list, and nothing else. Nothing is saved to a database. You stay signed in for two hours through an encrypted cookie.</p>
+<span class="ctaw"><a class="cta" href="/auth/login"><span class="plus"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span>Sign in with Discord</span></a></span>
+<p class="note">Prefer not to sign in? <a class="inl" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add BEV the usual way</a>.</p>
+</section>
+
+<section id="deny" class="panel deny" hidden>
+<h2 class="disp">Access denied</h2>
+<p id="denymsg"></p>
+<div class="row">
+<a class="mini" id="denyback" href="/servers.html" hidden>My servers</a>
+<button class="mini" type="button" data-logout>Sign out</button>
+</div>
+</section>
+
+<section id="err" class="panel deny" hidden>
+<h2 class="disp" id="errh">Sign-in did not finish</h2>
+<p id="errmsg" role="alert"></p>
+<a class="mini" id="errretry" href="/auth/login">Try again</a>
+</section>
+
+<section id="in" hidden>
+<div class="who">
+<div class="me"><span class="av sm" id="meav" aria-hidden="true"></span><p>Signed in as <strong id="who"></strong></p></div>
+<button class="mini" type="button" data-logout>Sign out</button>
+</div>
+
+<div class="panel" id="dashcard">
+<div class="dhead"><h2 class="disp">Dashboard</h2><span class="stat" id="dashstat"></span></div>
+<p id="dashmsg"></p>
+<span class="ctaw" id="dashgo" hidden><a class="cta" href="/dashboard"><span class="plus"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span>Open dashboard</span></a></span>
+</div>
+
+<p class="note gap" id="botnote" hidden>BEV could not check which servers it is in just now, so every server below shows the add button. Reload the page to try again.</p>
+<input class="field gap" id="filter" type="search" placeholder="Search your servers" aria-label="Search your servers" autocomplete="off" hidden>
+
+<section class="grp" id="g-here" hidden>
+<h2 class="disp">BEV is in these servers <span class="ct" id="c-here"></span></h2>
+<div class="grid" id="list-here"></div>
+</section>
+
+<section class="grp" id="g-add" hidden>
+<h2 class="disp">Add BEV to these servers <span class="ct" id="c-add"></span></h2>
+<div class="grid" id="list-add"></div>
+</section>
+
+<p class="note gap">Sign out ends this session. To remove BEV's access to your account altogether, open Discord, then Settings, then Authorized Apps.</p>
+</section>
+
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/nav.js?v=6dc2e996f1" defer></script>
+<script src="/servers.js?v=1d3d3b91e5" defer></script>
+</body>
+</html>
