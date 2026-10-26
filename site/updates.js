@@ -5,6 +5,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.12',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Commands follow your dashboard',
+        text: "A feature's commands now only show in Discord's command list in servers where that feature is switched on. For example, /star only appears once the Starboard is on. Switch a feature on or off and its commands are added or removed within a few seconds. Discord's app may need a restart (or Ctrl+R) to show the change." },
+      { title: '/help',
+        text: "/help now lists only the commands your server can use. Everyday commands like /help, /dashboard and the moderation commands are always there." },
+    ],
+  },
+  {
     id: '4.11',
     date: '26 October 2026',
     changes: [
