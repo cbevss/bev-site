@@ -5,6 +5,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.19',
+    date: '26 October 2026',
+    changes: [
+      { title: '/trade and /market',
+        text: 'Members swap coins and items with /trade (nothing moves until the other person accepts), and buy and sell items on /market. The Trading & Market card sets a market fee and how many listings each member can have.' },
+      { title: '/pet (Pets & Battles)',
+        text: 'Catch pets of 5 rarities, pick a team of 3, name them, and battle other members for coins. Pets level up as they fight. Switch it on in the Economy section.' },
+      { title: '/collect (Character Collecting)',
+        text: 'Roll for over 120 anime and game characters and race to press Claim: each one can only belong to one member in your server. Limited rolls per hour and a wait between claims. Switch it on in the Economy section.' },
+      { title: '/proxy (Character Proxying)',
+        text: 'Save roleplay characters with a name, picture and tag, then start a message with the tag to post as that character. Right-click a character message → Apps → Who posted this? shows who wrote it. Switch it on in the Community section (BEV needs Manage Webhooks).' },
+    ],
+  },
+  {
     id: '4.18',
     date: '26 October 2026',
     changes: [
