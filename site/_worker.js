@@ -669,6 +669,7 @@ async function ready(db) {
       db.prepare('CREATE TABLE IF NOT EXISTS site_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL, updated_by TEXT)'),
       db.prepare('CREATE TABLE IF NOT EXISTS page_views (day TEXT NOT NULL, path TEXT NOT NULL, views INTEGER NOT NULL DEFAULT 0, '
         + 'visits INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, path))'),
+      db.prepare('CREATE TABLE IF NOT EXISTS update_seen (user_id TEXT PRIMARY KEY, version TEXT NOT NULL, seen_at INTEGER NOT NULL)'),
     ]);
     prepared.set(db, p);
     p.catch(() => prepared.delete(db));
@@ -737,7 +738,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=bc88023dd2">
+<link rel="stylesheet" href="/styles.css?v=e290b6e66b">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1271,6 +1272,41 @@ async function adminApi(request, env, c, url, secure, s) {
   return json(await adminState(env, c, s, site));
 }
 
+/* ---------- what's new: which update each person last pressed "Got it" on ---------- */
+
+const UPDATE_ID_RE = /^[\w.-]{1,20}$/;
+
+async function updatesApi(request, env, url, s) {
+  if (request.method !== 'GET' && request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+  if (request.method === 'POST' && request.headers.get('origin') !== url.origin) return json({ error: 'bad_origin' }, 403);
+  if (!s.session) return json({ error: 'signed_out' }, 401);
+  const userId = String(s.session.user.id);
+  const db = database(env);
+  if (request.method === 'GET') {
+    if (!db) return json({ seen: null, saved: false });
+    try {
+      await ready(db);
+      const row = await db.prepare('SELECT version FROM update_seen WHERE user_id = ?1').bind(userId).first();
+      return json({ seen: row ? row.version : null, saved: true });
+    } catch {
+      return json({ seen: null, saved: false });
+    }
+  }
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'bad_request' }, 400); }
+  const version = body && typeof body.version === 'string' ? body.version : '';
+  if (!UPDATE_ID_RE.test(version)) return json({ error: 'bad_request' }, 400);
+  if (!db) return json({ ok: true, saved: false });
+  try {
+    await ready(db);
+    await db.prepare('INSERT INTO update_seen (user_id, version, seen_at) VALUES (?1, ?2, ?3) '
+      + 'ON CONFLICT(user_id) DO UPDATE SET version = excluded.version, seen_at = excluded.seen_at').bind(userId, version, Date.now()).run();
+    return json({ ok: true, saved: true });
+  } catch {
+    return json({ ok: true, saved: false });
+  }
+}
+
 /* ---------- entry ---------- */
 
 export default {
@@ -1296,6 +1332,7 @@ export default {
         if (path.startsWith('/api/')) return withSecurity(json({ error: 'maintenance' }, 503));
         return maintenancePage(site.maintenance, request.method);
       }
+      if (path === '/api/updates') return withSecurity(await updatesApi(request, env, url, s));
       if (path.startsWith('/api/')) return withSecurity(await api(request, c, url, secure, s));
       if (DASHBOARD_PATHS.has(path)) return await dashboardPage(request, env, ctx, c, secure, s);
       if (ADMIN_PATHS.has(path)) return await adminPage(request, env, ctx, secure, s);

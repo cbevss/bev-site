@@ -178,6 +178,89 @@
     });
   }
 
+  // What's new: after an update, people who are signed in get a popup listing every change since the last one they
+  // saw (the list is in updates.js). "Got it" is saved to their account, so it doesn't show again on any device
+  // until the next update. The browser keeps a copy too, so pages don't have to ask each time.
+  var newsShown = false;
+  function seenKey(user) { return 'bev_seen_update_' + user.id; }
+  function seenHere(user) { try { return root.localStorage.getItem(seenKey(user)); } catch (e) { return null; } }
+  function rememberSeen(user, id) { try { root.localStorage.setItem(seenKey(user), id); } catch (e) { /* storage blocked */ } }
+
+  function unseenUpdates(list, seen) {
+    if (!seen) return list.slice(0, 1);                  // never pressed Got it: just the latest update
+    var out = [];
+    for (var i = 0; i < list.length && i < 10; i++) {
+      if (list[i].id === seen) break;
+      out.push(list[i]);
+    }
+    return out;
+  }
+
+  function el(tag, cls, text) {
+    var n = doc.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function newsDialog(updates, onGotIt) {
+    var box = el('dialog', 'askbox newsbox');
+    box.setAttribute('aria-labelledby', 'newstitle');
+    var head = el('h2', 'disp', "What's new on BEV");
+    head.id = 'newstitle';
+    box.appendChild(head);
+    var count = updates.reduce(function (n, u) { return n + u.changes.length; }, 0);
+    box.appendChild(el('p', 'newssub', count === 1 ? 'There is 1 change since you last visited.' : 'There are ' + count + ' changes since you last visited.'));
+    var list = el('div', 'newslist');
+    list.id = 'newslist';
+    list.tabIndex = 0;
+    updates.forEach(function (u) {
+      list.appendChild(el('h3', 'newsver', 'Update ' + u.id + (u.date ? ' · ' + u.date : '')));
+      u.changes.forEach(function (c) {
+        var item = el('div', 'newsitem');
+        item.appendChild(el('b', 'newsname', c.title));
+        item.appendChild(el('p', null, c.text));
+        list.appendChild(item);
+      });
+    });
+    box.appendChild(list);
+    var row = el('div', 'newsrow');
+    var ok = el('button', 'newsok', '✅ Got it');
+    ok.type = 'button';
+    ok.id = 'newsok';
+    row.appendChild(ok);
+    box.appendChild(row);
+    ok.addEventListener('click', function () { onGotIt(); box.close(); box.remove(); });
+    box.addEventListener('cancel', function () { box.remove(); });     // Escape: closed for now, shown again next time
+    doc.body.appendChild(box);
+    if (typeof box.showModal === 'function') box.showModal(); else box.setAttribute('open', '');
+    ok.focus();
+    return box;
+  }
+
+  function whatsNew(user) {
+    var list = root.BEV_UPDATES;
+    if (newsShown || !user || !user.id || !Array.isArray(list) || !list.length) return;
+    var latest = list[0].id;
+    if (seenHere(user) === latest) return;
+    newsShown = true;
+    root.fetch('/api/updates', { credentials: 'same-origin', cache: 'no-store', headers: { accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) { newsShown = false; return; }
+        var seen = d.seen || seenHere(user);
+        if (seen === latest) { rememberSeen(user, latest); return; }
+        var updates = unseenUpdates(list, seen);
+        if (!updates.length) return;
+        newsDialog(updates, function () {
+          rememberSeen(user, latest);
+          root.fetch('/api/updates', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
+                                       body: JSON.stringify({ version: latest }) }).catch(function () { /* the browser still remembers */ });
+        });
+      })
+      .catch(function () { newsShown = false; });
+  }
+
   function boot() {
     banner();
     var out = doc.getElementById('navout');
@@ -188,7 +271,7 @@
       setFlag();
       show(true);
       var user = e && e.detail && e.detail.user;
-      if (user && user.name) { rememberMe(user); showMe(user); }
+      if (user && user.name) { rememberMe(user); showMe(user); whatsNew(user); }
     });
     doc.addEventListener('bev:signedout', function () { clearFlag(); show(false); });
 
@@ -206,7 +289,7 @@
       })
       .then(function (d) {
         if (!d) return;
-        if (d.user && d.user.name) { setFlag(); rememberMe(d.user); showMe(d.user); }
+        if (d.user && d.user.name) { setFlag(); rememberMe(d.user); showMe(d.user); whatsNew(d.user); }
         if (typeof d.admin === 'boolean') adminTab(d.admin);
       })
       .catch(function () { /* offline or backend not reachable: leave the top bar as it is */ });

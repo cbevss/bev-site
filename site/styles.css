@@ -882,3 +882,19 @@ dialog.askbox::backdrop{background:rgba(2,4,10,.72);-webkit-backdrop-filter:blur
 .askrow .mini{cursor:pointer;font-family:inherit}
 .askrow .act.save{min-width:0;padding:0 20px}
 @media(max-width:420px){.askrow>*{flex:1 1 100%;justify-content:center}}
+
+/* What's new popup */
+dialog.newsbox{width:min(560px,calc(100vw - 32px));max-width:none;display:flex;flex-direction:column;max-height:min(80vh,720px)}
+dialog.newsbox:not([open]){display:none}
+.newsbox .newssub{margin:0 0 12px}
+.newslist{overflow-y:auto;overscroll-behavior:contain;flex:1 1 auto;min-height:0;padding-right:6px;margin-right:-6px}
+.newslist:focus-visible{outline:2px solid var(--ac2);outline-offset:2px;border-radius:8px}
+.newsver{margin:14px 0 8px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#B9D0FF}
+.newsver:first-child{margin-top:0}
+.newsitem{padding:12px 14px;margin:0 0 8px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.03)}
+.newsitem .newsname{display:block;color:#fff;font-size:15.5px;margin:0 0 4px}
+.newsitem p{margin:0;font-size:14.5px}
+.newsrow{display:flex;justify-content:flex-end;margin-top:16px;flex:0 0 auto}
+.newsok{cursor:pointer;font:inherit;font-weight:700;font-size:15px;min-height:44px;padding:0 22px;border:0;border-radius:12px;background:#16A34A;color:#fff;box-shadow:0 8px 24px -10px rgba(34,197,94,.7)}
+.newsok:hover{background:#15803D}
+.newsok:focus-visible{outline:2px solid #86EFAC;outline-offset:3px}
