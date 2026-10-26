@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.15',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Requests to be freed: roles to ping',
+        text: 'The Jail setting for who to ping about new requests now takes several roles (up to 10), and all of them are pinged. A role you picked before is kept.' },
+    ],
+  },
+  {
     id: '4.14',
     date: '26 October 2026',
     changes: [
