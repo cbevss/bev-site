@@ -16,7 +16,7 @@
     network: 'The BEV site could not be reached. Check your connection and try again.',
     maintenance: 'The site is being worked on right now. Try again soon.'
   };
-  var state = { guild: null, pleas: [], picked: null, busy: false };
+  var state = { guild: null, pleas: [], picked: null, busy: false, options: [] };
 
   function $(id) { return doc.getElementById(id); }
   function el(tag, cls, text) {
@@ -116,12 +116,24 @@
     $('jruser').textContent = p.name ? '@' + p.name : '';
     var facts = $('jrfacts');
     facts.replaceChildren();
+    $('jrwhytext').textContent = p.reason || 'No reason was given when they were jailed.';
+    $('jrwhy').classList.toggle('none', !p.reason);
     facts.append(el('li', null, 'Asked ' + when(p.at) + ' (' + ago(p.at) + ')'));
     if (p.since) facts.append(el('li', null, 'In jail since ' + when(p.since)));
-    if (p.reason) facts.append(el('li', null, 'Jailed for: ' + p.reason));
     facts.append(el('li', null, p.until ? 'Freed automatically ' + when(p.until) : 'Stays in jail until the staff free them'));
     if (!p.here) facts.append(el('li', 'warn', "They've left the server. Approving just takes them off the jail list."));
     $('jrmsg').textContent = p.text;
+    var hist = Array.isArray(p.history) ? p.history : [];
+    var hl = $('jrhistlist');
+    hl.replaceChildren();
+    hist.forEach(function (h) {
+      var li = el('li');
+      var word = h.status === 'approved' ? '✅ ' + (h.outcome || 'Freed') : h.status === 'denied' ? '❌ Denied' : '🕊️ Freed another way first';
+      li.append(el('b', null, word + ' • asked ' + when(h.at)), el('span', 'jrhq', '“' + h.text + '”'));
+      if (h.note) li.append(el('span', 'jrhn', 'Staff note: ' + h.note));
+      hl.append(li);
+    });
+    $('jrhist').hidden = !hist.length;
     setButtons(false);
     if (focus) {
       $('jrdetail').focus({ preventScroll: true });
@@ -136,17 +148,28 @@
 
   /* ---------- approve or deny ---------- */
 
-  function ask(title, text, ok) {
+  // Asks before approving or denying. opts.choices: how to free them; opts.reason: a box for why (shown to them).
+  function ask(title, text, ok, opts) {
+    opts = opts || {};
     var box = $('jrask');
     $('jraskh').textContent = title;
     $('jraskt').textContent = text;
     $('jraskyes').textContent = ok;
+    var pick = $('jraskpick');
+    pick.replaceChildren();
+    (opts.choices || []).forEach(function (c) { var o = el('option', null, c.label); o.value = c.value; pick.append(o); });
+    $('jraskpickw').hidden = !(opts.choices && opts.choices.length);
+    $('jraskreasonw').hidden = !opts.reason;
+    $('jraskreasonl').textContent = opts.reason || 'Why (optional)';
+    $('jraskreason').value = '';
     return new Promise(function (resolve) {
-      if (typeof box.showModal !== 'function') { resolve(root.confirm(title + '\n\n' + text)); return; }
-      function done(answer) {
+      function answer(yes) { return yes ? { choice: pick.value || null, reason: $('jraskreason').value.trim() } : null; }
+      if (typeof box.showModal !== 'function') { resolve(answer(root.confirm(title + '\n\n' + text))); return; }
+      function done(yes) {
         $('jraskyes').onclick = null; $('jraskno').onclick = null; box.oncancel = null;
+        var result = answer(yes);
         if (box.open) box.close();
-        resolve(answer);
+        resolve(result);
       }
       $('jraskyes').onclick = function () { done(true); };
       $('jraskno').onclick = function () { done(false); };
@@ -163,15 +186,18 @@
     ask(approve ? 'Free ' + nameOf(p) + '?' : 'Deny ' + nameOf(p) + "'s request?",
       approve ? 'They get their access back straight away, and BEV tells them by DM.'
         : "They stay in jail and BEV tells them in the jail channel. They can send a new request in 7 days.",
-      approve ? '✅ Approve' : '❌ Deny').then(function (yes) {
-      if (!yes) return;
+      approve ? '✅ Approve' : '❌ Deny',
+      approve ? { choices: state.options, reason: 'A note for them (optional, sent with their DM)' }
+        : { reason: 'Why (optional, they’ll see this in the jail channel)' }).then(function (got) {
+      if (!got) return;
+      if (approve && got.choice) decision = got.choice;
       state.busy = true;
       setButtons(true);
       var guild = state.guild;
       request('/api/action', {
         method: 'POST',
         headers: { accept: 'application/json', 'content-type': 'application/json' },
-        body: JSON.stringify({ guild_id: guild, owner: 'jail', action: 'plea', values: { plea: p.id, decision: decision } })
+        body: JSON.stringify({ guild_id: guild, owner: 'jail', action: 'plea', values: { plea: p.id, decision: decision, reason: got.reason || '' } })
       }).then(function (r) {
         state.busy = false;
         var ok = r.status === 200 && r.data && r.data.ok;
@@ -224,6 +250,7 @@
       }
       var before = state.picked;
       state.pleas = Array.isArray(jail.pleas) ? jail.pleas : [];
+      state.options = Array.isArray(jail.plea_options) && jail.plea_options.length ? jail.plea_options : [{ value: 'approve', label: 'Freed' }];
       show('jrbox');
       if (before && state.pleas.some(function (p) { return p.id === before; })) { drawList(); }
       else { pick(null); drawList(); }

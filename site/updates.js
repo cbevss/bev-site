@@ -5,6 +5,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.14',
+    date: '26 October 2026',
+    changes: [
+      { title: 'Dashboard Access (new)',
+        text: "A new card in the Security section lets you give a role, or particular members, access to this server's dashboard without making them admins. Tick exactly which cards each one can see and change. They never see the Dashboard Access card, so they can't give themselves more." },
+      { title: 'Requests to be freed: staff alerts',
+        text: 'Pick a channel and a role on the Jail card, and BEV posts each new request there, pinging that role, with a button to review it.' },
+      { title: 'Requests to be freed: approving and denying',
+        text: 'Approve can now free them with a warning or with a 24-hour timeout, and add a note for their DM. Deny can say why, and they see it in the jail channel.' },
+      { title: 'Requests to be freed: what they were jailed for and history',
+        text: "Each request shows what they were jailed for at the top, plus their earlier requests and how they were answered. Member tools on the dashboard show someone's requests too." },
+    ],
+  },
+  {
     id: '4.13',
     date: '26 October 2026',
     changes: [

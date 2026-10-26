@@ -219,11 +219,12 @@ async function botGuildIds(c) {
 
 // Servers the user administers, whether BEV is in each, and which dashboards they may open:
 // every one they administer that BEV is in. Unknown bot presence opens nothing.
-async function buildView(guilds, c) {
+async function buildView(guilds, c, userId) {
   let botIds = null;
   try { botIds = await botGuildIds(c); } catch { botIds = null; }
-  const servers = guilds
-    .filter((g) => g && ID_RE.test(String(g.id)) && isAdmin(g))
+  const valid = guilds.filter((g) => g && ID_RE.test(String(g.id)));
+  const servers = valid
+    .filter((g) => isAdmin(g))
     .map((g) => ({
       id: g.id,
       name: String(g.name ?? ''),
@@ -231,8 +232,19 @@ async function buildView(guilds, c) {
       owner: g.owner === true,
       botPresent: botIds ? botIds.has(g.id) : null,
       dashboard: !!botIds && botIds.has(g.id),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+      access: 'full',
+    }));
+  // Servers where they aren't an admin but were given Dashboard Access (the bot decides, from their roles).
+  const others = botIds && userId ? valid.filter((g) => !isAdmin(g) && botIds.has(g.id)).slice(0, 200) : [];
+  if (others.length) {
+    const res = await bot(c, '/api/access', { method: 'POST', body: JSON.stringify({ user_id: String(userId), guild_ids: others.map((g) => String(g.id)) }) });
+    const access = res.status === 200 && res.data && typeof res.data.access === 'object' && res.data.access ? res.data.access : {};
+    for (const g of others) {
+      if (!Array.isArray(access[g.id]) || !access[g.id].length) continue;
+      servers.push({ id: g.id, name: String(g.name ?? ''), icon: g.icon || null, owner: false, botPresent: true, dashboard: true, access: 'limited' });
+    }
+  }
+  servers.sort((a, b) => a.name.localeCompare(b.name));
   return {
     servers,
     botKnown: !!botIds,
@@ -245,7 +257,7 @@ async function loadView(session, c, fresh) {
   const hit = viewCache.get(session.user.id);
   if (!fresh && hit && hit.tok === session.tok && Date.now() - hit.at < 60000) return hit.view;
   const guilds = await discord('/users/@me/guilds', 'Bearer ' + session.tok);
-  const view = await buildView(guilds, c);
+  const view = await buildView(guilds, c, session.user.id);
   if (viewCache.size > 500) viewCache.clear();
   viewCache.set(session.user.id, { at: Date.now(), tok: session.tok, view });
   return view;
@@ -351,6 +363,7 @@ async function bot(c, path, init = {}) {
 function botAnswer(res) {
   if (res.error) return json({ error: res.error }, 503);
   if (res.status === 401) return json({ error: 'bot_rejected_key' }, 502);
+  if (res.status === 403) return json({ error: 'no_access', message: str(res.data && res.data.error), problems: problems(res.data && res.data.problems) }, 403);
   if (res.status === 503) return json({ error: 'bot_starting' }, 503);
   if (res.status === 404) return json({ error: 'bot_not_in_server' }, 404);
   if (res.status === 400) return json({ error: 'invalid', message: str(res.data && res.data.error), problems: problems(res.data && res.data.problems) }, 400);
@@ -456,8 +469,14 @@ async function api(request, c, url, secure, s) {
 
   if (path === '/api/servers') return json({ user: session.user, ...view });
 
-  // Only a server this user administers and BEV is in. The bot also checks it is in the server.
+  // Only a server this user administers (or was given Dashboard Access in) and BEV is in. The bot also checks it is in the server.
   const allowed = (id) => typeof id === 'string' && ID_RE.test(id) && view.servers.some((s) => s.id === id && s.dashboard);
+  // Who is looking, for the bot: someone who isn't an admin there only gets the parts they were given.
+  allowed.viewer = (id) => {
+    const server = view.servers.find((s) => s.id === id);
+    return { viewer_id: String(session.user.id), viewer_full: !!server && server.access !== 'limited' };
+  };
+  const viewerQuery = (id) => { const v = allowed.viewer(id); return '&viewer_id=' + v.viewer_id + '&viewer_full=' + (v.viewer_full ? '1' : '0'); };
 
   if (path === '/api/level-roles') return levelRoles(request, c, url, session, allowed);
   if (path === '/api/messages') return sendMessage(request, c, session, allowed);
@@ -468,7 +487,7 @@ async function api(request, c, url, secure, s) {
     const guildId = url.searchParams.get('guild_id') || '';
     if (!ID_RE.test(guildId)) return json({ error: 'bad_request' }, 400);
     if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
-    const res = await bot(c, '/api/config?guild_id=' + guildId);
+    const res = await bot(c, '/api/config?guild_id=' + guildId + viewerQuery(guildId));
     return botAnswer(res) || json(res.data);
   }
 
@@ -484,7 +503,7 @@ async function api(request, c, url, secure, s) {
   if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
   const save = cleanSave(body, guildId, `${session.user.name} (${session.user.id}) on the website`);
   if (!save) return json({ error: 'bad_request' }, 400);
-  const res = await bot(c, '/api/config', { method: 'POST', body: JSON.stringify(save) });
+  const res = await bot(c, '/api/config', { method: 'POST', body: JSON.stringify({ ...save, ...allowed.viewer(guildId) }) });
   return botAnswer(res) || json({ ok: true, notes: (Array.isArray(res.data.notes) ? res.data.notes : []).slice(0, 80).map((n) => str(n, 500)), config: res.data.config });
 }
 
@@ -495,7 +514,8 @@ async function levelRoles(request, c, url, session, allowed) {
     const guildId = url.searchParams.get('guild_id') || '';
     if (!ID_RE.test(guildId)) return json({ error: 'bad_request' }, 400);
     if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
-    const res = await bot(c, '/api/level-roles?guild_id=' + guildId);
+    const v = allowed.viewer(guildId);
+    const res = await bot(c, '/api/level-roles?guild_id=' + guildId + '&viewer_id=' + v.viewer_id + '&viewer_full=' + (v.viewer_full ? '1' : '0'));
     return levelRolesProblem(res) || json({ job: cleanLevelJob(res.data.job) });
   }
   const body = await readJson(request, 2000);
@@ -504,7 +524,7 @@ async function levelRoles(request, c, url, session, allowed) {
   if (typeof guildId !== 'string' || !ID_RE.test(guildId) || !Number.isInteger(count) || count < 1 || count > 100) return json({ error: 'bad_request' }, 400);
   if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
   const res = await bot(c, '/api/level-roles', {
-    method: 'POST', body: JSON.stringify({ guild_id: guildId, count, actor: `${session.user.name} (${session.user.id}) on the website` }),
+    method: 'POST', body: JSON.stringify({ guild_id: guildId, count, actor: `${session.user.name} (${session.user.id}) on the website`, ...allowed.viewer(guildId) }),
   });
   return levelRolesProblem(res) || json({ ok: true, job: cleanLevelJob(res.data.job) });
 }
@@ -512,6 +532,7 @@ async function levelRoles(request, c, url, session, allowed) {
 function levelRolesProblem(res) {
   if (res.error) return json({ error: res.error }, 503);
   if (res.status === 401) return json({ error: 'bot_rejected_key' }, 502);
+  if (res.status === 403) return json({ error: 'no_access' }, 403);
   if (res.status === 404 && !(res.data && res.data.error)) return json({ error: 'bot_outdated' }, 501);
   if (res.status === 404) return json({ error: 'bot_not_in_server' }, 404);
   if (res.status === 503) return json({ error: 'bot_starting' }, 503);
@@ -546,7 +567,7 @@ async function sendMessage(request, c, session, allowed) {
       || (mode !== 'send' && mode !== 'update')) return json({ error: 'bad_request' }, 400);
   if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
   const res = await bot(c, '/api/custom-messages/send', {
-    method: 'POST', body: JSON.stringify({ guild_id: guildId, template_id: templateId, mode, actor: `${session.user.name} (${session.user.id}) on the website` }),
+    method: 'POST', body: JSON.stringify({ guild_id: guildId, template_id: templateId, mode, actor: `${session.user.name} (${session.user.id}) on the website`, ...allowed.viewer(guildId) }),
   });
   return levelRolesProblem(res) || json({ ok: true, posted: cleanPosted(res.data.posted) });
 }
@@ -596,10 +617,11 @@ async function webAction(request, c, session, allowed) {
   if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
   const res = await bot(c, '/api/action', {
     method: 'POST',
-    body: JSON.stringify({ guild_id: guildId, owner, action, values, actor: `${session.user.name} (${session.user.id}) on the website`, actor_id: session.user.id }),
+    body: JSON.stringify({ guild_id: guildId, owner, action, values, actor: `${session.user.name} (${session.user.id}) on the website`, actor_id: session.user.id, ...allowed.viewer(guildId) }),
   });
   if (res.error) return json({ error: res.error }, 503);
   if (res.status === 401) return json({ error: 'bot_rejected_key' }, 502);
+  if (res.status === 403) return json({ error: 'no_access' }, 403);
   if (res.status === 404) {
     // The bot says which: it isn't in that server, or (an older bot) it doesn't know this button yet.
     return res.data && res.data.error === 'BEV is not in that server' ? json({ error: 'bot_not_in_server' }, 404) : json({ error: 'bot_outdated' }, 501);
@@ -615,7 +637,8 @@ async function findMembers(c, url, allowed) {
   const q = (url.searchParams.get('q') || '').slice(0, 40);
   if (!ID_RE.test(guildId)) return json({ error: 'bad_request' }, 400);
   if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
-  const res = await bot(c, '/api/members?guild_id=' + guildId + '&q=' + encodeURIComponent(q));
+  const v = allowed.viewer(guildId);
+  const res = await bot(c, '/api/members?guild_id=' + guildId + '&q=' + encodeURIComponent(q) + '&viewer_id=' + v.viewer_id + '&viewer_full=' + (v.viewer_full ? '1' : '0'));
   const problem = levelRolesProblem(res);
   if (problem) return problem;
   return json({ members: (Array.isArray(res.data.members) ? res.data.members : []).slice(0, 20).map((m) => ({
@@ -738,7 +761,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=4c105ac3d1">
+<link rel="stylesheet" href="/styles.css?v=13ef1b3e5b">
 </head>
 <body class="notice">
 <div class="hero">

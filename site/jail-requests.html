@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=4c105ac3d1">
+<link rel="stylesheet" href="/styles.css?v=13ef1b3e5b">
 </head>
 <body class="dash jr">
 
@@ -62,9 +62,11 @@
 <div class="jrcard" id="jrcard" hidden>
 <button class="mini jrbacklist" id="jrbacklist" type="button">← All requests</button>
 <div class="jrwho"><span class="jrav" id="jrav"></span><div><h2 class="disp" id="jrname"></h2><p class="jruser" id="jruser"></p></div></div>
+<div class="jrwhy" id="jrwhy"><span class="jrwhyh">⛓️ Jailed for</span><p id="jrwhytext"></p></div>
 <ul class="jrfacts" id="jrfacts"></ul>
 <h3 class="jrsub">Their message</h3>
 <blockquote class="jrmsg" id="jrmsg"></blockquote>
+<div class="jrhist" id="jrhist" hidden><h3 class="jrsub">Their earlier requests</h3><ul id="jrhistlist"></ul></div>
 <div class="jrbtns"><button class="jrno" id="jrdeny" type="button">❌ Deny</button> <button class="jrok" id="jrapprove" type="button">✅ Approve</button></div>
 <p class="fnote" id="jrnote" role="status" hidden></p>
 </div>
@@ -74,6 +76,8 @@
 <dialog class="askbox" id="jrask" aria-labelledby="jraskh">
 <h2 class="disp" id="jraskh"></h2>
 <p id="jraskt"></p>
+<div class="jrfield" id="jraskpickw" hidden><label class="flabel" for="jraskpick">How to free them</label><select class="field" id="jraskpick"></select></div>
+<div class="jrfield" id="jraskreasonw" hidden><label class="flabel" for="jraskreason" id="jraskreasonl">Why (optional)</label><textarea class="field" id="jraskreason" maxlength="300" rows="3"></textarea></div>
 <div class="askrow"><button class="mini" id="jraskno" type="button">Go back</button> <button class="act save" id="jraskyes" type="button"></button></div>
 </dialog>
 </main>
@@ -85,8 +89,8 @@
 <nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
 </footer>
 
-<script src="/updates.js?v=efee52df2e" defer></script>
+<script src="/updates.js?v=82a7d10fa7" defer></script>
 <script src="/nav.js?v=9f240af849" defer></script>
-<script src="/jail-requests.js?v=f50da481a7" defer></script>
+<script src="/jail-requests.js?v=5d8ebc07bf" defer></script>
 </body>
 </html>

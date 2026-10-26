@@ -15,6 +15,7 @@
 
   var ERRORS = {
     forbidden: 'You can only change servers where you are an administrator and BEV has been added.',
+    no_access: 'You don’t have access to that part of this server’s dashboard. Ask one of the server’s admins if you need it.',
     bot_not_in_server: 'BEV isn\'t in that server any more. Add it again, then reload.',
     bot_not_configured: 'The website isn\'t connected to the bot yet. If you run this site, add BOT_API_BASE and BOT_API_KEY in Cloudflare.',
     bot_unreachable: 'The bot didn\'t answer in time. It may be busy or restarting (for example after an update). Try again in a minute.',
@@ -166,7 +167,7 @@
       var og = el('optgroup');
       og.label = group[0];
       group[1].forEach(function (s) {
-        var o = el('option', null, s.name + (s.dashboard ? '' : '  (add BEV first)'));
+        var o = el('option', null, s.name + (s.dashboard ? (s.access === 'limited' ? '  (limited access)' : '') : '  (add BEV first)'));
         o.value = s.id;
         og.append(o);
       });
@@ -237,6 +238,16 @@
 
   function useConfig(config) {
     state.config = config;
+    var limited = config.access && config.access.limited;
+    var note = $('accessnote');
+    if (note) {
+      note.hidden = !limited;
+      if (limited) {
+        var n = (config.features || []).length + (config.tools || []).length + (config.builder ? 1 : 0);
+        note.textContent = '🔑 Limited access: an admin of this server gave you ' + (n === 1 ? '1 part' : n + ' parts') +
+          ' of the dashboard. Only those are shown here, and you can only change them.';
+      }
+    }
     state.original = valuesOf(config);
     state.draft = clone(state.original);
     state.keep = {};
@@ -249,7 +260,7 @@
   /* ---------- drawing the settings ---------- */
 
   // Cards that fill a whole row go after the others in their section, so the two-column grid has no gaps.
-  var WIDE = { custom_messages: true, 'tool:members': true };
+  var WIDE = { custom_messages: true, dashboard_access: true, 'tool:members': true };
   function isWide(f) { return !!WIDE[f.tool ? 'tool:' + f.key : f.key]; }
 
   function inOrder(feats) {
@@ -411,6 +422,7 @@
   function featureCard(f) {
     var card = el('article', 'feat');
     card.id = 'f-' + f.key;
+    if (f.key === 'dashboard_access') card.classList.add('wide');
     card.setAttribute('data-search', searchText(f));
     card.setAttribute('data-key', f.key);
     var head = el('div', 'fhead');
@@ -946,6 +958,21 @@
           + ' • starts again ' + new Date(d.ladder.resets * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' if nothing else happens');
       }
       summary.append(facts);
+      var pleas = Array.isArray(d.pleas) ? d.pleas : [];
+      if (pleas.length) {
+        summary.append(el('p', 'flabel', 'Requests to be freed from jail'));
+        var plist = el('ul', 'mpleas');
+        var WORD = { approved: '✅ Approved', denied: '❌ Denied', closed: '🕊️ Freed another way first' };
+        pleas.forEach(function (pl) {
+          var li = el('li');
+          var head = (pl.status === 'approved' && pl.outcome ? '✅ ' + pl.outcome : (WORD[pl.status] || pl.status)) + ' • asked ' +
+            new Date(pl.at * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+          li.append(el('b', null, head), el('span', 'mpq', '“' + pl.text + '”'));
+          if (pl.note) li.append(el('span', 'mpn', 'Staff note: ' + pl.note));
+          plist.append(li);
+        });
+        summary.append(plist);
+      }
       var temp = Array.isArray(d.temp_roles) ? d.temp_roles : [];
       if (temp.length) {
         var list = el('ul', 'mtemp');
@@ -1129,7 +1156,7 @@
       return node;
     }
     if (kind === 'multi') {
-      node = el('div', 'checks');
+      node = el('div', 'checks' + (s.options.length > 20 ? ' long' : ''));
       node.id = id;
       s.options.forEach(function (o) {
         var lab = el('label', 'chk');
@@ -2165,6 +2192,8 @@
     var data = builderData();
     var stat = $('bentrystat');
     $('bentrynote').hidden = true;
+    // People given Dashboard Access without the Server Builder don't see it at all.
+    $('bentry').hidden = !data && !!(state.config && state.config.access && state.config.access.limited);
     if (!data) {
       stat.textContent = 'Upload the newest bev_bot.py to use the Server Builder.';
       $('bopen').disabled = true;
