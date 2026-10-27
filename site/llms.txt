@@ -1,0 +1,173 @@
+# BEV
+
+> BEV is a free all-in-one Discord bot. Server admins switch features on and set them up on the web dashboard at https://bevbotdiscord.com/dashboard, and members use slash commands in Discord.
+
+- Add BEV to a server: https://discord.com/oauth2/authorize?client_id=1562204643755429980&permissions=8&integration_type=0&scope=bot+applications.commands
+- Every command and feature: https://bevbotdiscord.com/features
+- Support: https://bevbotdiscord.com/support (Discord: https://discord.gg/cbevs)
+- Find a server that uses BEV: https://bevbotdiscord.com/discover
+
+## Features (all free)
+
+### Security
+- Anti-Nuke Protection: Watches the audit log for anyone who bans, kicks, prunes members or deletes roles or channels too fast, stops them straight away, and can rebuild what they deleted.
+- Anti-Raid Shield: Counts how fast people join. When too many join within a minute, BEV locks the server down and deals with everyone who joins until it ends.
+- Anti-Link Filter: Removes links that members post, so nobody can spam invites, scams or ads. Allow certain websites, or only block Discord invites.
+- Anti-Spam: Catches message floods, copy-pasted spam, mass pings, walls of capitals, emoji spam and glitchy text. Also reports ghost pings.
+- Scam Link Blocker: Blocks known scam and phishing sites (fake free Nitro, fake Steam pages) using a list that updates every day, while normal links keep working.
+- Discord AutoMod Rules: Sets up Discord's own AutoMod for you. It blocks words, invites and mention spam before the message is even sent, and keeps working while BEV is offline.
+- Word Filter: Deletes messages containing slurs or any words you block, and can time the sender out. It matches whole words, so innocent words are left alone.
+- Account Age Gate: Checks how old a Discord account is when it joins. Brand-new accounts are a common sign of raid bots and alts, so BEV deals with them and explains why.
+- Honeypot Trap: A trap channel near the top of the server. Real members read the warning and stay away, but spam bots type everywhere, so they're caught instantly.
+- Member Verification: New members get the Unverified role and must pass a check to get Verified: a button, a maths question or a picture code. Hide your channels from @everyone and show them to Verified.
+- Whitelist: Members, roles and channels on this list are never touched by BEV's automatic protections. Admins are always safe from the filters.
+- Shared Raider Blocklist: Servers that turn this on share bans for raiding, spam and scams. When someone on the shared list joins, BEV warns your staff or acts on it.
+- Moderation Logs: A private channel where BEV reports everything it does, so staff can always see what happened and why.
+- Full Server Logs: Logs deleted and edited messages, joins and leaves, role and nickname changes, voice moves, channel changes and bans.
+- Nickname Clean-up: Fixes names that use symbols to jump to the top of the member list, names with blocked words, and names nobody can read or type.
+- Server Lockdown: While it's on, only staff can type in any channel, for raids or emergencies. Switching it off puts everything back exactly as it was. Staff can also use /lockdown in Discord.
+- Server Backups: Saves your channels, categories, roles and permissions so you can rebuild the server after a nuke or a mistake. Switching it on turns on automatic backups.
+- AI Moderation: Reads messages for their meaning, not just words: harassment, hate, threats, sexual content, self-harm and scams that slip past word lists. It can check pictures too. Uses the AI key (ANTHROPIC_API_KEY), paid per message checked.
+- Advanced AutoMod Rules: Your own filters written as regular expressions (patterns), with how many matches it takes, how fast, and what happens. For words, the Word Filter is simpler.
+- Alt Account Detection: Scores everyone who joins for signs of an alt account: a new account, no profile picture, a name like someone recently banned, or joining through the same invite as a banned member soon after. Suspicious joins are reported to staff with the reasons, and can be acted on.
+- Ban Sync: Shares bans between every server you own that also has Ban Sync on: ban someone in one and BEV bans them in the others, with the reason.
+- Dashboard Access: Lets people who aren't admins use this server's dashboard: pick a role or members, then what they can see and change. Only admins can change this card, and people given access never see it.
+
+### Moderation
+- Warnings: Admins give official warnings with /warn. BEV keeps a case history for every member and can punish automatically when warnings add up.
+- Punishment Ladder: Repeat offenders go up a ladder instead of getting each filter's own punishment: first a timeout, then jail, then a ban. BEV remembers each member's step, and it starts again after a month without an offence.
+- Jail: Takes a member's roles away and keeps them in one jail channel until staff release them, then gives everything back.
+- Reports: Members report a person with /report, or a message by right-clicking it. Staff get the report with buttons to deal with it.
+- Modmail: Members DM BEV to reach the staff privately. Each conversation becomes a private thread where staff reply through BEV.
+
+### Welcome & roles
+- Welcome, Goodbye & Boosts: Greets new members with a message and a picture card, can DM them your rules, says goodbye when people leave and thanks boosters. Use {user}, {name}, {server} and {count}.
+- Auto-Roles & Sticky Roles: Gives roles to everyone who joins (with separate roles for bots), and can give people their roles back when they leave and rejoin.
+- Role Menus: Build menus of buttons or dropdowns that let members pick their own roles: ranks, colours, pronouns, regions, ping roles and more. Make some roles one at a time, so picking a new one swaps out the old one, and leave the rest free to add alongside.
+- Invite Tracker: Shows who invited each new member, keeps an invites leaderboard and can give roles for inviting people.
+- Booster Role: BEV gives this role to everyone boosting the server and takes it away when they stop. Discord's own Server Booster role can't be handed out by bots, so this one is yours to colour and use for perks. If no role is picked, switching this on makes a pink one called Booster.
+
+### Community
+- Support Tickets: Posts a Create Support Ticket button. Each press opens a private channel for that member and your staff, with close, reopen, transcript and delete buttons.
+- Giveaways: Run giveaways: members press a button to enter and BEV picks the winners when the timer ends. Reroll winners or end early any time.
+- Polls: Members vote with buttons, with a timer, anonymous voting and a live results bar.
+- Suggestions: Members post ideas with /suggest. Others vote, and staff approve or deny them with a reason.
+- Profiles, Marriage & Rep: /profile shows a member's card: bio, level, coins, rep points, badges and who they're married to. Members set a bio with /bio, propose with /marry (the other person has to accept) and give someone a rep point with /rep.
+- Server Listing: Lists this server on BEV's public Find a server page (bevbotdiscord.com/discover) with your description and tags. Members move it back to the top with /bump every hour. Bumping gives coins too, if Vote & Bump Rewards is on.
+- Roleplay Characters: For roleplay: members save characters with a name, picture and tag (like k:) using /roleplay add. A message that starts with the tag is reposted as that character. Right-click a reposted message → Apps → Who posted this? shows who wrote it. BEV needs Manage Webhooks.
+- Starboard: Messages that get enough star reactions are reposted to a hall-of-fame channel.
+- Auto-Replies: Make your own trigger words that BEV answers automatically, like typing 'ip' to get your game server's address.
+- FAQ Tags: Saved answers anyone can post with /tag, like /tag rules. Admins add and edit them here.
+- Reminders: Members ask BEV to remind them about anything later, from 1 minute to 1 year.
+- Scheduled Announcements: Posts messages automatically on a schedule, like a rules reminder every day.
+- AFK Status: Members set themselves as away. Anyone who pings them is told why, and it switches off when they talk again.
+- Counting Channel: A channel where members count up one number at a time. Get it wrong and the count resets.
+- Anonymous Confessions: Members post anonymously with /confess. A staff log can still record who wrote what, in case it's abused.
+- Join-to-Create Voice Rooms: Joining the 'Create a room' voice channel gives you your own room that you can rename, lock or limit with /voice. It deletes itself when empty.
+- Activity Statistics: Tracks messages per day, the busiest channels and hours, top chatters and voice time, shown with /activity.
+- Bump Reminder: Notices when someone bumps the server with Disboard and reminds everyone when the next bump is ready, 2 hours later.
+- Events: Create events with Going, Maybe and Can't buttons, a member limit and a reminder before they start.
+- Staff Applications: Members apply through a form of your questions. Staff review each one with Accept and Deny buttons.
+- Question of the Day: Posts a new discussion question every day at the time you pick, from your own list or BEV's built-in one.
+- Channel Modes: Give channels special behaviour: start a thread on every post, allow only pictures and videos, or keep a sticky message at the bottom.
+- News Feeds & Free Games: Posts new YouTube uploads, Reddit posts, website and blog (RSS) updates, and free game deals on Steam, Epic and more.
+- Live Stream Alerts: Checks your streamers every 3 minutes and posts one alert when they go live on Twitch, YouTube, Kick or TikTok, with their profile picture and a live preview that keeps refreshing while they're live.
+- Server Stats Counters: Adds locked voice channels at the top of the server showing live numbers: members, people online, bots and people in voice.
+- Birthdays: Members save their birthday with /my-birthday. On the day, BEV posts a celebration and gives a birthday role for 24 hours.
+
+### Levels
+- Leveling & XP: Members earn XP for chatting and talking in voice. Add level-up rewards, XP boosts for roles, double XP events and a weekly top chatter role.
+- Achievements & Badges: Members unlock badges for milestones like their first message, level 10, 10,000 coins or getting married. Badges show on /profile, /achievements shows everyone's progress, and you can add your own badges that give a role.
+- Daily Quests: Every member gets 3 random quests a day, like sending 40 messages, using /work twice or playing a game. Each one pays coins and XP, and finishing all 3 on days in a row builds a streak bonus. /quests shows today's quests.
+
+### Economy & games
+- Economy & Shop: Coins for chatting, /daily rewards, /work, /pay, a bank, robbing and a shop selling roles and items.
+- Casino: Coin games: coinflip, blackjack, slots, roulette, dice, higher-or-lower, crash and a weekly lottery.
+- Fishing, Hunting & Mining: Members go fishing, hunting or mining with /explore to collect items of different rarities and sell them for coins.
+- Mini-Games & Trivia: Tic-tac-toe, Connect Four, hangman, a word game, duels and trivia with /game.
+- Fun Commands: 8-ball, would-you-rather, truth or dare, memes, roleplay actions with anime GIFs (hug, pat, kiss, slap and more) with /fun, and picture edits of anyone's avatar (Wanted poster, jail bars, RIP and more) with /image.
+- Trading & Market: Members swap coins and items safely with /trade (both have to agree), and sell items to each other on the /market. Items listed for sale are held by BEV until they're bought or taken back.
+- Pets & Battles: Members catch pets of different rarities with /pet catch, pick a team of 3, and battle each other's teams for coins. Pets level up as they battle.
+- Character Collecting: Members roll for anime and game characters with /collect roll and race to claim them: each character can only belong to one member here. Build a collection and give characters away.
+- Vote & Bump Rewards: Gives coins to members who vote for BEV on top.gg (double at weekends) and to whoever bumps the server with Disboard. Members see when they can vote again with /vote. Needs Economy switched on.
+
+### Utility
+- Custom Commands: Make your own commands, like !rules or !apply. Each can reply (with a random answer if you give several), give, take or swap a role, or DM the member. Use {user}, {name}, {server}, {channel}, {count} and {args} in the reply.
+- Music Player: Play songs in voice with /music play: search SoundCloud by name or paste a SoundCloud or direct audio link. There's a queue, skip, pause, loop, shuffle and volume. YouTube and Spotify can't be played (their rules forbid bots playing them).
+- Auto-Publish: Publishes new posts in your announcement channels straight away, so every server that follows them gets them without staff pressing Publish.
+- Translate: Translate messages with /translate or by right-clicking a message (Apps > Translate message).
+- AI Assistant: Members ask questions with /ask and get answers in chat. Needs ANTHROPIC_API_KEY in the bot's settings (paid per use).
+- Weather & Time: /weather for any place, and /time to see the local time of any member who has set their time zone.
+- Snipe: /snipe shows the last deleted message in a channel. Off by default because it's less private.
+- Radio: Plays internet radio stations in a voice channel with /radio. Needs two extra packages on the bot (see the setup guide).
+- Message Designer: Design your own messages: text, a coloured box with a title, pictures and a link button. See exactly how they'll look on the dashboard, then send them in any channel. Saved messages can be sent again, or the one you sent can be updated.
+- BEV Status Alerts: When the BEV team is about to take BEV offline for maintenance, a notice is posted here with the ping you choose, so your members know why commands stop for a few minutes. If no channel is picked, switching this on makes a read-only one.
+
+## Slash commands
+
+- /ban: Ban a member for good or for a set time, or softban them to wipe their messages.
+- /channel: Lock, unlock, hide or slow down a channel.
+- /clear: Bulk-delete messages in a channel, filtered by age, amount and who sent them.
+- /jail: Lock a member in a jail channel without their roles, then free them with roles back.
+- /kick: Remove a member from the server. They can come back with a new invite.
+- /lockdown: Lock or unlock every channel at once, and end a raid lockdown.
+- /timeout: Mute a member for a set time so they can't chat, talk or react.
+- /unban: Browse the ban list, see why people were banned and unban them.
+- /warn: Give a member an official warning that's saved to their case history.
+- /warnings: Look up a member's warnings, kicks, bans and timeouts, add staff notes or clear warnings.
+- /activity: See server activity: messages per day, top chatters, busiest channels and hours.
+- /bio: Set the short bio shown on your profile card.
+- /bump: Move this server back to the top of BEV's Find a server page (every hour).
+- /confess: Post an anonymous confession to the server.
+- /divorce: End your marriage.
+- /event: Create an event with Going, Maybe and Can't buttons and a reminder before it starts.
+- /giveaway: Start, end and reroll giveaways that members enter with a button.
+- /invites: See how many people you've invited and the server's invite leaderboard.
+- /marry: Propose to another member. They have to accept.
+- /my-birthday: Save or remove your birthday so the server can celebrate it with you.
+- /poll: Create a poll with buttons, a timer and live results.
+- /profile: Show your profile card, or someone else's: bio, level, coins, rep, badges and partner.
+- /rep: Give another member a reputation point.
+- /report: Report a member to the staff privately, with a reason.
+- /roleplay: Post as roleplay characters: save a character with a tag, then start messages with that tag.
+- /star: Star a message for the starboard (reply to it with !star, or use its Apps menu).
+- /suggest: Suggest a change to BEV (the bot or the website), or an idea for this server.
+- /tag: Post one of the server's saved answers, like the rules or an FAQ.
+- /voice: Control your temporary voice room: rename it, lock it, limit it or hand it over.
+- /achievements: See every badge and how close you (or someone else) are to each one.
+- /balance: Check a member's wallet and bank, see the richest members and open the shop.
+- /bank: Move coins between your wallet and the bank, where they can't be stolen.
+- /bet: Casino games: blackjack, slots, roulette, dice, higher-or-lower, crash and the lottery.
+- /coinflip: Bet coins on heads or tails. Win and you double your bet, lose and it's gone.
+- /daily: Claim your daily and weekly coin rewards and keep your streak going.
+- /explore: Go fishing, hunting or mining for items you can sell for coins.
+- /leaderboard: See the top members in this server, ranked by level or by coins.
+- /market: Buy and sell items with other members.
+- /pay: Send some of your coins to another member.
+- /quests: See today's 3 daily quests, your progress and your streak.
+- /rank: Show a member's level, XP progress and place on the server leaderboard.
+- /rob: Try to steal coins from another member's wallet. Get caught and you pay a fine.
+- /shop: Browse the shop, buy roles and items, and see or use your inventory.
+- /trade: Offer another member a swap of coins and items. Nothing moves until they accept.
+- /vote: Vote for BEV on top.gg to get coins, and see when you can vote again.
+- /work: Work a shift for coins. Better jobs unlock as you level up.
+- /collect: Roll for anime and game characters and race to claim them.
+- /fun: Play with the magic 8-ball, would you rather, truth or dare, hugs and high-fives.
+- /game: Play tic-tac-toe, Connect Four, hangman, a word game, duels or trivia.
+- /image: Fun picture edits of someone's avatar: Wanted poster, jail bars, RIP and more.
+- /pet: Catch pets, build a team of 3 and battle other members.
+- /afk: Set yourself as away. Anyone who pings you is told why.
+- /ask: Ask BEV's AI assistant a question.
+- /music: Play SoundCloud songs and audio links in voice, with a queue.
+- /radio: Play an internet radio station in your voice channel.
+- /remind: Set a reminder and BEV will ping you when it's time.
+- /snipe: Show the last deleted message in this channel.
+- /time: Set your time zone, or see what time it is for another member.
+- /translate: Translate any text into another language.
+- /weather: Get the current weather and forecast for any place.
+- /boosters: List everyone currently boosting this server and when they started.
+- /dashboard: Get the link to this server's dashboard on the BEV website, where every setting lives.
+- /help: Show every BEV command by category, plus this server's info and links.
+- /my-data: See what BEV stores about you, and delete your own data.
+- /serverinfo: Show this server's details: members, channels, roles, boosts and more.
+- /userinfo: Show a member's profile: account age, roles, permissions, avatar and level.

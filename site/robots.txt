@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /admin-suggestions
+Disallow: /servers
+Disallow: /jail-requests
+Disallow: /auth/
+Disallow: /api/
+
+Sitemap: https://bevbotdiscord.com/sitemap.xml

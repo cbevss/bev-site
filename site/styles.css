@@ -1257,3 +1257,13 @@ button.k.copy{display:inline-flex;width:auto;flex:none;align-self:flex-start;jus
 .sgrow .count{color:var(--mut);font-size:14px}
 .suggest #sgin .act{display:inline-flex;margin-top:6px}
 .sganswer .field{max-width:none;width:100%}
+/* Home: questions people ask */
+.faqs{display:flex;flex-direction:column;gap:10px;margin-top:clamp(20px,3vw,32px);max-width:860px}
+.faq{border:1px solid var(--line);border-radius:12px;background:rgba(9,15,32,.7);transition:border-color .2s}
+.faq[open],.faq:hover{border-color:var(--ac2)}
+.faq summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:0 20px;cursor:pointer;list-style:none;font-weight:700;color:#fff}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:22px;color:var(--ac2);transition:transform .2s}
+.faq[open] summary::after{transform:rotate(45deg)}
+.faq summary:focus-visible{outline:2px solid var(--ac2);outline-offset:3px;border-radius:12px}
+.faq p{margin:0;padding:0 20px 18px;color:var(--mut)}
