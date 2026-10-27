@@ -5,15 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
 <title>BEV | Status</title>
+<meta property="og:site_name" content="BEV">
+<meta property="og:title" content="Is BEV online?">
+<meta property="og:description" content="Is BEV online? Live status of the BEV Discord bot.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bevbotdiscord.com/status">
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
 <meta name="description" content="Is BEV online? Live status of the BEV Discord bot.">
 <meta name="theme-color" content="#2563EB">
 <link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=c50ad7457b">
+<link rel="stylesheet" href="/styles.css?v=0ce0b54e9c">
 </head>
 <body class="status">
+<a class="skip" href="#main">Skip to content</a>
 
 <div class="hero">
 <div class="floor" aria-hidden="true"></div>
@@ -39,26 +49,31 @@
 </div>
 </div>
 
-<main class="wrap sec">
+<main id="main" class="wrap sec">
 <div class="cards" id="facts">
 <div class="card"><div class="lab mono">Servers</div><p class="fig" id="servers">…</p></div>
 <div class="card"><div class="lab mono">Ping to Discord</div><p class="fig" id="ping">…</p></div>
 <div class="card"><div class="lab mono">Online for</div><p class="fig" id="uptime">…</p></div>
 <div class="card"><div class="lab mono">Commands</div><p class="fig" id="commands">…</p></div>
 </div>
+<section class="uptime" id="uptimebox" hidden aria-labelledby="uph">
+<div class="uphead"><h2 class="disp" id="uph">The last 7 days</h2><p class="uppct" id="uppct"></p></div>
+<div class="upbars" id="upbars" role="img"></div>
+<div class="upkey"><span>7 days ago</span><span class="upleg"><i class="ok"></i> Online <i class="part"></i> Some downtime <i class="off"></i> Offline <i class="none"></i> No record</span><span>Now</span></div>
+</section>
 <p class="note gap" id="checked">This page checks again every 30 seconds.</p>
 <p class="note">If BEV is offline for more than a few minutes, tell us in the <a class="inl" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">BEV Discord</a>.</p>
 </main>
 
 <footer class="wrap foot">
 <div class="logo disp small">BEV</div>
-<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
 <p>BEV is not affiliated with or endorsed by Discord.</p>
 <nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
 </footer>
 
-<script src="/updates.js?v=941ba60a07" defer></script>
-<script src="/nav.js?v=2f1e0ac4ba" defer></script>
-<script src="/status.js?v=3bdc638f82" defer></script>
+<script src="/updates.js?v=d3a7791ced" defer></script>
+<script src="/nav.js?v=94983d167b" defer></script>
+<script src="/status.js?v=d666645c36" defer></script>
 </body>
 </html>

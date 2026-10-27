@@ -5,6 +5,26 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.26',
+    date: '27 October 2026',
+    changes: [
+      { title: '/suggest',
+        text: 'Suggest a change to BEV (the bot or the website) from any server with /suggest. The BEV team reads every one, and BEV DMs you when they answer. Servers with the Suggestions feature can still use /suggest for ideas about their own server: pick "This server".' },
+      { title: 'Suggest an idea (website)',
+        text: 'A new Suggest page (linked at the bottom of every page) lets you send the BEV team an idea when you are signed in.' },
+      { title: 'Top bar and phones',
+        text: 'The top bar now stays at the top of the screen as you scroll. On phones it is one short row with a ☰ menu for the tabs and buttons. Long pages have a Back to top button.' },
+      { title: 'Features page',
+        text: 'The search box and section buttons stay at the top while you scroll. Click any command to copy it, ready to paste into Discord.' },
+      { title: 'Home, Discover, Status and Leaderboard',
+        text: 'Home shows how many servers BEV is in and what its messages look like in Discord. Discover can sort by members, and has a Try again button if the list can’t load. Status shows the last 7 days hour by hour, with a green dot when BEV is online. The leaderboard page lets you pick one of your servers.' },
+      { title: 'Dashboard',
+        text: 'Press Ctrl+S to save. The search box now finds single settings and highlights them, and cards you leave open stay open. Number boxes are typed from the left, without the little arrows.' },
+      { title: 'Everywhere',
+        text: 'A proper Page not found page, link previews when you share any page, bigger tap targets on phones, more hover effects, and a Skip to content link for keyboard users.' },
+    ],
+  },
+  {
     id: '4.25',
     date: '27 October 2026',
     changes: [

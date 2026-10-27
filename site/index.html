@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BEV | Discord Bot</title>
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
 <meta name="description" content="BEV is an all-in-one Discord bot: protection, moderation, welcomes, role menus, levels, economy, games and stream alerts, set up with buttons or on the web dashboard.">
 <meta name="theme-color" content="#2563EB">
 <meta property="og:site_name" content="BEV">
@@ -15,9 +19,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=c50ad7457b">
+<link rel="stylesheet" href="/styles.css?v=0ce0b54e9c">
 </head>
 <body class="home">
+<a class="skip" href="#main">Skip to content</a>
 
 <div class="hero">
 <div class="floor" aria-hidden="true"></div>
@@ -36,9 +41,9 @@
 <div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
 </header>
 
-<main class="wrap herogrid">
+<main id="main" class="wrap herogrid">
 <div class="copy">
-<div class="tag mono rise">An all-in-one Discord bot</div>
+<div class="tagrow rise"><div class="tag mono">An all-in-one Discord bot</div><p class="livecount mono" id="livecount" hidden><span class="ldot" aria-hidden="true"></span><span id="livetext"></span></p></div>
 <h1 class="disp rise d1">Add <span class="bevword">BEV</span> to your Discord server</h1>
 <p class="lead rise d2">Protection, moderation, welcomes, role menus, levels, an economy, games and stream alerts. Switch features on and set them up on the dashboard. Your members and staff use the commands in Discord.</p>
 <div class="ctablock rise d3">
@@ -72,11 +77,51 @@
 <section class="wrap sec">
 <h2 class="disp">What BEV does</h2>
 <div class="cards">
-<div class="card"><h3>Keeps your server safe</h3><p>Anti-nuke, anti-raid, scam link blocking, spam filters, verification, a honeypot trap, backups and full logs.</p></div>
-<div class="card"><h3>Helps your staff</h3><p>Warnings with automatic punishments, case history, temp bans, jail, modmail, reports and tickets, all with buttons.</p></div>
-<div class="card"><h3>Brings people together</h3><p>Welcome cards, role menus, levels and rewards, an economy and casino, giveaways, polls, events, games and messages you design yourself.</p></div>
+<a class="card cardlink" href="/features.html#dash-security"><h3>Keeps your server safe</h3><p>Anti-nuke, anti-raid, scam link blocking, spam filters, verification, a honeypot trap, backups and full logs.</p><span class="cardgo">See the security features →</span></a>
+<a class="card cardlink" href="/features.html#moderation"><h3>Helps your staff</h3><p>Warnings with automatic punishments, case history, temp bans, jail, modmail, reports and tickets, all with buttons.</p><span class="cardgo">See the staff commands →</span></a>
+<a class="card cardlink" href="/features.html#community"><h3>Brings people together</h3><p>Welcome cards, role menus, levels and rewards, an economy and casino, giveaways, polls, events, games and messages you design yourself.</p><span class="cardgo">See the community commands →</span></a>
 </div>
 <p class="note gap"><a class="inl" href="/features.html">See every command and what it does</a></p>
+</section>
+
+<section class="wrap sec showcase" aria-labelledby="showh">
+<h2 class="disp" id="showh">See it in Discord</h2>
+<p class="lead small">A few of the messages BEV posts. Every one of them can be changed on the dashboard, and the Preview button shows yours before anything is sent.</p>
+<div class="showgrid">
+<figure class="showitem">
+<figcaption>A welcome for every new member</figcaption>
+<div class="dprev mprev showmsg">
+<img class="dav" src="/bev-avatar.png?v=7d7dbb208c" alt="" width="40" height="40">
+<div class="dbody"><p class="dhead"><b>BEV</b> <span class="dapp">APP</span> <span class="dtime">Today at 18:04</span></p>
+<div class="mtext mcontent"><p><span class="dmention">@goldie</span></p></div>
+<div class="dembed membed" style="border-left-color:#2563EB"><div class="mmain"><div class="mtext mdesc"><p>Welcome <span class="dmention">@goldie</span> to <b>Rocket League Lounge</b>! You're member #1,204.</p></div>
+<p class="showfield">📨 Invited by <span class="dmention">@cbevs</span>, who has invited <b>20 people</b></p></div></div>
+</div>
+</div>
+</figure>
+<figure class="showitem">
+<figcaption>Level-ups and rewards</figcaption>
+<div class="dprev mprev showmsg">
+<img class="dav" src="/bev-avatar.png?v=7d7dbb208c" alt="" width="40" height="40">
+<div class="dbody"><p class="dhead"><b>BEV</b> <span class="dapp">APP</span> <span class="dtime">Today at 18:11</span></p>
+<div class="dembed membed" style="border-left-color:#16A34A"><div class="mmain"><div class="mtext mdesc"><p>🎉 <span class="dmention">@goldie</span> reached <b>Level 10</b>! You unlocked <span class="dmention">@Regular</span>!</p></div></div></div>
+</div>
+</div>
+</figure>
+<figure class="showitem">
+<figcaption>Role menus with buttons</figcaption>
+<div class="dprev mprev showmsg">
+<img class="dav" src="/bev-avatar.png?v=7d7dbb208c" alt="" width="40" height="40">
+<div class="dbody"><p class="dhead"><b>BEV</b> <span class="dapp">APP</span> <span class="dtime">Today at 18:20</span></p>
+<div class="pvcont" style="border-left-color:#7C3AED"><div class="mtext"><p class="mh2">Pick your rank</p></div><div class="pvsep"></div>
+<div class="pvsection"><div class="mtext"><p><span class="dmention">@Bronze</span></p></div><span class="mbtn pvb grey">Pick</span></div>
+<div class="pvsection"><div class="mtext"><p><span class="dmention">@Gold</span></p></div><span class="mbtn pvb grey">Pick</span></div>
+<div class="pvsection"><div class="mtext"><p><span class="dmention">@Champion</span></p></div><span class="mbtn pvb grey">Pick</span></div>
+<div class="pvsep"></div><div class="mtext"><p class="msub">Press a button to get that role. Picking another one swaps it.</p></div></div>
+</div>
+</div>
+</figure>
+</div>
 </section>
 
 <section class="wrap sec appdl" id="app">
@@ -123,12 +168,13 @@
 
 <footer class="wrap foot">
 <div class="logo disp small">BEV</div>
-<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
 <p>BEV is not affiliated with or endorsed by Discord.</p>
 <nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
 </footer>
 
-<script src="/updates.js?v=941ba60a07" defer></script>
-<script src="/nav.js?v=2f1e0ac4ba" defer></script>
+<script src="/updates.js?v=d3a7791ced" defer></script>
+<script src="/nav.js?v=94983d167b" defer></script>
+<script src="/home.js?v=ec7be465ca" defer></script>
 </body>
 </html>

@@ -94,11 +94,39 @@
     board.setAttribute('aria-label', view === 'week' ? 'This week' : 'All time');
   }
 
+  // No server in the address: someone signed in can pick one of their servers that BEV is in.
+  function pickServer() {
+    if (!/(?:^|;\s*)bev_in=1(?:;|$)/.test(doc.cookie)) return;
+    root.fetch('/api/servers', { headers: { accept: 'application/json' }, credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var list = d && Array.isArray(d.servers) ? d.servers.filter(function (s) { return s.botPresent && ID_RE.test(s.id); }) : [];
+        if (!list.length) return;
+        var box = doc.getElementById('lbpick');
+        list.forEach(function (s) {
+          var li = el('li');
+          var a = el('a', 'lbsrv');
+          a.href = '/leaderboard?guild=' + s.id;
+          var icon = s.icon && /^[\w]+$/.test(s.icon) ? 'https://cdn.discordapp.com/icons/' + s.id + '/' + s.icon + '.png?size=64' : null;
+          a.append(picture(icon, s.name, 'av sm'), el('span', null, s.name));
+          li.append(a);
+          box.append(li);
+        });
+        doc.getElementById('errmsg').textContent = 'Pick one of your servers, or use the website button on /leaderboard in Discord.';
+        box.hidden = false;
+      })
+      .catch(function () { /* nothing to pick from */ });
+  }
+
   function boot() {
     var params = new URLSearchParams(root.location.search);
     var guild = params.get('guild') || '';
     var view = params.get('view') === 'week' ? 'week' : 'all';
-    if (!ID_RE.test(guild)) return fail('No server picked', 'This page needs a server. Use the website button on /leaderboard in Discord to open your server’s board.');
+    if (!ID_RE.test(guild)) {
+      fail('Pick a server', 'Use the website button on /leaderboard in Discord to open your server’s board.');
+      doc.getElementById('err').classList.remove('deny');
+      return pickServer();
+    }
     root.fetch('/api/leaderboard?guild_id=' + guild, { headers: { accept: 'application/json' }, cache: 'no-store' }).then(function (r) {
       return r.json().then(function (d) { return { status: r.status, data: d }; }, function () { return { status: r.status, data: {} }; });
     }, function () { return { status: 0, data: {} }; }).then(function (r) {
@@ -109,6 +137,7 @@
       doc.title = 'BEV | ' + (g.name || 'Leaderboard');
       doc.getElementById('title').textContent = (g.name || 'Server') + ' leaderboard';
       doc.getElementById('gicon').replaceChildren(picture(g.icon, g.name, 'av big'));
+      doc.getElementById('gicon').hidden = false;
       var data = { members: r.data.members, week: Array.isArray(r.data.week) ? r.data.week : [], week_from: r.data.week_from || null };
       var tabs = doc.getElementById('lbtabs');
       // An older bot doesn't count the week yet: then there's only the all-time board.

@@ -48,13 +48,13 @@ const DURATIONS = [0, 15, 30, 60, 120, 240, 480, 720, 1440]; // maintenance leng
 const DEFAULT_MESSAGE = "We're carrying out scheduled maintenance to improve bevbotdiscord.com, so the website is temporarily unavailable. "
   + "The BEV bot isn't affected and keeps running in Discord as normal. Thank you for your patience. We'll be back shortly.";
 // The pages visits are counted for, with the names the admin page shows.
-const PAGES = { '/discover': 'Find a server', '/': 'Home', '/features': 'Features', '/support': 'Support', '/status': 'Bot status', '/leaderboard': 'Leaderboard',
+const PAGES = { '/suggest': 'Suggest an idea', '/discover': 'Find a server', '/': 'Home', '/features': 'Features', '/support': 'Support', '/status': 'Bot status', '/leaderboard': 'Leaderboard',
   '/servers': 'My servers', '/dashboard': 'Dashboard', '/terms': 'Terms of Service', '/privacy': 'Privacy Policy' };
 // Link previews, crawlers, uptime monitors and scripts don't count as visits.
 const NOT_A_PERSON = /bot|crawl|spider|slurp|preview|monitor|uptime|curl|wget|python|httpclient|headless|lighthouse|facebookexternalhit|embedly|whatsapp/i;
 const STATIC_FILE = /^\/[\w.-]+\.(?:css|js|png|jpe?g|gif|svg|ico|webp|txt|xml|webmanifest|woff2?)$/;
 const DASHBOARD_PATHS = new Set(['/dashboard', '/dashboard/', '/dashboard.html', '/jail-requests', '/jail-requests/', '/jail-requests.html']);
-const ADMIN_PATHS = new Set(['/admin', '/admin/', '/admin.html']);
+const ADMIN_PATHS = new Set(['/admin', '/admin/', '/admin.html', '/admin-suggestions', '/admin-suggestions/', '/admin-suggestions.html']);
 const BANNER_STYLES = ['info', 'warning', 'success'];
 
 class Upstream extends Error {
@@ -436,7 +436,8 @@ async function publicApi(request, c, url) {
     const d = res.status === 200 && res.data ? res.data : null;
     const body = d
       ? { online: d.online === true, servers: Number(d.servers) || 0, latency_ms: Number.isFinite(d.latency_ms) ? d.latency_ms : null,
-          uptime_s: Number(d.uptime_s) || 0, version: str(d.version, 20), commands: Number(d.commands) || 0, checked: Date.now() }
+          uptime_s: Number(d.uptime_s) || 0, version: str(d.version, 20), commands: Number(d.commands) || 0, checked: Date.now(),
+          history: (Array.isArray(d.history) ? d.history : []).slice(-168).map((v) => (typeof v === 'number' && v >= 0 && v <= 1 ? v : null)) }
       : { online: false, reachable: false, checked: Date.now() };
     statusCache = { at: Date.now(), body };
     return json(body);
@@ -461,7 +462,7 @@ async function publicApi(request, c, url) {
   });
 }
 
-const PRIVATE = { '/api/me': ['GET'], '/api/servers': ['GET'], '/api/config': ['GET', 'POST'], '/api/level-roles': ['GET', 'POST'], '/api/messages': ['POST'],
+const PRIVATE = { '/api/suggest': ['POST'], '/api/me': ['GET'], '/api/servers': ['GET'], '/api/config': ['GET', 'POST'], '/api/level-roles': ['GET', 'POST'], '/api/messages': ['POST'],
                   '/api/action': ['POST'], '/api/members': ['GET'], '/api/preview': ['POST'] };
 
 async function api(request, c, url, secure, s) {
@@ -478,6 +479,7 @@ async function api(request, c, url, secure, s) {
   // Cheap on purpose: the top bar asks this on page loads, so it never calls Discord.
   // "admin" only decides whether the top bar shows the Admin tab; /admin and its API check again.
   if (path === '/api/me') return json({ user: session.user, admin: s.admin });
+  if (path === '/api/suggest') return sendSuggestion(request, c, s);
 
   let view;
   try {
@@ -822,7 +824,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=c50ad7457b">
+<link rel="stylesheet" href="/styles.css?v=0ce0b54e9c">
 </head>
 <body class="notice">
 <div class="hero">
@@ -975,6 +977,11 @@ async function servePage(request, env, ctx, s, { noStore = false, count = true }
     req = new Request(request, { headers });
   }
   let res = await env.ASSETS.fetch(req);
+  // A page that doesn't exist gets BEV's own "Page not found" page (still with the 404 status).
+  if (res.status === 404 && request.method === 'GET' && (request.headers.get('accept') || '').includes('text/html')) {
+    const lost = await env.ASSETS.fetch(new Request(new URL('/404', url), { headers: { accept: 'text/html' } }));
+    if (lost.status === 200) res = new Response(lost.body, { status: 404, headers: lost.headers });
+  }
   const html = (res.headers.get('content-type') || '').includes('text/html');
   if (res.status === 200 && html && inject && request.method === 'GET') {
     const page = await res.text();
@@ -1025,7 +1032,7 @@ async function adminPage(request, env, ctx, secure, s) {
 const ADMIN_ROUTES = {
   '/api/admin/state': 'GET', '/api/admin/maintenance': 'POST', '/api/admin/banner': 'POST', '/api/admin/check': 'POST',
   '/api/admin/alert': 'GET', '/api/admin/alert/send': 'POST', '/api/admin/inbox': 'GET', '/api/admin/inbox/mark': 'POST',
-  '/api/admin/features': 'GET', '/api/admin/features/set': 'POST',
+  '/api/admin/features': 'GET', '/api/admin/features/set': 'POST', '/api/admin/suggestions': 'GET', '/api/admin/suggestions/answer': 'POST',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1343,6 +1350,7 @@ async function adminApi(request, env, c, url, secure, s) {
   if (path === '/api/admin/inbox') return json(await inboxState(env, c));
   if (path === '/api/admin/inbox/mark') return markInbox(request, env, s);
   if (path === '/api/admin/features' || path === '/api/admin/features/set') return ownerFeatures(request, c, s, path);
+  if (path === '/api/admin/suggestions' || path === '/api/admin/suggestions/answer') return adminSuggestions(request, c, s, path);
 
   const body = await readJson(request, 20000);
   if (!body) return json({ error: 'bad_request' }, 400);
@@ -1421,6 +1429,53 @@ async function ownerFeatures(request, c, s, path) {
   if (res.status === 400) return json({ error: 'bad_request' }, 400);
   if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
   return json(cleanOwnerFeatures(res.data));
+}
+
+/* ---------- suggestions for BEV: sent from /suggest or the website, answered by site admins ---------- */
+
+function cleanSuggestion(x) {
+  const status = ['pending', 'approved', 'denied'].includes(x && x.status) ? x.status : 'pending';
+  return {
+    id: Number(x.id) || 0, user_id: ID_RE.test(String(x.user_id)) ? String(x.user_id) : '', username: str(x.username, 64), display: str(x.display, 64),
+    avatar: typeof x.avatar === 'string' && /^https:\/\/cdn\.discordapp\.com\//.test(x.avatar) ? x.avatar.slice(0, 300) : null,
+    guild: str(x.guild, 100) || null, text: str(x.text, 1500), source: x.source === 'website' ? 'website' : 'discord',
+    created: Number(x.created) || 0, status, decided_at: Number(x.decided_at) || null, decided_by: str(x.decided_by, 120) || null,
+    note: str(x.note, 1000) || null, told: x.told === true,
+  };
+}
+
+async function adminSuggestions(request, c, s, path) {
+  let res;
+  if (path === '/api/admin/suggestions/answer') {
+    const body = await readJson(request, 4000);
+    if (!body || !Number.isInteger(body.id) || !['approved', 'denied'].includes(body.decision)) return json({ error: 'bad_request' }, 400);
+    res = await bot(c, '/api/bev-suggestions/answer', { method: 'POST', body: JSON.stringify({
+      id: body.id, decision: body.decision, note: str(body.note, 1000), tell: body.tell === true, by: `${s.session.user.name} (${s.session.user.id})` }) });
+  } else {
+    res = await bot(c, '/api/bev-suggestions');
+  }
+  if (res.error) return json({ error: res.error }, 503);
+  if (res.status === 404 && !(res.data && res.data.error)) return json({ error: 'bot_outdated' }, 501);
+  if (res.status === 400 || res.status === 404) return json({ error: 'refused', message: str(res.data && res.data.error, 300) }, 400);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
+  if (path === '/api/admin/suggestions/answer') return json({ ok: true, suggestion: cleanSuggestion(res.data.suggestion || {}), dm: typeof res.data.dm === 'boolean' ? res.data.dm : null });
+  return json({ suggestions: (Array.isArray(res.data.suggestions) ? res.data.suggestions : []).slice(0, 300).map(cleanSuggestion), waiting: Number(res.data.waiting) || 0 });
+}
+
+// Anyone signed in can send a suggestion from the website. Who they are comes from their sign-in, never the page.
+async function sendSuggestion(request, c, s) {
+  if (!s.session) return json({ error: 'signed_out' }, 401);
+  const body = await readJson(request, 4000);
+  const text = body && typeof body.text === 'string' ? body.text.trim() : '';
+  if (text.length < 5 || text.length > 1500) return json({ error: 'invalid', message: 'Write between 5 and 1,500 characters.' }, 400);
+  const u = s.session.user;
+  const avatar = u.avatar && /^[\w]+$/.test(u.avatar) ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : null;
+  const res = await bot(c, '/api/bev-suggestions/submit', { method: 'POST', body: JSON.stringify({ user_id: String(u.id), username: u.username || u.name, display: u.name, avatar, text }) });
+  if (res.error) return json({ error: res.error, message: "BEV didn't answer. Try again in a minute." }, 503);
+  if (res.status === 400) return json({ error: 'invalid', message: str(res.data && res.data.error, 300) }, 400);
+  if (res.status === 404) return json({ error: 'bot_outdated', message: "This needs the newest version of BEV. Try again later." }, 501);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error', message: 'Something went wrong. Try again in a minute.' }, 502);
+  return json({ ok: true, id: Number(res.data.id) || 0 });
 }
 
 /* ---------- entry ---------- */

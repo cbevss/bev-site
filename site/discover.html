@@ -5,15 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
 <title>BEV | Find a server</title>
+<meta property="og:site_name" content="BEV">
+<meta property="og:title" content="Find a server to join">
+<meta property="og:description" content="Find a Discord server to join: communities that use BEV, newest bumps first.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bevbotdiscord.com/discover">
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
 <meta name="description" content="Find a Discord server to join: communities that use BEV, newest bumps first.">
 <meta name="theme-color" content="#2563EB">
 <link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=c50ad7457b">
+<link rel="stylesheet" href="/styles.css?v=0ce0b54e9c">
 </head>
 <body class="disc">
+<a class="skip" href="#main">Skip to content</a>
 
 <div class="hero">
 <div class="floor" aria-hidden="true"></div>
@@ -36,28 +46,28 @@
 <div class="tag mono rise">Find a server</div>
 <h1 class="disp rise d1">Find a <span class="bevword">server</span> to join</h1>
 <p class="lead rise d2">Communities that use BEV and chose to be listed. The most recently bumped are at the top: members bump their server with <b>/bump</b> every 2 hours. Want yours here? Switch on <b>Server Listing</b> on the dashboard.</p>
-<div class="findbar rise d3"><input class="field" id="dfind" type="search" placeholder="Search, like gaming or anime" aria-label="Search servers" autocomplete="off"><span class="stat" id="dcount" aria-live="polite"></span></div>
+<div class="findbar rise d3"><input class="field" id="dfind" type="search" placeholder="Search, like gaming or anime" aria-label="Search servers" autocomplete="off"><select class="field dsort" id="dsort" aria-label="Sort servers"><option value="bumped">Recently bumped</option><option value="members">Most members</option><option value="online">Most online</option></select><span class="stat" id="dcount" aria-live="polite" hidden></span></div>
 <nav class="jump rise d3" id="dtags" aria-label="Popular tags"></nav>
 </div>
 </div>
 
-<main class="wrap sec">
+<main id="main" class="wrap sec">
 <noscript><div class="panel deny"><h2 class="disp">JavaScript is off</h2><p>This page needs JavaScript to load the servers.</p></div></noscript>
 <section id="dbusy" class="panel" role="status"><span class="spin" aria-hidden="true"></span><h2 class="disp">Loading servers</h2></section>
-<section id="derr" class="panel deny" hidden><h2 class="disp">Couldn't load the servers</h2><p id="derrmsg">BEV didn't answer. Try again in a minute.</p></section>
+<section id="derr" class="panel deny" hidden><h2 class="disp">Couldn't load the servers</h2><p id="derrmsg">BEV didn't answer. It may be restarting.</p><button class="mini" id="dretry" type="button">↻ Try again</button></section>
 <ul class="dgrid" id="dgrid" hidden></ul>
 <p class="dnone" id="dnone" hidden>No servers match that. Try another search or tag.</p>
 </main>
 
 <footer class="wrap foot">
 <div class="logo disp small">BEV</div>
-<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
 <p>BEV is not affiliated with or endorsed by Discord.</p>
 <nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
 </footer>
 
-<script src="/updates.js?v=941ba60a07" defer></script>
-<script src="/nav.js?v=2f1e0ac4ba" defer></script>
-<script src="/discover.js?v=27beb1411e" defer></script>
+<script src="/updates.js?v=d3a7791ced" defer></script>
+<script src="/nav.js?v=94983d167b" defer></script>
+<script src="/discover.js?v=c020c5cf3d" defer></script>
 </body>
 </html>

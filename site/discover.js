@@ -2,7 +2,7 @@
 (function (root) {
   'use strict';
   var doc = root.document;
-  var state = { servers: [], tag: '', q: '' };
+  var state = { servers: [], tag: '', q: '', sort: 'bumped' };
   function $(id) { return doc.getElementById(id); }
   function el(tag, cls, text) { var n = doc.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
   function initials(name) { return Array.from(String(name || '').trim()).slice(0, 2).join('').toUpperCase() || '?'; }
@@ -29,7 +29,8 @@
   function draw() {
     var grid = $('dgrid');
     grid.replaceChildren();
-    var shown = state.servers.filter(matches);
+    var key = { bumped: 'bumped', members: 'members', online: 'online' }[state.sort] || 'bumped';
+    var shown = state.servers.filter(matches).sort(function (a, b) { return (Number(b[key]) || 0) - (Number(a[key]) || 0); });
     shown.forEach(function (s) {
       var li = el('li', 'dcard');
       var top = el('div', 'dtop');
@@ -60,6 +61,7 @@
       grid.append(li);
     });
     $('dnone').hidden = shown.length > 0 || !state.servers.length;
+    $('dcount').hidden = false;
     $('dcount').textContent = shown.length === state.servers.length ? state.servers.length + ' servers' : shown.length + ' of ' + state.servers.length + ' servers';
     if (!state.servers.length) {
       $('dnone').hidden = false;
@@ -83,8 +85,13 @@
   }
   function boot() {
     $('dfind').addEventListener('input', function () { state.q = this.value.trim(); draw(); });
+    $('dsort').addEventListener('change', function () { state.sort = this.value; draw(); });
+    $('dretry').addEventListener('click', function () { $('derr').hidden = true; $('dbusy').hidden = false; load(); });
+    load();
+  }
+  function load() {
     root.fetch('/api/directory', { headers: { accept: 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); }, function () { return Promise.reject(0); })
       .then(function (d) {
         state.servers = Array.isArray(d.servers) ? d.servers : [];
         $('dbusy').hidden = true;
@@ -92,7 +99,7 @@
         drawTags();
         draw();
       })
-      .catch(function () { $('dbusy').hidden = true; $('derr').hidden = false; });
+      .catch(function () { $('dbusy').hidden = true; $('derr').hidden = false; $('dretry').focus(); });
   }
   boot();
 })(window);

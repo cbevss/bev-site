@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<title>BEV | Suggest an idea</title>
+<meta property="og:site_name" content="BEV">
+<meta property="og:title" content="Suggest an idea">
+<meta property="og:description" content="Suggest a change to BEV, the Discord bot, or its website. The BEV team reads every suggestion.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bevbotdiscord.com/suggest">
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Suggest a change to BEV, the Discord bot, or its website. The BEV team reads every suggestion.">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=0ce0b54e9c">
+</head>
+<body class="suggest">
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/discover">Discover</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Suggestions</div>
+<h1 class="disp rise d1">Got an idea for <span class="bevword">BEV</span>?</h1>
+<p class="lead rise d2">Suggest a new command, a change to one, or something for the website. The BEV team reads every suggestion, and BEV will DM you when it's been answered. You can also use <b>/suggest</b> in any server with BEV.</p>
+</div>
+</div>
+
+<main id="main" class="wrap sec">
+<section class="panel sgform" id="sgform" hidden>
+<h2 class="disp">Your suggestion</h2>
+<label class="flabel" for="sgtext">What would you like BEV to do, or do differently?</label>
+<textarea class="field ta" id="sgtext" rows="6" maxlength="1500" placeholder="For example: a /remind command that repeats every week."></textarea>
+<div class="sgrow"><span class="count" id="sgcount">0 / 1500</span><button class="act save" id="sgsend" type="button" disabled>💡 Send suggestion</button></div>
+<p class="fnote" id="sgnote" role="status" hidden></p>
+</section>
+<section class="panel" id="sgin" hidden>
+<h2 class="disp">Sign in to send a suggestion</h2>
+<p>Signing in with Discord lets BEV DM you when the team answers. It only takes a moment.</p>
+<a class="act save" href="/auth/login">Sign in with Discord</a>
+</section>
+<div class="cards gap">
+<div class="card"><h3>What makes a good suggestion</h3><p>Say what you'd like and why it would help your server. One idea per suggestion is easiest to answer.</p></div>
+<div class="card"><h3>Found a bug?</h3><p>Tell us in the <a class="inl" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">BEV Discord</a> or on the <a class="inl" href="/support.html">Support</a> page, so we can fix it quickly.</p></div>
+</div>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/updates.js?v=d3a7791ced" defer></script>
+<script src="/nav.js?v=94983d167b" defer></script>
+<script src="/suggest.js?v=687fc712df" defer></script>
+</body>
+</html>

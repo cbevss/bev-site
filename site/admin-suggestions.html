@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<title>BEV | Suggestions</title>
+<meta name="description" content="BEV, an all-in-one Discord bot.">
+<meta property="og:site_name" content="BEV">
+<meta property="og:title" content="Suggestions">
+<meta property="og:description" content="BEV, an all-in-one Discord bot.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bevbotdiscord.com/admin-suggestions">
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=0ce0b54e9c">
+</head>
+<body class="admin jr sg">
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/discover">Discover</a>
+<a class="tab" href="/dashboard" data-dash>Dashboard</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/admin" data-admin data-static>Admin</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login" hidden>Sign in with Discord</a> <div class="acct" id="acct"><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Admin</div>
+<h1 class="disp rise d1">Suggestions</h1>
+<p class="lead rise d2">Ideas people sent for BEV with /suggest or on the website. Pick one to read it, then approve or deny it. BEV can DM them to say so, with a message from you.</p>
+</div>
+</div>
+
+<main class="wrap sec" id="main">
+<noscript><div class="panel deny"><h2 class="disp">JavaScript is off</h2><p>This page needs JavaScript. Switch it on for this site, then reload the page.</p></div></noscript>
+
+<div class="bar">
+<div class="seg sgfilter" role="group" aria-label="Show"><button type="button" data-f="pending" aria-pressed="true">Waiting</button> <button type="button" data-f="approved" aria-pressed="false">Approved</button> <button type="button" data-f="denied" aria-pressed="false">Denied</button> <button type="button" data-f="all" aria-pressed="false">All</button></div>
+<button class="mini" id="jrreload" type="button">Refresh</button>
+<a class="mini" id="jrback" href="/admin#suggestions">← Back to the admin panel</a>
+</div>
+
+<p class="sr" id="jrlive" role="status" aria-live="polite"></p>
+
+<section class="panel" id="jrbusy" role="status"><p>Loading suggestions…</p></section>
+<section class="panel deny" id="jrerr" hidden><h2 class="disp" id="jrerrh">Something went wrong</h2><p id="jrerrmsg"></p></section>
+
+<section class="jrbox" id="jrbox" hidden>
+<div class="jrside">
+<p class="jrcount" id="jrcount"></p>
+<ul class="jrlist" id="jrlist" aria-label="Suggestions, newest first"></ul>
+</div>
+<div class="jrdetail" id="jrdetail" tabindex="-1">
+<div class="jrpick" id="jrpick"><p>Pick a suggestion on the list to read it.</p></div>
+<div class="jrcard" id="jrcard" hidden>
+<button class="mini jrbacklist" id="jrbacklist" type="button">← All suggestions</button>
+<div class="jrwho"><span class="jrav" id="jrav"></span><div><h2 class="disp" id="jrname"></h2><p class="jruser" id="jruser"></p></div></div>
+<ul class="jrfacts" id="jrfacts"></ul>
+<h3 class="jrsub">Their suggestion</h3>
+<blockquote class="jrmsg" id="jrmsg"></blockquote>
+<div class="sgdone" id="sgdone" hidden></div>
+<div class="sganswer" id="sganswer">
+<label class="sgtell"><input type="checkbox" id="sgtell" checked> <span>DM them to say whether it was approved or denied</span></label>
+<div class="jrfield"><label class="flabel" for="sgnote">Message to them <span class="opt">(optional, sent in a DM)</span></label><textarea class="field" id="sgnote" maxlength="1000" rows="4" placeholder="Thanks for the idea! …"></textarea></div>
+<p class="sghint" id="sghint"></p>
+<div class="jrbtns"><button class="jrno" id="jrdeny" type="button">❌ Deny</button> <button class="jrok" id="jrapprove" type="button">✅ Approve</button></div>
+</div>
+<p class="fnote" id="jrnote" role="status" hidden></p>
+</div>
+</div>
+</section>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/updates.js?v=d3a7791ced" defer></script>
+<script src="/nav.js?v=94983d167b" defer></script>
+<script src="/admin-suggestions.js?v=8ecca1e460" defer></script>
+</body>
+</html>

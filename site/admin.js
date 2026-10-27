@@ -894,6 +894,16 @@
   $('ffind').addEventListener('input', drawOwner);
   loadOwner();
 
+  // Suggestions: how many are waiting. The list itself has its own page.
+  call('/api/admin/suggestions').then(function (res) {
+    if (!res.ok) { $('sgstate').textContent = res.data.error === 'bot_outdated' ? 'Bot needs updating' : 'Not available'; return; }
+    var n = Number(res.data.waiting) || 0;
+    $('sgwait').textContent = String(n);
+    $('sgwait').className = 'jrn' + (n ? '' : ' zero');
+    $('sgwait').setAttribute('aria-label', n === 1 ? '1 waiting' : n + ' waiting');
+    $('sgstate').textContent = n ? n + ' waiting' : 'All answered';
+  }, function () { $('sgstate').textContent = 'Not available'; });
+
   var resizeTimer = null;
   root.addEventListener('resize', function () {
     root.clearTimeout(resizeTimer);

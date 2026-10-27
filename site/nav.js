@@ -305,5 +305,90 @@
       .catch(function () { /* offline or backend not reachable: leave the top bar as it is */ });
   }
 
+  /* ---------- the top bar follows you down the page, a ☰ menu on phones, and Back to top ---------- */
+  function navExtras() {
+    var nav = doc.querySelector('header.nav');
+    if (!nav || nav.getAttribute('data-extras')) return;
+    nav.setAttribute('data-extras', '1');
+    var page = doc.documentElement;
+
+    // Phones: the tabs and buttons fold into a menu, so the bar is one short row.
+    var menu = doc.createElement('button');
+    menu.type = 'button';
+    menu.className = 'navmenu';
+    menu.id = 'navmenu';
+    menu.setAttribute('aria-expanded', 'false');
+    menu.setAttribute('aria-label', 'Menu');
+    menu.innerHTML = '<span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>';
+    var logo = nav.querySelector('.logo');
+    if (logo && logo.nextSibling) nav.insertBefore(menu, logo.nextSibling); else nav.appendChild(menu);
+    function setOpen(open) {
+      nav.classList.toggle('open', open);
+      menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menu.setAttribute('aria-label', open ? 'Close the menu' : 'Menu');
+    }
+    menu.addEventListener('click', function () { setOpen(!nav.classList.contains('open')); });
+    nav.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('a[href]')) setOpen(false); });
+    doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && nav.classList.contains('open')) { setOpen(false); menu.focus(); } });
+    doc.addEventListener('click', function (e) { if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false); });
+
+    // Once the bar has scrolled out of view it comes back, pinned to the top, so the tabs are always one click away.
+    // A placeholder keeps its space on the page, so nothing jumps.
+    var holder = doc.createElement('div');
+    holder.className = 'navholder';
+    holder.hidden = true;
+    nav.parentNode.insertBefore(holder, nav);
+    var bottom = 0;
+    function measure() {
+      if (nav.classList.contains('fixed')) return;
+      var r = nav.getBoundingClientRect();
+      bottom = r.bottom + root.pageYOffset;
+      holder.style.height = r.height + 'px';
+    }
+
+    // Back to top, on long pages once you've scrolled a while.
+    var up = doc.createElement('button');
+    up.type = 'button';
+    up.className = 'totop';
+    up.id = 'totop';
+    up.setAttribute('aria-label', 'Back to top');
+    up.title = 'Back to top';
+    up.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    up.hidden = true;
+    doc.body.appendChild(up);
+    up.addEventListener('click', function () {
+      root.scrollTo({ top: 0, behavior: 'smooth' });
+      var skip = doc.querySelector('.logo');
+      if (skip) skip.focus({ preventScroll: true });
+    });
+
+    var ticking = false;
+    function update() {
+      ticking = false;
+      if (page.classList.contains('newsopen')) return;
+      var y = root.pageYOffset;
+      var fix = y > bottom + 40;
+      if (fix !== nav.classList.contains('fixed')) {
+        holder.hidden = !fix;
+        nav.classList.toggle('fixed', fix);
+        if (!fix) setOpen(false);
+      }
+      page.style.setProperty('--navh', fix ? nav.offsetHeight + 'px' : '0px');
+      // How tall the pinned bar is (or will be), so a link to a section never hides its heading under the bar.
+      page.style.setProperty('--navfix', (fix ? nav.offsetHeight : Math.max(0, nav.offsetHeight - 20)) + 'px');
+      var long = doc.documentElement.scrollHeight > root.innerHeight * 2.5;
+      up.hidden = !(long && y > root.innerHeight * 0.8);
+    }
+    function onScroll() { if (!ticking) { ticking = true; root.requestAnimationFrame(update); } }
+    measure();
+    update();
+    root.addEventListener('scroll', onScroll, { passive: true });
+    root.addEventListener('resize', function () { if (!nav.classList.contains('fixed')) measure(); onScroll(); });
+    root.addEventListener('load', function () { measure(); update(); });
+    // The top bar can change height when the account pill or Admin tab appears.
+    if (root.ResizeObserver) new root.ResizeObserver(function () { measure(); }).observe(nav);
+  }
+
+  navExtras();
   boot();
 })(window);

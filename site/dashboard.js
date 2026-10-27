@@ -475,6 +475,14 @@
       var box = el('details', 'fset');
       var sum = el('summary', null, 'Settings (' + f.settings.length + ')');
       box.append(sum);
+      // Which cards had their settings open is remembered for this server, so they stay open after saving or reloading.
+      if (openCards()[f.key]) box.open = true;
+      box.addEventListener('toggle', function () {
+        if (box.hasAttribute('data-findopen')) return;
+        var open = openCards();
+        if (box.open) open[f.key] = 1; else delete open[f.key];
+        storeOpenCards(open);
+      });
       var fields = el('div', 'fields');
       var making = (f.actions || []).find(function (a) { return a && a.key === 'level_roles'; });
       if (f.key === 'jail' && Array.isArray(f.jailed)) fields.append(jailList(f));
@@ -2389,6 +2397,33 @@
     $('oncount').textContent = on + ' of ' + config.features.length + ' features on';
   }
 
+  function openKey() { return 'bev_open_' + (state.guild || ''); }
+  function openCards() {
+    try { return JSON.parse(root.localStorage.getItem(openKey()) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function storeOpenCards(open) {
+    try { root.localStorage.setItem(openKey(), JSON.stringify(open)); } catch (e) { /* private window: just not remembered */ }
+  }
+
+  // The search also finds single settings: a card whose setting matches opens its settings and that setting is highlighted.
+  function findSettings(words) {
+    doc.querySelectorAll('.fld.findhit').forEach(function (f) { f.classList.remove('findhit'); });
+    doc.querySelectorAll('details.fset[data-findopen]').forEach(function (d) { d.removeAttribute('data-findopen'); var card = d.closest('.feat'); d.open = !!(card && openCards()[card.getAttribute('data-key')]); });
+    var q = words.join(' ');
+    if (q.length < 3) return [];
+    var hits = [];
+    doc.querySelectorAll('.feat:not([hidden]) .fld').forEach(function (f) {
+      var label = f.querySelector('.flabel');
+      var text = ((label ? label.textContent : '') + ' ' + ((f.querySelector('.help') || {}).textContent || '')).toLowerCase();
+      if (!words.every(function (w) { return text.indexOf(w) !== -1; })) return;
+      f.classList.add('findhit');
+      hits.push(f);
+      var d = f.closest('details.fset');
+      if (d && !d.open && hits.length <= 24) { d.setAttribute('data-findopen', ''); d.open = true; }
+    });
+    return hits;
+  }
+
   function applyFind() {
     var words = $('find').value.toLowerCase().split(/\s+/).filter(Boolean);
     var shown = 0;
@@ -2404,6 +2439,8 @@
       shown += visible;
     });
     $('nofind').hidden = shown !== 0;
+    var hits = findSettings(words);
+    $('find').setAttribute('data-hits', String(hits.length));
   }
 
   function markProblems() {
@@ -2874,6 +2911,24 @@
       });
     });
     $('find').addEventListener('input', applyFind);
+    // Enter jumps to the first matching setting (or the first matching card).
+    $('find').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      var first = doc.querySelector('.fld.findhit') || doc.querySelector('.dsec:not([hidden]) .feat:not([hidden])');
+      if (!first) return;
+      first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      var input = first.querySelector('input, select, textarea, button');
+      if (input) input.focus({ preventScroll: true });
+    });
+    // Ctrl+S (or Cmd+S on a Mac) saves.
+    doc.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 's' || e.key === 'S')) {
+        if (!state.draft) return;
+        e.preventDefault();
+        if (dirtyCount() && !state.saving && !$('save').disabled) save();
+      }
+    });
     $('save').addEventListener('click', save);
     $('discard').addEventListener('click', discard);
     $('dismiss').addEventListener('click', dismiss);
