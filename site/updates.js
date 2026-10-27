@@ -10,6 +10,8 @@ window.BEV_UPDATES = [
     changes: [
       { title: 'No dashes after emojis',
         text: 'Every channel BEV makes, including all the Server Builder templates, now has its emoji straight before the name with no dash, like 💬general and 📜rules.' },
+      { title: 'Website animations',
+        text: 'As you scroll, sections and cards now fade in, rise and sharpen into place. Hovering over cards and buttons is smoother too, with a soft blue glow that follows your mouse.' },
     ],
   },
   {

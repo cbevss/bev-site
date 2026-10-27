@@ -306,6 +306,67 @@
   }
 
   /* ---------- the top bar follows you down the page, a ☰ menu on phones, and Back to top ---------- */
+
+  // Scroll animations: things below the fold fade in, grow slightly and rise as they come into view.
+  function scrollReveal() {
+    var path = location.pathname;
+    if (/^\/(dashboard|admin|jail-requests)/.test(path) || !('IntersectionObserver' in window)) return;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var SEL = '.sec .card, .cards > *, .showgrid > *, .shead, .sec h2, .faq, .fig, .grid > *, .tabs, .note, .st, .sd, article, .srv, .dcard, .upd, .pvsection, .sec table, .sec .pill, footer .wrap > *';
+    var seen = new WeakSet();
+    var io = new IntersectionObserver(function (entries) {
+      var shown = 0;
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        el.style.transitionDelay = Math.min(shown++ * 70, 350) + 'ms';
+        el.classList.add('rv-in');
+        io.unobserve(el);
+        setTimeout(function () { el.style.transitionDelay = ''; el.classList.remove('rv', 'rv-in'); }, 1200);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    function scan() {
+      var fold = innerHeight;
+      doc.querySelectorAll(SEL).forEach(function (el) {
+        if (seen.has(el) || el.closest('header.nav, .hero, .modal, #news, dialog')) return;
+        seen.add(el);
+        if (el.parentElement && el.parentElement.closest('.rv')) return;   // its parent already animates
+        if (el.getBoundingClientRect().top < fold * 0.92) return;           // already on screen: no flash
+        el.classList.add('rv');
+        io.observe(el);
+      });
+    }
+    scan();
+    // Jumping to a section (an 'On this page' link, or a link with #) shows everything at once so the target is in place.
+    function showAll() {
+      doc.querySelectorAll('.rv').forEach(function (el) { io.unobserve(el); el.style.transitionDelay = ''; el.classList.remove('rv', 'rv-in'); });
+    }
+    doc.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href*="#"]');
+      if (a && a.hash && a.pathname === location.pathname) showAll();
+    }, true);
+    addEventListener('hashchange', showAll);
+    if (location.hash) showAll();
+    var queued = false;
+    new MutationObserver(function () {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(function () { queued = false; scan(); });
+    }).observe(doc.body, { childList: true, subtree: true });
+  }
+
+  // The hover glow on cards follows the mouse.
+  function hoverGlow() {
+    var SEL = '.card, .cmd, .srv, .mod, a.cardlink, .lbsrv, .feat, .showitem, .dcard';
+    doc.addEventListener('pointermove', function (e) {
+      var el = e.target.closest && e.target.closest(SEL);
+      if (!el) return;
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+  }
+
   function navExtras() {
     var nav = doc.querySelector('header.nav');
     if (!nav || nav.getAttribute('data-extras')) return;
@@ -390,5 +451,7 @@
   }
 
   navExtras();
+  scrollReveal();
+  hoverGlow();
   boot();
 })(window);

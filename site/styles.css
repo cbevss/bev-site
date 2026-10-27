@@ -1267,3 +1267,31 @@ button.k.copy{display:inline-flex;width:auto;flex:none;align-self:flex-start;jus
 .faq[open] summary::after{transform:rotate(45deg)}
 .faq summary:focus-visible{outline:2px solid var(--ac2);outline-offset:3px;border-radius:12px}
 .faq p{margin:0;padding:0 20px 18px;color:var(--mut)}
+
+/* Scroll animations */
+.rv{opacity:0;transform:translateY(28px) scale(.94);filter:blur(6px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1),filter .7s ease}
+.rv.rv-in{opacity:1;transform:none;filter:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;filter:none;transition:none}}
+
+/* Hover animations: smooth easing, a glow that follows the mouse, a lit edge, and a soft press */
+:root{--ease:cubic-bezier(.2,.8,.2,1)}
+.card,.cmd,.srv,.mod,a.cardlink,.lbsrv,.faq,.feat,.showitem,.dcard{position:relative;isolation:isolate;transition:transform .45s var(--ease),border-color .35s var(--ease),box-shadow .45s var(--ease),background .35s var(--ease)}
+.card::before,.cmd::before,.srv::before,.mod::before,a.cardlink::before,.lbsrv::before,.feat::before,.showitem::before,.dcard::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s var(--ease);
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(37,99,235,.2),transparent 45%)}
+.card:hover::before,.cmd:hover::before,.srv:hover::before,.mod:hover::before,a.cardlink:hover::before,.lbsrv:hover::before,.feat:hover::before,.showitem:hover::before,.dcard:hover::before{opacity:1}
+.card:hover,.cmd:hover,.srv:hover,.mod:hover,a.cardlink:hover{transform:translateY(-6px) scale(1.012);box-shadow:0 24px 60px -28px var(--glow),0 0 0 1px rgba(127,166,255,.25) inset}
+.showitem:hover,.dcard:hover{transform:translateY(-4px);border-color:var(--ac2);box-shadow:0 20px 50px -26px var(--glow)}
+.card:active,.cmd:active,.srv:active,a.cardlink:active{transform:translateY(-2px) scale(.995);transition-duration:.12s}
+.cta,.mini,.act,.pill,.totop,.navmenu,.lbsrv,button.k.copy,.newsok,.jrok,.jrno,.acctout{transition:transform .3s var(--ease),background .3s var(--ease),box-shadow .35s var(--ease),border-color .3s var(--ease),color .2s,filter .3s}
+.cta:hover,.mini:hover,.act:hover,.acctout:hover{transform:translateY(-2px)}
+.cta:active,.mini:active,.act:active,.pill:active,.totop:active,button.k.copy:active,.newsok:active,.acctout:active{transform:translateY(0) scale(.96);transition-duration:.1s}
+.tab{position:relative;transition:color .3s var(--ease),background .3s var(--ease),box-shadow .35s var(--ease),transform .3s var(--ease)}
+a.tab:hover{transform:translateY(-1px)}
+.flinks a,.llinks a,.toc a{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .35s var(--ease),color .25s}
+.flinks a:hover,.llinks a:hover,.toc a:hover{background-size:100% 1px}
+.faq summary{transition:color .25s}
+.faq:hover summary{color:#fff}
+.switch{transition:background .3s var(--ease),box-shadow .35s var(--ease),transform .2s var(--ease)}
+.switch:active{transform:scale(.94)}
+@media (hover:none){.card:hover,.cmd:hover,.srv:hover,.mod:hover,a.cardlink:hover{transform:none}}
+@media (prefers-reduced-motion:reduce){.card,.cmd,.srv,.mod,a.cardlink,.cta,.mini,.act,.pill,.tab{transition:none!important;transform:none!important}}
