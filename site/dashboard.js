@@ -2902,7 +2902,11 @@
     list.setAttribute('role', 'listbox');
     list.hidden = true;
     input.setAttribute('aria-controls', list.id);
-    wrap.append(input, el('span', 'sscaret'), list);
+    var caret = el('button', 'sscaret');
+    caret.type = 'button';
+    caret.tabIndex = -1;
+    caret.setAttribute('aria-label', 'Show or hide the options');
+    wrap.append(input, caret, list);
     wrap.append(sel);
     sel.classList.add('ssnative');
     sel.tabIndex = -1;
@@ -3012,6 +3016,14 @@
       sync();
     }
     input.addEventListener('focus', openList);
+    // The arrow opens the list, or closes it again when it's open.
+    caret.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    caret.addEventListener('click', function () {
+      if (sel.disabled) return;
+      if (open) closeList();
+      else if (doc.activeElement === input) openList();
+      else input.focus();
+    });
     input.addEventListener('mousedown', function () { if (doc.activeElement === input && !open) openList(); });
     input.addEventListener('blur', closeList);
     input.addEventListener('input', function () { if (!open) openList(); draw(input.value); place(); });
