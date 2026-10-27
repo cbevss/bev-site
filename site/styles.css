@@ -28,8 +28,9 @@ a.tab:hover{color:#fff;background:rgba(37,99,235,.2)}
 @media(min-width:761px){.nav:has(> .tabs > :nth-child(5)) .tabs{order:3;flex:1 0 100%}.nav:has(> .tabs > :nth-child(5)) .tab{flex:1;justify-content:center}}
 @media(min-width:761px){.nav:has(> .tabs > :nth-child(6)) .tabs{order:3;flex:1 0 100%}.nav:has(> .tabs > :nth-child(6)) .tab{flex:1;justify-content:center}}
 /* Phones: when the tabs need two rows, split them evenly (3 + 3, or 3 + 2) rather than leaving one on its own. */
-@media(max-width:470px){.tabs:has(> :nth-child(6)) > .tab{flex:1 0 30%}}
-@media(max-width:350px){.tabs:has(> :nth-child(5)) > .tab{flex:1 0 30%}}
+@media(max-width:600px){.tabs:has(> :nth-child(6)):not(:has(> :nth-child(7))) > .tab{flex:1 0 30%}}
+@media(max-width:760px){.tabs:has(> :nth-child(7)) > .tab{flex:1 0 22%}}
+@media(max-width:350px){.tabs:has(> :nth-child(5)):not(:has(> :nth-child(7))) > .tab{flex:1 0 30%}}
 
 /* hero */
 .hero{position:relative;overflow:hidden;padding-bottom:clamp(48px,7vw,84px)}
@@ -1100,3 +1101,9 @@ dialog.askbox.pvbox:not([open]){display:none}
   html{scrollbar-color:#2563EB #04060C}
   *{scrollbar-color:#3B6FE8 transparent}
 }
+/* Your own invite link: discord.gg/ is fixed in the box, the code is typed after it */
+.field.invbox{display:flex;align-items:center;gap:0;padding:0 14px;cursor:text}
+.invbox:focus-within{border-color:var(--ac2);box-shadow:0 0 0 3px rgba(127,166,255,.25)}
+.invpre{flex:none;color:var(--mut);font-weight:600;user-select:none}
+.invin{flex:1;min-width:0;height:42px;padding:0;border:0;background:none;color:#fff;font:inherit;font-size:16px;outline:none}
+.fnear{margin-top:10px}

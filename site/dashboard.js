@@ -457,7 +457,11 @@
     }
     if (f.problem) meta.append(el('p', 'miss', '⚠️ ' + f.problem));
     if (f.info && f.info.length) meta.append(infoList(f.info));
-    if (f.buttons && f.buttons.length) meta.append(actionRow(f.key, f.buttons));
+    // Buttons that belong next to one setting (like Write it with AI under the listing description) go there instead.
+    var NEAR = { listing: { ai_write: 'listing_description' } };
+    var near = NEAR[f.key] || {};
+    var cardButtons = (f.buttons || []).filter(function (b) { return !near[b.key]; });
+    if (cardButtons.length) meta.append(actionRow(f.key, cardButtons));
     if (f.key === 'jail' && f.enabled && f.pleas_on) meta.append(pleaButton(f));
     if (f.previews && f.previews.length) meta.append(previewButton(f));
     if (meta.childNodes.length) main.append(meta);
@@ -476,7 +480,14 @@
       if (f.key === 'jail' && Array.isArray(f.jailed)) fields.append(jailList(f));
       f.settings.forEach(function (s) {
         if (making && s.key === 'level_rewards') fields.append(levelRolesBox(making));
-        fields.append(fieldFor(s));
+        var field = fieldFor(s);
+        fields.append(field);
+        var here = (f.buttons || []).filter(function (b) { return near[b.key] === s.key; });
+        if (here.length) {
+          var row = actionRow(f.key, here);
+          row.classList.add('fnear');
+          field.append(row);
+        }
       });
       box.append(fields);
       card.append(box);
@@ -492,15 +503,10 @@
     var url = '/jail-requests?guild=' + encodeURIComponent(state.guild);
     var a = el('a', 'mini jreq', '📨 Requests to be freed');
     a.id = 'jreq';
-    a.href = url;
-    a.target = '_blank';
+    a.href = url;          // opens in this tab; its Back to the dashboard button comes back to the Jail card
     var badge = el('span', 'jrn' + (n ? '' : ' zero'), String(n));
     badge.setAttribute('aria-label', n === 1 ? '1 waiting' : n + ' waiting');
     a.append(badge);
-    a.addEventListener('click', function (e) {
-      var w = root.open(url, 'bev-jail-requests', 'popup,width=1000,height=760');
-      if (w) { e.preventDefault(); try { w.focus(); } catch (err) { /* another window */ } }
-    });
     var row = el('div', 'row');
     row.append(a);
     return row;
@@ -668,6 +674,7 @@
           show(r.data.note || 'Done.', true);
           if (extra.onResult) extra.onResult(r.data);
           if (owner === 'backup' && b.key === 'history' && Array.isArray(r.data.data)) drawBackupHistory(r.data.data);
+          if (owner === 'listing' && b.key === 'ai_write' && r.data.data) useListingSuggestion(r.data.data, r.data.note);
           if (r.data.reload) refreshAfterAction(owner, r.data.note || 'Done.', show);
           return;
         }
@@ -707,6 +714,21 @@
       var d = Math.round(s / 86400); return d + ' day' + (d === 1 ? '' : 's') + ' ago';
     }
     return box;
+  }
+
+  // Server Listing → Write it with AI: the suggestion fills the card as unsaved changes, to edit and then Save.
+  function useListingSuggestion(d, note) {
+    if (typeof d.description === 'string') set('listing_description', d.description);
+    if (Array.isArray(d.tags)) set('listing_tags', d.tags.filter(function (t) { return typeof t === 'string'; }).slice(0, 5));
+    var old = $('f-listing');
+    var f = (state.config.features || []).find(function (x) { return x.key === 'listing'; });
+    if (!old || !f) return;
+    var fresh = featureCard(f);
+    old.replaceWith(fresh);
+    var box = fresh.querySelector('details.fset');
+    if (box) box.open = true;
+    var desc = fresh.querySelector('textarea');
+    if (desc) desc.focus();
   }
 
   // A pop-up question with two clearly named answers. Resolves true for ok, false for cancel (Escape cancels too).
@@ -1222,6 +1244,32 @@
         put(/^-?\d+$/.test(v) ? Number(v) : v);
       });
       return node;
+    }
+    if (kind === 'text' && s.key === 'listing_invite_code') {
+      // discord.gg/ is part of the box and can't be deleted; only the code after it is typed.
+      var ibox = el('div', 'field invbox');
+      var pre = el('span', 'invpre', 'discord.gg/');
+      pre.setAttribute('aria-hidden', 'true');
+      node = el('input', 'invin');
+      node.id = id;
+      node.type = 'text';
+      node.autocomplete = 'off';
+      node.spellcheck = false;
+      node.maxLength = 32;
+      node.placeholder = s.placeholder || 'your-server';
+      node.setAttribute('aria-describedby', id + '-pre');
+      var sr = el('span', 'sr', 'discord.gg/');
+      sr.id = id + '-pre';
+      node.value = get() || '';
+      node.addEventListener('input', function () {
+        // A pasted full link keeps only the code.
+        var v = node.value.replace(/^\s*(?:https?:\/\/)?(?:www\.)?(?:discord\.gg\/|discord(?:app)?\.com\/invite\/)/i, '').replace(/\s+/g, '');
+        if (v !== node.value) node.value = v;
+        put(v);
+      });
+      ibox.addEventListener('click', function (e) { if (e.target !== node) node.focus(); });
+      ibox.append(pre, node, sr);
+      return ibox;
     }
     if (kind === 'text') {
       var box = el('div', 'tbox');

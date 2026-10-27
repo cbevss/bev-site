@@ -5,6 +5,26 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.24',
+    date: '27 October 2026',
+    changes: [
+      { title: '/roleplay (was /proxy)',
+        text: 'The roleplay character commands are now /roleplay add, /roleplay list and /roleplay remove. They work the same as before, and your saved characters are kept. On the dashboard the card is called Roleplay Characters.' },
+      { title: '/marry',
+        text: 'Accept and Decline on a proposal now keep working for 24 hours, even if BEV restarts, so they no longer fail with “BEV didn’t respond in time”. After 24 hours the proposal says it ran out.' },
+      { title: 'Requests to be freed',
+        text: 'The button on the Jail card now opens the requests in the same tab instead of a new window. Back to the dashboard takes you straight back to the Jail card.' },
+      { title: 'Server Listing: Write it with AI',
+        text: 'A new button under the Description box on the Server Listing card has BEV look over your whole server (channels, categories, roles, the BEV features you use and their commands) and write a description for you, with the 5 tags that suit your server best. It fills in the card so you can change anything before you press Save.' },
+      { title: 'Server Listing: your own invite link',
+        text: 'Switch on “Use my own invite link” at the bottom of the Server Listing settings to use your own invite, like a vanity link, instead of the one BEV makes. Type the part after discord.gg/, or paste the whole link.' },
+      { title: 'Discover tab',
+        text: 'Find a server (bevbotdiscord.com/discover) now has its own Discover tab at the top of every page.' },
+      { title: 'Dashboard dropdowns',
+        text: 'Click the arrow to open or close a list. What you picked stays highlighted in the list. Prompts like “Add a role…” show as faded text and aren’t options in the list. Scrollbars are BEV blue across the site.' },
+    ],
+  },
+  {
     id: '4.23',
     date: '26 October 2026',
     changes: [
