@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.30',
+    date: '27 October 2026',
+    changes: [
+      { title: 'No dashes after emojis',
+        text: 'Every channel BEV makes, including all the Server Builder templates, now has its emoji straight before the name with no dash, like 💬general and 📜rules.' },
+    ],
+  },
+  {
     id: '4.29',
     date: '27 October 2026',
     changes: [
