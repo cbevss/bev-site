@@ -885,7 +885,8 @@ dialog.askbox::backdrop{background:rgba(2,4,10,.72);-webkit-backdrop-filter:blur
 @media(max-width:420px){.askrow>*{flex:1 1 100%;justify-content:center}}
 
 /* What's new popup */
-dialog.newsbox{width:min(560px,calc(100vw - 32px));max-width:none;display:flex;flex-direction:column;max-height:min(80vh,720px)}
+dialog.newsbox{position:fixed;inset:0;margin:auto;height:fit-content;width:min(560px,calc(100vw - 32px));max-width:none;display:flex;flex-direction:column;max-height:min(80vh,720px)}
+html.newsopen,html.newsopen body{overflow:hidden;overscroll-behavior:none}
 dialog.newsbox:not([open]){display:none}
 .newsbox .newssub{margin:0 0 12px}
 .newslist{overflow-y:auto;overscroll-behavior:contain;flex:1 1 auto;min-height:0;padding-right:6px;margin-right:-6px}

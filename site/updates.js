@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.25',
+    date: '27 October 2026',
+    changes: [
+      { title: 'Invite Tracker: join log',
+        text: 'The join log has a new look: the new member’s picture, who invited them, how many people that person has invited so far, and when the account was made. Showing the invite count is a new setting, on by default.' },
+      { title: 'Welcome messages: who invited them',
+        text: 'Two new Welcome settings add who invited the new member, and how many people their inviter has invited, under the welcome message. You can also put {inviter} and {invites} anywhere in your message. This needs the Invite Tracker switched on.' },
+      { title: "What's new popup",
+        text: 'This popup now sits in the middle of the screen, and the page behind it stays still until you press Got it.' },
+    ],
+  },
+  {
     id: '4.24',
     date: '27 October 2026',
     changes: [

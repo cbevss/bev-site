@@ -237,8 +237,11 @@
     ok.id = 'newsok';
     row.appendChild(ok);
     box.appendChild(row);
-    ok.addEventListener('click', function () { onGotIt(); box.close(); box.remove(); });
-    box.addEventListener('cancel', function () { box.remove(); });     // Escape: closed for now, shown again next time
+    // Nothing else on the page works until Got it is pressed: no Escape, no clicking or scrolling behind it.
+    var page = doc.documentElement;
+    ok.addEventListener('click', function () { onGotIt(); box.close(); box.remove(); page.classList.remove('newsopen'); });
+    box.addEventListener('cancel', function (e) { e.preventDefault(); });
+    page.classList.add('newsopen');
     doc.body.appendChild(box);
     if (typeof box.showModal === 'function') box.showModal(); else box.setAttribute('open', '');
     ok.focus();
