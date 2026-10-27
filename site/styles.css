@@ -1081,3 +1081,17 @@ dialog.askbox.pvbox:not([open]){display:none}
 .ssgroup{flex:none;font-size:12px;color:var(--mut)}
 .ssnone{padding:10px;color:var(--mut);font-size:14.5px}
 .ssel .ssin::placeholder{color:#AEB8D6;opacity:1}
+/* Scrollbars in BEV's colours, on every page and every scrolling box (the page itself, dropdown lists, popups) */
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-track{background:#04060C}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#3B6FE8,#2563EB);border:3px solid #04060C;border-radius:999px}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#7FA6FF,#3B6FE8)}
+::-webkit-scrollbar-corner{background:#04060C}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
+.sslist::-webkit-scrollbar,.pvlist::-webkit-scrollbar,.notes::-webkit-scrollbar{width:8px}
+.sslist::-webkit-scrollbar-track,.pvlist::-webkit-scrollbar-track{background:transparent}
+.sslist::-webkit-scrollbar-thumb,.pvlist::-webkit-scrollbar-thumb{border:2px solid #0B1226}
+@supports not selector(::-webkit-scrollbar){
+  html{scrollbar-color:#2563EB #04060C}
+  *{scrollbar-color:#3B6FE8 transparent}
+}
