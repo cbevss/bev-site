@@ -5,6 +5,28 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.29',
+    date: '27 October 2026',
+    changes: [
+      { title: 'Pick a category for channels BEV makes',
+        text: 'Every feature that makes its own channel when none is picked now has a "Category for the channel BEV makes" setting, just under its channel. Leave it empty and the channel goes at the top of the server like before.' },
+      { title: 'Neater channel names',
+        text: 'Channels BEV makes now start with an emoji that fits what they are for, straight before the name, like 👋welcome, ⭐starboard and 📣bev-status.' },
+    ],
+  },
+  {
+    id: '4.28',
+    date: '27 October 2026',
+    changes: [
+      { title: 'Welcome messages',
+        text: 'Inside the welcome box, names are now written out (like Welcome Goldie to BEVS) instead of mentions, which sometimes showed as a long number. The new member is still pinged, with one mention just above the box.' },
+      { title: 'Welcome and Invite Tracker together',
+        text: 'If the welcome message and the join log use the same channel, BEV now posts one box instead of two: your welcome message, who invited them, how many people their inviter has invited, and when the account was made.' },
+      { title: 'Join log',
+        text: 'The join log names the inviter in plain text too, so it never shows a long number instead of a name.' },
+    ],
+  },
+  {
     id: '4.27',
     date: '27 October 2026',
     changes: [
