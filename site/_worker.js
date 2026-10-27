@@ -419,7 +419,7 @@ async function directoryApi(c) {
   }
   const servers = res.data.servers.slice(0, 300).map((s) => ({
     id: ID_RE.test(String(s && s.id)) ? String(s.id) : '', name: str(s && s.name, 100), icon: /^https:\/\/cdn\.discordapp\.com\//.test(str(s && s.icon, 300)) ? str(s.icon, 300) : null,
-    members: Number(s && s.members) || 0, online: Number(s && s.online) || 0, description: str(s && s.description, 300),
+    members: Number(s && s.members) || 0, description: str(s && s.description, 300),
     tags: (Array.isArray(s && s.tags) ? s.tags : []).slice(0, 5).map((t) => str(t, 20).toLowerCase()).filter(Boolean),
     invite: INVITE_RE.test(str(s && s.invite, 60)) ? s.invite : null, bumped: Number(s && s.bumped) || 0,
   })).filter((s) => s.id && s.name && s.invite);

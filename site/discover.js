@@ -29,13 +29,13 @@
   function draw() {
     var grid = $('dgrid');
     grid.replaceChildren();
-    var key = { bumped: 'bumped', members: 'members', online: 'online' }[state.sort] || 'bumped';
+    var key = { bumped: 'bumped', members: 'members' }[state.sort] || 'bumped';
     var shown = state.servers.filter(matches).sort(function (a, b) { return (Number(b[key]) || 0) - (Number(a[key]) || 0); });
     shown.forEach(function (s) {
       var li = el('li', 'dcard');
       var top = el('div', 'dtop');
       var who = el('div', 'dwho');
-      who.append(el('h2', 'disp', s.name), el('p', 'dstats', s.members.toLocaleString() + ' members' + (s.online ? ' • ' + s.online.toLocaleString() + ' online' : '')));
+      who.append(el('h2', 'disp', s.name), el('p', 'dstats', s.members.toLocaleString() + ' members'));
       top.append(icon(s), who);
       li.append(top);
       if (s.description) li.append(el('p', 'ddesc', s.description));

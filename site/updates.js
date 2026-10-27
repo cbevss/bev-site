@@ -5,6 +5,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.27',
+    date: '27 October 2026',
+    changes: [
+      { title: '/bump',
+        text: 'You can now bump your server to the top of Find a server every hour instead of every 2 hours. Bump coins from Vote & Bump Rewards come every hour too.' },
+      { title: 'Find a server',
+        text: 'Server cards no longer show how many members are online, just the member count.' },
+    ],
+  },
+  {
     id: '4.26',
     date: '27 October 2026',
     changes: [
