@@ -1080,3 +1080,4 @@ dialog.askbox.pvbox:not([open]){display:none}
 .ssopt.off{opacity:.45;cursor:default}
 .ssgroup{flex:none;font-size:12px;color:var(--mut)}
 .ssnone{padding:10px;color:var(--mut);font-size:14.5px}
+.ssel .ssin::placeholder{color:#AEB8D6;opacity:1}

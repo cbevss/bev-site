@@ -2916,10 +2916,15 @@
     var active = -1;
     var open = false;
 
+    // "Add a role…" / "Pick a channel…" are prompts, not choices: shown greyed in the box, never in the list.
+    function isPrompt(o) { return !!o && o.value === '' && /…$/.test(o.textContent.trim()); }
     function sync() {
       var o = sel.options[sel.selectedIndex];
-      if (!open) input.value = o ? o.textContent : '';
-      input.placeholder = o ? '' : 'Type to search…';
+      var label = o ? o.textContent : '';
+      if (!open) {
+        input.value = o && !isPrompt(o) ? label : '';
+        input.placeholder = isPrompt(o) ? label : (o ? '' : 'Type to search…');
+      }
       input.disabled = sel.disabled;
       input.title = sel.title || '';
     }
@@ -2935,7 +2940,7 @@
       list.replaceChildren();
       shown = [];
       Array.prototype.forEach.call(sel.options, function (o) {
-        if (o.hidden) return;
+        if (o.hidden || isPrompt(o)) return;
         var text = o.textContent;
         var group = o.parentNode && o.parentNode.tagName === 'OPTGROUP' ? o.parentNode.label : '';
         if (q && words(text).indexOf(q) === -1 && text.toLowerCase().indexOf(q) === -1 && words(group).indexOf(q) === -1) return;
@@ -2980,9 +2985,12 @@
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
       wrap.classList.add('open');
+      // Start empty so typing searches straight away; what's picked now shows greyed until you type.
+      var o = sel.options[sel.selectedIndex];
+      input.placeholder = o ? o.textContent : 'Type to search…';
+      input.value = '';
       draw('');
       place();
-      input.select();
     }
     function closeList() {
       if (!open) return;
@@ -3021,7 +3029,7 @@
       } else if (e.key === 'Enter') {
         if (open) { e.preventDefault(); e.stopPropagation(); if (active >= 0 && shown[active] && !shown[active].o.disabled) choose(shown[active].o); else closeList(); }
       } else if (e.key === 'Escape') {
-        if (open) { e.preventDefault(); e.stopPropagation(); closeList(); input.select(); }
+        if (open) { e.preventDefault(); e.stopPropagation(); closeList(); }
       } else if (e.key === 'Tab') closeList();
     });
     sel.addEventListener('change', sync);
