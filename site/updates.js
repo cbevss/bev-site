@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.34',
+    date: '28 October 2026',
+    changes: [
+      { title: 'Music: SoundCloud songs play properly',
+        text: 'SoundCloud sends most songs in small chunks that the player couldn\'t read, so they stayed silent. BEV now fetches the whole song first (it takes a second or two), then plays it. If a song still can\'t play, BEV says why under the message.' },
+    ],
+  },
+  {
     id: '4.33',
     date: '28 October 2026',
     changes: [
