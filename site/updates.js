@@ -13,7 +13,7 @@ window.BEV_UPDATES = [
       { title: 'Message Designer: Advanced (JSON)',
         text: 'Switch a message to Advanced (JSON) to build it as raw JSON: up to 10 boxes with fields, plus rows of buttons and dropdown menus. Buttons open links, give, take or toggle a role, or reply privately, and dropdown options give roles or reply. JSON from Discohook works too, the preview updates as you type, and mistakes are explained before anything is sent.' },
       { title: 'Smoother website',
-        text: 'The whole site is much smoother: everything that moves now uses the graphics chip, so scrolling and animations keep up with high refresh rate screens. Popups spring open, ease out when closed, and their contents slide in one after another. Feature previews start loading as soon as you point at the button. Things now fade in and out at the speed you scroll, and people named in previews show as blue @mentions, like You have been warned by @Admin.' },
+        text: 'Popups and previews are much smoother to open and scroll. Scrolling animations are richer: things rise out of a soft blur with a slight 3D tilt and cascade in reading order. Popups spring open, ease out when closed, and their contents slide in one after another. Feature previews start loading as soon as you point at the button. Things now fade in and out at the speed you scroll, and people named in previews show as blue @mentions, like You have been warned by @Admin.' },
       { title: 'Previews on the Features page',
         text: 'Dashboard features on the Features page now have a Preview button showing an example of what BEV posts.' },
       { title: 'Website',

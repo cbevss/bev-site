@@ -318,10 +318,14 @@
     // In view: fade, grow and sharpen in. Scrolled away: fade back out, ready to come in again next time.
     var io = new IntersectionObserver(function (entries) {
       var shown = 0;
+      // Things coming in together cascade in reading order: top to bottom, then left to right.
+      entries = entries.slice().sort(function (a, b) {
+        return (a.boundingClientRect.top - b.boundingClientRect.top) || (a.boundingClientRect.left - b.boundingClientRect.left);
+      });
       entries.forEach(function (e) {
         var el = e.target;
         if (e.isIntersecting) {
-          el.style.transitionDelay = jumping ? '' : Math.min(shown++ * 70, 350) + 'ms';
+          el.style.transitionDelay = jumping ? '' : Math.min(shown++ * 60, 360) + 'ms';
           el.classList.add('rv-in');
         } else {
           el.style.transitionDelay = '';
