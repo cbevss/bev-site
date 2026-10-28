@@ -5,13 +5,27 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.31',
+    date: '28 October 2026',
+    changes: [
+      { title: 'Stream alerts: one creator, every platform',
+        text: 'Give someone\'s Twitch, YouTube, TikTok and Kick accounts the same creator name. If they go live on several at once, you get one alert listing every platform, with a watch button for each, instead of a ping per platform. Each account can also have its own message above the alert ({name}, {platform}, {title}, {game} and {url} work) and its own roles to ping.' },
+      { title: 'Message Designer: Advanced (JSON)',
+        text: 'Switch a message to Advanced (JSON) to build it as raw JSON: up to 10 boxes with fields, plus rows of buttons and dropdown menus. Buttons open links, give, take or toggle a role, or reply privately, and dropdown options give roles or reply. JSON from Discohook works too, the preview updates as you type, and mistakes are explained before anything is sent.' },
+      { title: 'Previews on the Features page',
+        text: 'Dashboard features on the Features page now have a Preview button showing an example of what BEV posts.' },
+      { title: 'Website',
+        text: 'Scroll animations are on every page now, things fade back out as you scroll away, the blue glow stays under your mouse while you scroll, and open dropdowns always show above the cards around them.' },
+    ],
+  },
+  {
     id: '4.30',
     date: '27 October 2026',
     changes: [
       { title: 'No dashes after emojis',
         text: 'Every channel BEV makes, including all the Server Builder templates, now has its emoji straight before the name with no dash, like 💬general and 📜rules.' },
       { title: 'Website animations',
-        text: 'As you scroll, sections and cards now fade in, rise and sharpen into place. Hovering over cards and buttons is smoother too, with a soft blue glow that follows your mouse.' },
+        text: 'As you scroll, everything on every page now fades in, rises and sharpens into place, then fades back out as you scroll away and in again when you come back.  Hovering over cards and buttons is smoother too, with a soft blue glow that follows your mouse.' },
     ],
   },
   {

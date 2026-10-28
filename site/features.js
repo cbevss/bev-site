@@ -133,5 +133,70 @@
     if (q) { box.value = q.slice(0, 60); apply(); }
   }
 
+  /* Preview buttons on dashboard features: an example of what the feature posts, made by the bot itself. */
+  var loading = null;
+  function loadPreviews() {
+    if (loading) return loading;
+    var script = new Promise(function (ok, bad) {
+      if (root.BEVRender) return ok();
+      var s = doc.createElement('script');
+      s.src = '/pvrender.js';
+      s.onload = ok; s.onerror = bad;
+      doc.head.append(s);
+    });
+    var data = root.fetch('/previews.json').then(function (r) { if (!r.ok) throw new Error('missing'); return r.json(); });
+    loading = Promise.all([data, script]).then(function (all) { return all[0]; });
+    loading.catch(function () { loading = null; });
+    return loading;
+  }
+  function node(tag, cls, text) {
+    var n = doc.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function openPreview(btn) {
+    var key = btn.getAttribute('data-preview');
+    var d = node('dialog', 'askbox pvbox');
+    d.setAttribute('aria-labelledby', 'fpvh');
+    var top = node('div', 'pvtop');
+    var h = node('h2', 'disp', '👀 Preview: ' + btn.getAttribute('data-name'));
+    h.id = 'fpvh';
+    var close = node('button', 'mini pvclose', '✕');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close the preview');
+    top.append(h, close);
+    var sub = node('p', 'pvsub', 'An example of what BEV posts. On the dashboard, Preview shows yours, with your own settings and wording.');
+    var body = node('div', 'pvlist');
+    body.append(node('p', 'pvwait', 'Loading the example…'));
+    d.append(top, sub, body);
+    function done() { if (d.open) d.close(); d.remove(); btn.focus(); }
+    close.addEventListener('click', done);
+    d.addEventListener('cancel', function (e) { e.preventDefault(); done(); });
+    d.addEventListener('click', function (e) { if (e.target === d) done(); });
+    doc.body.append(d);
+    if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+    close.focus();
+    loadPreviews().then(function (all) {
+      var ex = all[key];
+      body.replaceChildren();
+      if (!ex) { body.append(node('p', 'pvnote', 'There’s no example for this one yet.')); return; }
+      root.BEVRender.names(ex.names);
+      ex.items.forEach(function (item) {
+        var sec = node('section', 'pvitem');
+        sec.setAttribute('data-item', item.key);
+        sec.append(node('h3', 'pvh', item.label));
+        item.messages.forEach(function (m) { sec.append(root.BEVRender.message(m, item.label)); });
+        body.append(sec);
+      });
+    }, function () {
+      body.replaceChildren(node('p', 'fnote no', 'The example couldn’t be loaded. Check your connection and try again.'));
+    });
+  }
+  doc.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('button.fpv');
+    if (btn) openPreview(btn);
+  });
+
   boot();
 })(window);

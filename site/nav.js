@@ -310,36 +310,67 @@
   // Scroll animations: things below the fold fade in, grow slightly and rise as they come into view.
   function scrollReveal() {
     var path = location.pathname;
-    if (/^\/(dashboard|admin|jail-requests)/.test(path) || !('IntersectionObserver' in window)) return;
+    if (!('IntersectionObserver' in window)) return;
     if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var SEL = '.sec .card, .cards > *, .showgrid > *, .shead, .sec h2, .faq, .fig, .grid > *, .tabs, .note, .st, .sd, article, .srv, .dcard, .upd, .pvsection, .sec table, .sec .pill, footer .wrap > *';
     var seen = new WeakSet();
+    var jumping = 0;
+    // In view: fade, grow and sharpen in. Scrolled away: fade back out, ready to come in again next time.
     var io = new IntersectionObserver(function (entries) {
       var shown = 0;
       entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
         var el = e.target;
-        el.style.transitionDelay = Math.min(shown++ * 70, 350) + 'ms';
-        el.classList.add('rv-in');
-        io.unobserve(el);
-        setTimeout(function () { el.style.transitionDelay = ''; el.classList.remove('rv', 'rv-in'); }, 1200);
+        if (e.isIntersecting) {
+          el.style.transitionDelay = jumping ? '' : Math.min(shown++ * 70, 350) + 'ms';
+          el.classList.add('rv-in');
+        } else {
+          el.style.transitionDelay = '';
+          // Left through the top: it slides up and out (away from the screen), so it can't bounce back into view.
+          el.classList.toggle('rv-up', e.boundingClientRect.top < (e.rootBounds ? e.rootBounds.top : 0));
+          el.classList.remove('rv-in');
+        }
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    }, { rootMargin: '-4% 0px -8% 0px', threshold: 0.08 });
+    var SKIP = 'header.nav, header, .hero, .skip, .modal, noscript, #news, dialog, .totop, .navholder, script, style, template, br';
+    // Every page: walk down the page and animate blocks that fit on screen (big wrappers are split into their parts).
+    function blocks(root, out) {
+      var fold = innerHeight;
+      for (var i = 0; i < root.children.length; i++) {
+        var el = root.children[i];
+        if (el.matches(SKIP) || el.classList.contains('rv')) continue;
+        if (el.matches('button, input, select, textarea, label, .act, .mini, .seg, .row')) continue;   // controls stay put so clicks always land
+        var cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.position === 'fixed' || cs.position === 'sticky' || cs.position === 'absolute') continue;
+        var r = el.getBoundingClientRect();
+        if (!r.height || !r.width) continue;
+        var many = el.tagName === 'MAIN' || el.tagName === 'FORM' || el.children.length >= 3 && (cs.display.indexOf('grid') > -1 || (cs.display.indexOf('flex') > -1 && cs.flexWrap === 'wrap') || el.tagName === 'UL' || el.tagName === 'OL');
+        if ((r.height > fold * 0.6 || many) && el.children.length) { blocks(el, out); continue; }
+        if (el.matches(SEL) || r.height > 24 || el.children.length) out.push(el);
+      }
+      return out;
+    }
     function scan() {
       var fold = innerHeight;
-      doc.querySelectorAll(SEL).forEach(function (el) {
-        if (seen.has(el) || el.closest('header.nav, .hero, .modal, #news, dialog')) return;
+      blocks(doc.body, []).forEach(function (el) {
+        if (seen.has(el) || el.closest(SKIP)) return;
         seen.add(el);
-        if (el.parentElement && el.parentElement.closest('.rv')) return;   // its parent already animates
-        if (el.getBoundingClientRect().top < fold * 0.92) return;           // already on screen: no flash
+        if (el.parentElement && el.parentElement.closest('.rv')) return;
+        var r = el.getBoundingClientRect();
+        if (r.top < fold * 0.92 && r.bottom > 0) el.classList.add('rv-snap', 'rv-in');   // already on screen: no flash
         el.classList.add('rv');
         io.observe(el);
       });
+      requestAnimationFrame(function () { doc.querySelectorAll('.rv-snap').forEach(function (el) { if (!jumping) el.classList.remove('rv-snap'); }); });
     }
     scan();
-    // Jumping to a section (an 'On this page' link, or a link with #) shows everything at once so the target is in place.
+    // Jumping to a section (an 'On this page' link, or a link with #) shows what's there at once so the target is in place.
     function showAll() {
-      doc.querySelectorAll('.rv').forEach(function (el) { io.unobserve(el); el.style.transitionDelay = ''; el.classList.remove('rv', 'rv-in'); });
+      jumping++;
+      doc.querySelectorAll('.rv').forEach(function (el) { el.style.transitionDelay = ''; el.classList.add('rv-snap', 'rv-in'); });
+      setTimeout(function () {
+        jumping--;
+        doc.querySelectorAll('.rv-snap').forEach(function (el) { el.classList.remove('rv-snap'); });
+      }, 900);
     }
     doc.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('a[href*="#"]');
@@ -352,19 +383,29 @@
       if (queued) return;
       queued = true;
       requestAnimationFrame(function () { queued = false; scan(); });
-    }).observe(doc.body, { childList: true, subtree: true });
+    }).observe(doc.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'open'] });
+    addEventListener('resize', function () { requestAnimationFrame(scan); });
   }
 
   // The hover glow on cards follows the mouse.
   function hoverGlow() {
     var SEL = '.card, .cmd, .srv, .mod, a.cardlink, .lbsrv, .feat, .showitem, .dcard';
-    doc.addEventListener('pointermove', function (e) {
-      var el = e.target.closest && e.target.closest(SEL);
+    var x = -1, y = -1, queued = false;
+    function place() {
+      queued = false;
+      if (x < 0) return;
+      var hit = doc.elementFromPoint(x, y);
+      var el = hit && hit.closest && hit.closest(SEL);
       if (!el) return;
       var r = el.getBoundingClientRect();
-      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
-    }, { passive: true });
+      el.style.setProperty('--mx', (x - r.left) + 'px');
+      el.style.setProperty('--my', (y - r.top) + 'px');
+    }
+    function later() { if (!queued) { queued = true; requestAnimationFrame(place); } }
+    doc.addEventListener('pointermove', function (e) { x = e.clientX; y = e.clientY; later(); }, { passive: true });
+    // Scrolling moves the page under a still mouse, so the glow is moved to stay under the cursor.
+    addEventListener('scroll', later, { passive: true, capture: true });
+    doc.documentElement.addEventListener('pointerleave', function () { x = y = -1; });
   }
 
   function navExtras() {

@@ -1812,7 +1812,66 @@
     return img;
   }
 
+
+  /* ---------- Message Designer: Advanced (JSON) ---------- */
+  var JSON_STYLES = { primary: 1, blue: 1, secondary: 2, grey: 2, gray: 2, success: 3, green: 3, danger: 4, red: 4 };
+  function jsonMessage(t) {
+    var data;
+    try { data = JSON.parse(String(t.json || '')); } catch (e) { return { error: 'That isn’t valid JSON yet: ' + e.message }; }
+    if (data && Array.isArray(data.messages) && data.messages.length) data = (data.messages[0] || {}).data || {};
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return { error: 'The JSON must be an object, starting with {' };
+    var embeds = Array.isArray(data.embeds) ? data.embeds : data.embed ? [data.embed] : [];
+    if (embeds.length > 10) return { error: 'A message can have up to 10 boxes.' };
+    var out = { where: t.channel ? '#' + nameFor('channel', t.channel) : 'No channel picked yet', content: String(data.content || ''), embeds: [], components: [] };
+    var lead = pingLead(t);
+    if (lead) out.content = lead + (out.content ? ' ' + out.content : '');
+    embeds.forEach(function (e) {
+      if (!e || typeof e !== 'object') return;
+      var c = e.color != null ? e.color : e.colour;
+      var colour = typeof c === 'number' ? c : validColour(c) ? parseInt(validColour(c).slice(1), 16) : parseInt((validColour(t.color) || '#2563EB').slice(1), 16);
+      var pic = function (v) { return typeof v === 'string' ? { url: v } : v || undefined; };
+      out.embeds.push({ title: e.title, description: e.description, url: e.url, color: colour,
+        author: typeof e.author === 'string' ? { name: e.author } : e.author, footer: typeof e.footer === 'string' ? { text: e.footer } : e.footer,
+        image: pic(e.image), thumbnail: pic(e.thumbnail), fields: Array.isArray(e.fields) ? e.fields : [] });
+    });
+    (Array.isArray(data.components) ? data.components : []).slice(0, 5).forEach(function (r) {
+      if (!r || typeof r !== 'object') return;
+      if (r.type === 'select' || r.type === 'dropdown' || r.type === 'menu' || r.type === 3 || Array.isArray(r.options)) {
+        out.components.push({ type: 1, components: [{ type: 3, placeholder: r.placeholder || 'Choose…' }] });
+        return;
+      }
+      var buttons = (r.buttons || r.components || []).map(function (b) {
+        return { type: 2, label: b.label, emoji: typeof b.emoji === 'string' ? { name: b.emoji } : b.emoji, style: b.url ? 5 : (typeof b.style === 'number' ? b.style : JSON_STYLES[String(b.style || 'secondary').toLowerCase()] || 2) };
+      });
+      out.components.push({ type: 1, components: buttons });
+    });
+    if (!out.content && !out.embeds.length) return { error: 'Add some content or at least one box.' };
+    return out;
+  }
+  function jsonExample(t) {
+    var e = {};
+    if (String(t.title || '').trim()) e.title = t.title;
+    if (String(t.description || '').trim()) e.description = t.description;
+    if (validColour(t.color)) e.color = validColour(t.color);
+    if (String(t.author || '').trim()) e.author = { name: t.author };
+    if (String(t.footer || '').trim()) e.footer = { text: t.footer };
+    if (validUrl(t.image)) e.image = { url: t.image.trim() };
+    if (validUrl(t.thumbnail)) e.thumbnail = { url: t.thumbnail.trim() };
+    if (!Object.keys(e).length) { e.title = 'Welcome!'; e.description = 'Pick your roles below.'; e.color = '#2563EB'; e.fields = [{ name: 'Rules', value: 'Be kind', inline: true }]; }
+    var rows = [{ type: 'buttons', buttons: [{ label: 'Say hi', emoji: '👋', style: 'primary', reply: 'Hello! 👋' }] }];
+    if (String(t.button_label || '').trim() && validUrl(t.button_link)) rows[0].buttons.unshift({ label: t.button_label, url: t.button_link.trim() });
+    rows.push({ type: 'select', placeholder: 'Pick a role', options: [{ label: 'Pings', role: 'ROLE_ID_HERE', mode: 'toggle' }, { label: 'Info', reply: 'Some info just for you.' }] });
+    return JSON.stringify({ content: String(t.text || ''), embeds: [e], components: rows }, null, 2);
+  }
+
   function messagePreview(t) {
+    if (t.mode === 'json') {
+      var jm = jsonMessage(t);
+      if (jm.error) { var bad = el('div', 'dprev mprev'); bad.append(el('p', 'mempty', '⚠️ ' + jm.error)); return bad; }
+      var shown = previewMessage(jm, '');
+      var w = shown.querySelector('.pvwhere'); if (w) w.remove();
+      return shown;
+    }
     var wrap = el('div', 'dprev mprev');
     var av = el('img', 'dav');
     av.src = '/bev-avatar.png'; av.alt = ''; av.width = 40; av.height = 40;
@@ -2224,9 +2283,36 @@
       if (!t) return;
       form.append(group('Where it goes', [['name'], ['channel'], ['ping'], ['ping_role', 'mrole']]));
       form.querySelector('.mrole').hidden = t.ping !== 'role';
-      form.append(group('Text above the box', [['text', 'wide']]));
+      var seg = el('div', 'seg mmode');
+      seg.setAttribute('role', 'group');
+      seg.setAttribute('aria-label', 'Message type');
+      [['simple', 'Simple'], ['json', 'Advanced (JSON)']].forEach(function (o) {
+        var b = el('button', null, o[1]);
+        b.type = 'button';
+        b.setAttribute('data-mode', o[0]);
+        b.setAttribute('aria-pressed', (t.mode === 'json' ? 'json' : 'simple') === o[0] ? 'true' : 'false');
+        b.addEventListener('click', function () {
+          if ((current().mode === 'json' ? 'json' : 'simple') === o[0]) return;
+          if (o[0] === 'json' && !String(current().json || '').trim()) putField('json', jsonExample(current()));
+          putField('mode', o[0]);
+          drawForm();
+        });
+        seg.append(b);
+      });
+      form.append(seg);
+      if (t.mode === 'json') {
+        var jg = group('Advanced message', [['json', 'wide mjson']]);
+        var help = el('p', 'help');
+        help.innerHTML = 'Up to 10 boxes (<code>embeds</code>) with <code>fields</code>, plus up to 5 rows in <code>components</code>: a row of up to 5 <code>buttons</code>, or a <code>select</code> dropdown with up to 25 <code>options</code>. A button opens a <code>url</code>, or gives a <code>role</code> (<code>mode</code>: give, take or toggle) and/or sends a private <code>reply</code>. Dropdown options give roles or reply. JSON from Discohook works too.';
+        jg.append(help);
+        form.append(jg);
+        var ta = form.querySelector('#m-json');
+        if (ta) { ta.spellcheck = false; ta.classList.add('mono'); ta.rows = 18; }
+      } else {
+        form.append(group('Text above the box', [['text', 'wide']]));
       form.append(group('The box', [['color'], ['author'], ['title'], ['link'], ['description', 'wide'], ['image'], ['thumbnail'], ['footer', 'wide']]));
-      form.append(group('Button (optional)', [['button_label'], ['button_link']]));
+          form.append(group('Button (optional)', [['button_label'], ['button_link']]));
+      }
       var remove = el('button', 'mini danger', 'Delete this message');
       remove.type = 'button';
       remove.addEventListener('click', function () {
@@ -2252,7 +2338,7 @@
       side.append(messagePreview(t));
       var n = boxLength(t);
       var count = el('p', 'help mcount' + (n > 6000 ? ' over' : ''), 'Box: ' + n.toLocaleString('en-GB') + ' of 6,000 characters');
-      side.append(count);
+      if (t.mode !== 'json') side.append(count);
       var dirty = !same(state.draft.settings[s.key], state.original.settings[s.key]);
       var on = state.original.features[f.key] === true;
       var channel = t.channel ? nameFor('channel', t.channel) : null;
