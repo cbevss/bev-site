@@ -95,7 +95,7 @@
   /* ---------- page ---------- */
 
   var doc = root.document;
-  var state = { user: null, servers: [], guild: null, config: null, original: null, draft: null, saving: false, token: 0, dismissed: null, keep: {} };
+  var state = { user: null, servers: [], guild: null, config: null, original: null, draft: null, saving: false, token: 0, dismissed: null, keep: {}, barWanted: false };
   var problems = {};
 
   function $(id) { return doc.getElementById(id); }
@@ -112,8 +112,10 @@
   function show(name) {
     panel = name;
     PANELS.forEach(function (p) { $(p).hidden = p !== name; });
-    $('savebar').hidden = name !== 'board' || state.dismissed !== null;
+    showBar();
   }
+  // The save bar only appears once something has been changed, and stays (showing the result) after saving until it's dismissed.
+  function showBar() { $('savebar').hidden = !(panel === 'board' && state.barWanted && state.dismissed === null); }
 
   function say(text) { $('live').textContent = text; }
 
@@ -250,6 +252,7 @@
           ' of the dashboard. Only those are shown here, and you can only change them.';
       }
     }
+    state.barWanted = false;
     state.original = valuesOf(config);
     state.draft = clone(state.original);
     state.keep = {};
@@ -2455,6 +2458,7 @@
     var n = info.diff.count;
     // A dismissed bar comes back as soon as there's a change it hasn't shown yet.
     if (state.dismissed !== null && n && JSON.stringify(info.diff) !== state.dismissed) undismiss();
+    if (n && !state.barWanted) { state.barWanted = true; showBar(); }
     $('dirty').textContent = n ? n + ' unsaved change' + (n === 1 ? '' : 's') + ' for ' + state.config.guild.name : 'No changes yet. Everything is saved.';
     $('save').disabled = !n || state.saving;
     $('discard').disabled = !n || state.saving;
@@ -2565,7 +2569,8 @@
 
   function undismiss() {
     state.dismissed = null;
-    if (panel === 'board') $('savebar').hidden = false;
+    state.barWanted = true;
+    showBar();
   }
 
   function notesFade() {
@@ -2648,6 +2653,8 @@
     renderBoard();
     updateDirty();
     showNotes([], null);
+    state.barWanted = false;
+    showBar();
     say('Changes discarded');
   }
 
@@ -3170,12 +3177,14 @@
       list.style.left = Math.max(8, r.left) + 'px';
       list.style.width = Math.min(r.width, root.innerWidth - 16) + 'px';
       list.style.maxHeight = Math.max(120, Math.min(300, room)) + 'px';
-      if (below < 200 && r.top > below) { list.style.top = ''; list.style.bottom = (root.innerHeight - r.top + 4) + 'px'; }
-      else { list.style.bottom = ''; list.style.top = (r.bottom + 4) + 'px'; }
+      if (below < 200 && r.top > below) { list.style.top = ''; list.style.bottom = (root.innerHeight - r.top + 4) + 'px'; list.classList.add('up'); }
+      else { list.style.bottom = ''; list.style.top = (r.bottom + 4) + 'px'; list.classList.remove('up'); }
     }
     function openList() {
       if (open || sel.disabled) return;
       open = true;
+      // The list lives on the page itself while it's open, so cards around it (and their animations) can never cover or move it.
+      doc.body.append(list);
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
       wrap.classList.add('open');
@@ -3185,11 +3194,20 @@
       input.value = '';
       draw('');
       place();
+      // It builds itself: the panel unfolds from the box, then the options drop in one after another.
+      shown.forEach(function (x, i) { x.li.style.setProperty('--i', Math.min(i, 14)); });
+      list.classList.remove('ssbuild');
+      void list.offsetWidth;
+      list.classList.add('ssbuild');
+      root.clearTimeout(list._built);
+      list._built = root.setTimeout(function () { list.classList.remove('ssbuild'); }, 700);
     }
     function closeList() {
       if (!open) return;
       open = false;
       list.hidden = true;
+      list.classList.remove('ssbuild');
+      wrap.insertBefore(list, sel);
       input.setAttribute('aria-expanded', 'false');
       input.removeAttribute('aria-activedescendant');
       wrap.classList.remove('open');

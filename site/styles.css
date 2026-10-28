@@ -1305,7 +1305,6 @@ html .rv.rv-snap{transition:none!important}
 @media (prefers-reduced-motion:reduce){html .rv:not(.rv-in){opacity:1;transform:none;filter:none}}
 
 /* An open dropdown always sits above the cards around it */
-.card:has(.ssel.open),.feat:has(.ssel.open),.rv:has(.ssel.open),.cmd:has(.ssel.open),.mod:has(.ssel.open){position:relative;z-index:200;transform:none!important;filter:none!important;isolation:auto}
 /* Dashboard cards line themselves up by measuring, so they only fade (no movement) */
 html .feat.rv:not(.rv-in),html .dsec .rv:not(.rv-in){transform:none}
 .mmode{margin:0 0 14px}
@@ -1350,3 +1349,15 @@ dialog.askbox[open] :is(.pvitem,.newsitem,.newsver):nth-child(n+5){animation-del
 .pvlist{contain:content;transform:translateZ(0)}
 .pvitem{contain:layout paint}
 html{overflow-x:clip}   /* tilted blocks mid-animation never make the page scroll sideways */
+
+/* Dropdowns build themselves: the panel unfolds out of the box, then each option drops in just after the one above */
+.sslist.ssbuild{transform-origin:50% 0;animation:ssunfold .26s cubic-bezier(.16,1,.3,1) both}
+.sslist.ssbuild.up{transform-origin:50% 100%;animation-name:ssunfoldup}
+.sslist.ssbuild>li{animation:ssitem .32s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(60ms + var(--i,0) * 22ms)}
+.sslist.ssbuild.up>li{animation-name:ssitemup}
+@keyframes ssunfold{from{opacity:0;transform:translateY(-6px) scaleY(.6);clip-path:inset(0 0 100% 0 round 12px)}to{opacity:1;transform:none;clip-path:inset(0 0 0 0 round 12px)}}
+@keyframes ssunfoldup{from{opacity:0;transform:translateY(6px) scaleY(.6);clip-path:inset(100% 0 0 0 round 12px)}to{opacity:1;transform:none;clip-path:inset(0 0 0 0 round 12px)}}
+@keyframes ssitem{from{opacity:0;transform:translateY(-8px)}}
+@keyframes ssitemup{from{opacity:0;transform:translateY(8px)}}
+.ssel .sscaret::before{transition:transform .25s cubic-bezier(.16,1,.3,1)}
+@media (prefers-reduced-motion:reduce){.sslist.ssbuild,.sslist.ssbuild>li{animation:none}}

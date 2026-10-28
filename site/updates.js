@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.32',
+    date: '28 October 2026',
+    changes: [
+      { title: 'Dropdowns',
+        text: 'Opening a dropdown on the dashboard is instant again and never covers the top bar. The list now builds itself as it opens: the panel unfolds from the box and the options drop in one after another.' },
+      { title: 'The save bar',
+        text: 'The bar at the bottom of the dashboard only appears once you change something. After saving it stays, showing what happened, until you dismiss it.' },
+      { title: 'Animations',
+        text: 'Scrolling animations are richer: things rise out of a soft blur with a slight 3D tilt and cascade in reading order.' },
+    ],
+  },
+  {
     id: '4.31',
     date: '28 October 2026',
     changes: [
