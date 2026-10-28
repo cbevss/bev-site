@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.33',
+    date: '28 October 2026',
+    changes: [
+      { title: 'Music fix',
+        text: 'Some SoundCloud songs said Now playing but stayed silent. BEV now asks SoundCloud for the audio the way it expects and prefers a direct download over a chunked stream. If a song still sends no sound, BEV says so and skips to the next one instead of going quiet.' },
+    ],
+  },
+  {
     id: '4.32',
     date: '28 October 2026',
     changes: [
