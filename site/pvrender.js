@@ -39,7 +39,8 @@
     s = s.replace(/&lt;@&amp;(\d{5,25})&gt;/g, function (_, id) { return '<span class="dmention">@' + esc(nameFor('role', id)) + '</span>'; })
       .replace(/&lt;#(\d{5,25})&gt;/g, function (_, id) { return '<span class="dmention">#' + esc(nameFor('channel', id)) + '</span>'; })
       .replace(/&lt;@!?(\d{5,25})&gt;/g, function (_, id) { return '<span class="dmention">@' + esc((pvNames.users || {})[id] || 'member') + '</span>'; })
-      .replace(/(^|[^\w])@(everyone|here)\b/g, '$1<span class="dmention">@$2</span>');
+      .replace(/(^|[^\w])@(everyone|here)\b/g, '$1<span class="dmention">@$2</span>')
+      .replace(/\u2063@([^\u2063<\n]{1,64})\u2063/g, '<span class="dmention">@$1</span>');   // a person named in a preview, shown like a mention
     return s.replace(/\u0000(\d+)\u0000/g, function (_, i) { return '<code>' + codes[Number(i)] + '</code>'; });
   }
 

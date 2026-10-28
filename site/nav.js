@@ -378,13 +378,72 @@
     }, true);
     addEventListener('hashchange', showAll);
     if (location.hash) showAll();
+    // The faster you scroll, the quicker things fade in and out (and the slower, the gentler).
+    var lastY = scrollY, lastT = performance.now(), speed = 0, shownD = -1, settle = 0;
+    function setDuration(d) {
+      d = Math.round(d * 20) / 20;                      // steps of 0.05s, so the page isn't restyled on every frame
+      if (d !== shownD) { shownD = d; doc.documentElement.style.setProperty('--rvd', d + 's'); }
+    }
+    addEventListener('scroll', function () {
+      var now = performance.now(), dt = Math.max(now - lastT, 1);
+      var v = Math.abs(scrollY - lastY) / dt;          // pixels per millisecond
+      speed = speed * 0.6 + v * 0.4;
+      lastY = scrollY; lastT = now;
+      setDuration(Math.max(0.15, Math.min(0.9, 0.9 - speed * 0.25)));
+      clearTimeout(settle);
+      settle = setTimeout(function () { speed = 0; setDuration(0.6); }, 250);
+    }, { passive: true });
     var queued = false;
     new MutationObserver(function () {
       if (queued) return;
       queued = true;
-      requestAnimationFrame(function () { queued = false; scan(); });
+      setTimeout(function () { requestAnimationFrame(function () { queued = false; scan(); }); }, 120);
     }).observe(doc.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'open'] });
     addEventListener('resize', function () { requestAnimationFrame(scan); });
+  }
+
+
+  // Popups ease out before they close (and before they're removed), instead of vanishing.
+  function smoothDialogs() {
+    var D = root.HTMLDialogElement;
+    if (!D || D.prototype._bevSmooth) return;
+    if (root.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    D.prototype._bevSmooth = true;
+    var close = D.prototype.close;
+    // The popup really closes straight away (so the page works again at once); a copy of how it looked fades out on top, without catching clicks.
+    D.prototype.close = function (value) {
+      var d = this;
+      if (!d.open || !d.classList.contains('askbox')) return close.call(d, value);
+      var r = d.getBoundingClientRect();
+      var cs = getComputedStyle(d);
+      var ghost = doc.createElement('div');          // a plain copy, so nothing on the page mistakes it for the real popup
+      ghost.innerHTML = d.innerHTML;
+      ghost.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+      ghost.setAttribute('aria-hidden', 'true');
+      ghost.setAttribute('inert', '');
+      ghost.className = 'dlgghost';
+      ghost.style.cssText = 'position:fixed;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;margin:0;z-index:1000;pointer-events:none;overflow:hidden;box-sizing:border-box;display:' + cs.display +
+        ';flex-direction:' + cs.flexDirection + ';padding:' + cs.padding + ';border:' + cs.border + ';border-radius:' + cs.borderRadius + ';background:' + cs.backgroundColor + ';box-shadow:' + cs.boxShadow + ';color:' + cs.color;
+      var shade = doc.createElement('div');
+      shade.className = 'dlgshade';
+      doc.body.append(shade, ghost);
+      ghost.scrollTop = d.scrollTop;
+      ['.pvlist', '.newslist'].forEach(function (sel) {        // keep the list scrolled where it was
+        var from = d.querySelector(sel), to = ghost.querySelector(sel);
+        if (from && to) to.scrollTop = from.scrollTop;
+      });
+      close.call(d, value);
+      setTimeout(function () { ghost.remove(); shade.remove(); }, 190);
+    };
+  }
+
+  // The home page's moving background pauses when it's scrolled out of view.
+  function pauseOffscreen() {
+    if (!('IntersectionObserver' in root)) return;
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { e.target.classList.toggle('offscreen', !e.isIntersecting); });
+    });
+    doc.querySelectorAll('.hero, .ticker').forEach(function (el) { io.observe(el); });
   }
 
   // The hover glow on cards follows the mouse.
@@ -494,5 +553,7 @@
   navExtras();
   scrollReveal();
   hoverGlow();
+  smoothDialogs();
+  pauseOffscreen();
   boot();
 })(window);

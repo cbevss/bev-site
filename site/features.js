@@ -193,6 +193,10 @@
       body.replaceChildren(node('p', 'fnote no', 'The example couldn’t be loaded. Check your connection and try again.'));
     });
   }
+  // Start fetching the examples when someone points at (or touches) a Preview button, so the popup opens with them ready.
+  ['pointerover', 'touchstart', 'focusin'].forEach(function (type) {
+    doc.addEventListener(type, function (e) { if (e.target.closest && e.target.closest('button.fpv')) loadPreviews(); }, { passive: true });
+  });
   doc.addEventListener('click', function (e) {
     var btn = e.target.closest && e.target.closest('button.fpv');
     if (btn) openPreview(btn);
