@@ -71,7 +71,7 @@
 - Question of the Day: Posts a new discussion question every day at the time you pick, from your own list or BEV's built-in one.
 - Channel Modes: Give channels special behaviour: start a thread on every post, allow only pictures and videos, or keep a sticky message at the bottom.
 - News Feeds & Free Games: Posts new YouTube uploads, Reddit posts, website and blog (RSS) updates, and free game deals on Steam, Epic and more.
-- Live Stream Alerts: Checks your streamers every 3 minutes and posts one alert when they go live on Twitch, YouTube, Kick or TikTok, with their profile picture and a live preview that keeps refreshing while they're live.
+- Live Stream Alerts: Checks your streamers every 3 minutes and posts one alert when they go live on Twitch, YouTube, Kick or TikTok, with their profile picture and a live preview that keeps refreshing while they're live. Give someone's accounts the same creator name and they get one alert when they're live on several platforms at once, and each account can have its own message and roles to ping.
 - Server Stats Counters: Adds locked voice channels at the top of the server showing live numbers: members, people online, bots and people in voice.
 - Birthdays: Members save their birthday with /my-birthday. On the day, BEV posts a celebration and gives a birthday role for 24 hours.
 
@@ -100,7 +100,7 @@
 - Weather & Time: /weather for any place, and /time to see the local time of any member who has set their time zone.
 - Snipe: /snipe shows the last deleted message in a channel. Off by default because it's less private.
 - Radio: Plays internet radio stations in a voice channel with /radio. Needs two extra packages on the bot (see the setup guide).
-- Message Designer: Design your own messages: text, a coloured box with a title, pictures and a link button. See exactly how they'll look on the dashboard, then send them in any channel. Saved messages can be sent again, or the one you sent can be updated.
+- Message Designer: Design your own messages: text, a coloured box with a title, pictures and a link button. See exactly how they'll look on the dashboard, then send them in any channel. Saved messages can be sent again, or the one you sent can be updated. Advanced (JSON) mode builds a message as raw JSON: up to 10 boxes with fields, plus buttons and dropdown menus that open links, give or take roles, or reply privately.
 - BEV Status Alerts: When the BEV team is about to take BEV offline for maintenance, a notice is posted here with the ping you choose, so your members know why commands stop for a few minutes. If no channel is picked, switching this on makes a read-only one.
 
 ## Slash commands
