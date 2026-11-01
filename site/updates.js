@@ -5,6 +5,28 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.42',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Crafting',
+        text: 'A new Economy feature: /craft turns items into better ones, like iron and stone into an Iron Sword or gold and a diamond into a Golden Crown. It comes with 12 recipes that use what /explore finds, and you can add your own on the dashboard. Crafted items sell, trade and collect like anything else.' },
+      { title: 'Boss battles',
+        text: 'A boss appears and the whole server fights it together with one Attack button. Beat it in time and everyone who hit it shares the coins by how much damage they did; take too long and it escapes. Summon one from the dashboard, or have one turn up on its own every few hours or days. Levels and crafted weapons hit harder.' },
+    ],
+  },
+  {
+    id: '4.41',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Over 70 achievements',
+        text: 'New badges for chatting, levels, coins, work and daily rewards, the casino and games, exploring and /fun, rep, quests, music, the shop and collecting, time in voice and loyalty (like One Year Club and Server Booster). On the dashboard, each kind has its own list, so you can switch any badge off. /achievements shows one kind at a time with progress bars.' },
+      { title: 'Ready-made collectibles',
+        text: 'Add collectibles to your shop in one click from Economy & Shop on the dashboard: 28 of them, from a Rubber Duck to an Ancient Dragon, in five rarities. Add one, a whole rarity, or all of them. The shop now holds up to 60 items.' },
+      { title: 'Quests and panels',
+        text: 'Daily quests and badges now count the games you play from the /bet, /game and /fun panels.' },
+    ],
+  },
+  {
     id: '4.40',
     date: '1 November 2026',
     changes: [

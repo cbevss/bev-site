@@ -300,9 +300,21 @@
   - Setting: XP boosts for roles. Each has: Role, Extra XP.
   - Setting: Weekly top chatter role.
   - Setting: Show leaderboard on the website.
-- Achievements & Badges (also called: achievements, badges, milestones): Members unlock badges for milestones like their first message, level 10, 10,000 coins or getting married. Badges show on /profile, /achievements shows everyone's progress, and you can add your own badges that give a role. Page: https://bevbotdiscord.com/features/achievements
+- Achievements & Badges (also called: achievements, badges, milestones): Over 70 badges for chatting, levels, coins, work, games, exploring, rep, quests, music, the shop, voice and loyalty. Switch any of them off, add your own badges that give a role, and see everyone's progress with /achievements. Page: https://bevbotdiscord.com/features/achievements
   - Setting: Announce new badges.
   - Setting: Announce them in. Optional. Empty: where they earned it
+  - Setting: 💬 Chatting. Untick a badge to switch it off in this server. Choices: 💬 First Words: Send 1 message, 👋 Hello There: Send 10 messages, 🗨️ Regular: Send 100 messages, 📣 Talkative: Send 500 messages, 🗣️ Chatterbox: Send 1,000 messages, ✍️ Wordsmith: Send 5,000 messages, 📚 Storyteller: Send 10,000 messages, 🎙️ Voice of the Server: Send 25,000 messages, 🚀 Unstoppable: Send 50,000 messages.
+  - Setting: ⭐ Levels. Untick a badge to switch it off in this server. Choices: 🌱 Getting Started: Reach level 5, 🔟 Rising Star: Reach level 10, 🧗 Climbing: Reach level 15, 🌿 Seasoned: Reach level 25, 🌟 Veteran: Reach level 50, 💫 Elite: Reach level 75, 👑 Centurion: Reach level 100.
+  - Setting: 💰 Coins. Untick a badge to switch it off in this server. Choices: 🪙 Pocket Money: Have 1,000 coins, 💰 Moneybags: Have 10,000 coins, 🐷 Saver: Have 5,000 coins, 💎 Rich: Have 100,000 coins, 🤑 Tycoon: Have 500,000 coins, 🏦 Millionaire: Have 1,000,000 coins.
+  - Setting: 💼 Work and daily rewards. Untick a badge to switch it off in this server. Choices: 👷 First Shift: Use /work 1 time, 🛠️ Hard Worker: Use /work 25 times, 🏭 Workaholic: Use /work 100 times, 📅 Daily Habit: Claim /daily 7 times, 🗓️ Monthly Regular: Claim /daily 30 times, 🏅 Dedicated: Claim /daily 100 times.
+  - Setting: 🎲 Casino and games. Untick a badge to switch it off in this server. Choices: 🍀 Feeling Lucky: Play 1 casino game, 🎰 High Roller: Play 50 casino games, 🃏 Casino Royale: Play 250 casino games, 🐋 Whale: Play 1,000 casino games, 🕹️ Game On: Play 1 /game match, 🎮 Gamer: Play 25 /game matches, 🏆 Champion Player: Play 100 /game matches, 🗡️ Boss Slayer: Help beat 1 boss, 🐲 Legend of the Server: Help beat 10 bosses.
+  - Setting: 🎣 Exploring and fun. Untick a badge to switch it off in this server. Choices: 🧭 Adventurer: Go exploring 1 time, 🗺️ Explorer: Go exploring 50 times, 🌍 Globetrotter: Go exploring 200 times, 🏔️ Legendary Explorer: Go exploring 500 times, 🎈 Funny One: Use 10 /fun commands, 🎉 Life of the Party: Use 100 /fun commands, ⚒️ Apprentice Crafter: Craft 1 item, 🔨 Master Crafter: Craft 50 items.
+  - Setting: 👍 Social. Untick a badge to switch it off in this server. Choices: 🙂 Appreciated: Get 1 rep point, 👍 Popular: Get 10 rep points, 💖 Beloved: Get 50 rep points, 🌟 Icon: Get 100 rep points, 🤝 Generous: Give 10 rep points, 💍 Taken: Get married.
+  - Setting: 📜 Quests. Untick a badge to switch it off in this server. Choices: 🗒️ Quest Starter: Finish 1 daily quest, 📜 Questing: Finish 10 daily quests, 🔖 Quest Hunter: Finish 25 daily quests, 🐉 Quest Master: Finish 100 daily quests.
+  - Setting: 🎵 Music. Untick a badge to switch it off in this server. Choices: 🎧 DJ Debut: Play 1 song with /music, 🎶 Music Lover: Play 50 songs with /music, 🎼 Audiophile: Play 250 songs with /music, 📀 Living Jukebox: Play 1,000 songs with /music.
+  - Setting: 🛒 Shop and collecting. Untick a badge to switch it off in this server. Choices: 🛍️ First Purchase: Buy 1 thing in the shop, 🛒 Shopaholic: Buy 25 things in the shop, 💳 Big Spender: Buy 100 things in the shop, ⚡ Power User: Use 10 items, 🧸 Collector: Own 5 different items, 🖼️ Curator: Own 15 different items, 🏺 Hoarder: Own 30 different items.
+  - Setting: 🎙️ Voice. Untick a badge to switch it off in this server. Choices: 🎙️ Voice Debut: Spend 60 minutes in voice, 📻 Talk Show: Spend 600 minutes in voice, 🎤 Voice Legend: Spend 3,000 minutes in voice, 📡 Always On Air: Spend 10,000 minutes in voice.
+  - Setting: 🏠 Loyalty. Untick a badge to switch it off in this server. Choices: 🔥 Regular Visitor: Chat on 7 different days, 🏡 Familiar Face: Chat on 30 different days, 🏛️ Pillar of the Community: Chat on 100 different days, 📆 One Month In: Be in the server for 30 days, 🎂 One Year Club: Be in the server for 365 days, 🏰 Two Year Veteran: Be in the server for 730 days, 🚀 Server Booster: Boost the server.
   - Setting: Your own badges. Each has: Badge name, Emoji, Earned for, How many, Role to give (optional).
 - Daily Quests (also called: daily quests, missions, streaks, challenges): Every member gets 3 random quests a day, like sending 40 messages, using /work twice or playing a game. Each one pays coins and XP, and finishing all 3 on days in a row builds a streak bonus. /quests shows today's quests. Page: https://bevbotdiscord.com/features/quests
   - Setting: Coins per quest.
@@ -341,6 +353,15 @@
   - Setting: Coins for voting for BEV.
   - Setting: Coins for bumping with Disboard.
   - Setting: Thank people in. Optional. BEV thanks voters and bumpers here
+- Crafting (also called: craft, crafting system, recipes, make items, forge): Members turn items into better ones with /craft, like iron and stone into an Iron Sword. Comes with 12 recipes that use what /explore finds, and you can add your own. Crafted items can be sold, gifted, traded and collected. Page: https://bevbotdiscord.com/features/crafting
+  - Setting: Ready-made recipes. The 12 recipes that use /explore finds
+  - Setting: Your own recipes. Each has: What it makes, How many it makes, What it takes, Coins it costs (0 for none).
+- Boss Battles (also called: boss battle, raid boss, boss fight, world boss, server event, co-op battle): A boss appears and the whole server fights it together with one Attack button. If it falls in time, everyone who hit it shares the coins by how much damage they did. Summon one on the dashboard, or let one turn up on its own. Page: https://bevbotdiscord.com/features/bosses
+  - Setting: Channel bosses appear in.
+  - Setting: Bosses turn up on their own. Choices: Never (only when summoned), Every 6 hours, Every 12 hours, Once a day, Every 3 days, Once a week.
+  - Setting: Time to beat it. Choices: 10 minutes, 30 minutes, 1 hour, 3 hours.
+  - Setting: Coins shared out when it falls.
+  - Setting: Role to ping when one appears.
 
 ### Utility
 - Custom Commands (also called: custom commands, custom slash replies, command builder): Make your own commands, like !rules or !apply. Each can reply (with a random answer if you give several), give, take or swap a role, or DM the member. Use {user}, {name}, {server}, {channel}, {count} and {args} in the reply. Page: https://bevbotdiscord.com/features/custom-commands
@@ -423,6 +444,7 @@
 - /bank: Move coins between your wallet and the bank, where they can't be stolen.
 - /bet: Casino games: blackjack, slots, roulette, dice, higher-or-lower, crash and the lottery.
 - /coinflip: Bet coins on heads or tails. Win and you double your bet, lose and it's gone.
+- /craft: Make better items out of the ones you have.
 - /daily: Claim your daily and weekly coin rewards and keep your streak going.
 - /explore: Go fishing, hunting or mining for items you can sell for coins.
 - /inventory: See everything in your inventory and how many of each you have.
