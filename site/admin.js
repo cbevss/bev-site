@@ -868,13 +868,57 @@
   $('crun').addEventListener('click', runCheck);
   $('irefresh').addEventListener('click', loadInbox);
 
-  /* ---------- Dashboard settings: a switch per feature, for every server ---------- */
-  var owner = { features: [], categories: [], busy: {} };
+  /* ---------- Dashboard settings: a row per feature; On, Off everywhere, or Off everywhere except some servers ---------- */
+  var owner = { features: [], categories: [], servers: [], busy: {}, open: {}, find: {}, timers: {} };
+  var MODES = [['on', 'On'], ['off', 'Off everywhere'], ['except', 'Off everywhere except…']];
+  function modeText(f) {
+    if (f.mode === 'except') return f.keep.length ? 'Off except ' + f.keep.length + (f.keep.length === 1 ? ' server' : ' servers') : 'Off, with no exceptions yet';
+    return f.mode === 'off' ? 'Off everywhere' : 'On';
+  }
+  function serverPicker(f) {
+    var box = make('div', 'ofkeep');
+    box.append(make('label', 'flabel sm', 'Keep ' + f.name + ' on for these servers'));
+    var q = make('input', 'field');
+    q.type = 'search'; q.placeholder = 'Search servers'; q.autocomplete = 'off';
+    q.setAttribute('aria-label', 'Search servers for ' + f.name);
+    q.value = owner.find[f.key] || '';
+    var count = make('span', 'stat');
+    var list = make('ul', 'ofservers');
+    function paint() {
+      var term = q.value.trim().toLowerCase();
+      owner.find[f.key] = q.value;
+      list.replaceChildren();
+      var n = 0;
+      owner.servers.forEach(function (g) {
+        if (term && (g.name + ' ' + g.id).toLowerCase().indexOf(term) === -1) return;
+        n++;
+        var li = make('li');
+        var lab = make('label', 'ofsrv');
+        var cb = make('input'); cb.type = 'checkbox';
+        cb.checked = f.keep.indexOf(g.id) !== -1;
+        cb.addEventListener('change', function () {
+          var at = f.keep.indexOf(g.id);
+          if (cb.checked && at === -1) f.keep.push(g.id);
+          if (!cb.checked && at !== -1) f.keep.splice(at, 1);
+          count.textContent = f.keep.length + ' picked';
+          queueKeep(f);
+        });
+        lab.append(cb, make('span', 'ofsn', g.name), make('span', 'ofsm', Number(g.members).toLocaleString() + ' members'));
+        li.append(lab); list.append(li);
+      });
+      if (!n) list.append(make('li', 'ofnone', owner.servers.length ? 'No server matches.' : 'BEV isn’t in any server yet.'));
+    }
+    count.textContent = f.keep.length + ' picked';
+    q.addEventListener('input', paint);
+    paint();
+    box.append(q, count, list);
+    return box;
+  }
   function drawOwner() {
     var box = $('flist');
     box.replaceChildren();
     var q = ($('ffind').value || '').trim().toLowerCase();
-    var off = owner.features.filter(function (f) { return f.off; }).length;
+    var off = owner.features.filter(function (f) { return f.mode !== 'on'; }).length;
     $('fstate').textContent = off ? off + ' switched off' : 'Everything on';
     $('fstate').className = 'stat' + (off ? ' warnstat' : ' here');
     var shown = 0;
@@ -886,38 +930,81 @@
       var ul = make('ul', 'oflist2');
       feats.forEach(function (f) {
         shown++;
-        var li = make('li', 'ofrow' + (f.off ? ' isoff' : ''));
+        var li = make('li', 'ofrow' + (f.mode !== 'on' ? ' isoff' : '') + (f.mode === 'except' ? ' isexcept' : ''));
         li.setAttribute('data-key', f.key);
+        var head = make('div', 'ofhead');
         var text = make('div', 'oftext');
         text.append(make('b', null, f.icon + ' ' + f.name), make('span', 'ofabout', f.about));
-        var sw = make('button', 'ofswitch' + (f.off ? '' : ' on'), f.off ? 'Off for everyone' : 'On');
-        sw.type = 'button';
-        sw.setAttribute('aria-pressed', f.off ? 'false' : 'true');
-        sw.setAttribute('aria-label', f.name + ': ' + (f.off ? 'switched off for every server' : 'on'));
-        sw.disabled = !!owner.busy[f.key];
-        sw.addEventListener('click', function () { setOwner(f, !f.off, sw); });
-        li.append(text, sw);
+        var pill = make('span', 'ofmode ' + (f.mode === 'on' ? 'on' : 'off'), modeText(f));
+        head.append(text, pill);
+        var det = make('details', 'fset ofset');
+        det.open = !!owner.open[f.key];
+        det.addEventListener('toggle', function () { if (det.open) owner.open[f.key] = 1; else delete owner.open[f.key]; syncAll(); });
+        det.append(make('summary', null, 'Settings'));
+        var inner = make('div', 'ofinner');
+        var lab = make('label', 'flabel sm', 'Where ' + f.name + ' is on');
+        var sel = make('select', 'field ofmodesel');
+        sel.id = 'ofm-' + f.key;
+        lab.htmlFor = sel.id;
+        MODES.forEach(function (m) { var o = make('option', null, m[1]); o.value = m[0]; if (m[0] === f.mode) o.selected = true; sel.append(o); });
+        sel.disabled = !!owner.busy[f.key];
+        sel.addEventListener('change', function () {
+          var mode = sel.value;
+          if (mode === 'on') return saveOwner(f, 'on', []);
+          if (mode === 'off' && !root.confirm('Switch ' + f.name + ' off for every server? It disappears from every dashboard and its commands leave Discord.')) { sel.value = f.mode; return; }
+          if (mode === 'except') { f.mode = 'except'; return saveOwner(f, 'except', f.keep, true); }
+          saveOwner(f, 'off', []);
+        });
+        inner.append(lab, sel);
+        if (f.mode === 'except') inner.append(serverPicker(f));
+        det.append(inner);
+        li.append(head, det);
         ul.append(li);
       });
       group.append(ul);
       box.append(group);
     });
     $('fcount').textContent = shown + ' of ' + owner.features.length + ' features';
+    syncAll();
   }
-  function setOwner(f, off, button) {
-    if (off && !root.confirm('Switch ' + f.name + ' off for every server? It disappears from every dashboard and its commands leave Discord.')) return;
+  // The Show all / Hide all settings button follows the rows: it says "Hide" while every shown row is open.
+  function syncAll() {
+    var dets = $('flist').querySelectorAll('details.ofset');
+    var all = dets.length > 0 && Array.prototype.every.call(dets, function (d) { return d.open; });
+    $('fall').textContent = all ? 'Hide all settings' : 'Show all settings';
+    $('fall').setAttribute('aria-pressed', all ? 'true' : 'false');
+    $('fall').disabled = !dets.length;
+  }
+  function toggleAll() {
+    var dets = $('flist').querySelectorAll('details.ofset');
+    var open = $('fall').getAttribute('aria-pressed') !== 'true';
+    Array.prototype.forEach.call(dets, function (d) { d.open = open; });   // same chevron turn as a dashboard feature's Settings
+    Array.prototype.forEach.call(dets, function (d) { if (open) owner.open[d.parentNode.getAttribute('data-key')] = 1; else delete owner.open[d.parentNode.getAttribute('data-key')]; });
+    syncAll();
+    say(open ? 'All settings shown.' : 'All settings hidden.');
+  }
+  function queueKeep(f) {                 // ticking servers saves a moment after the last tick
+    root.clearTimeout(owner.timers[f.key]);
+    owner.timers[f.key] = root.setTimeout(function () { saveOwner(f, 'except', f.keep, true); }, 600);
+  }
+  function saveOwner(f, mode, keep, quiet) {
     owner.busy[f.key] = true;
-    button.disabled = true;
-    $('fnote').textContent = (off ? 'Switching off ' : 'Switching on ') + f.name + '…';
-    call('/api/admin/features/set', { key: f.key, off: off }).then(function (res) {
+    $('fnote').textContent = 'Saving ' + f.name + '…';
+    call('/api/admin/features/set', { key: f.key, mode: mode, keep: keep }).then(function (res) {
       delete owner.busy[f.key];
-      if (!res.ok) { $('fnote').textContent = 'That didn\u2019t save (' + (res.data.error || res.status) + '). Try again.'; drawOwner(); return; }
+      if (!res.ok) { $('fnote').textContent = 'That didn’t save (' + (res.data.error || res.status) + '). Try again.'; loadOwner(); return; }
       owner.features = res.data.features || owner.features;
       owner.categories = res.data.categories || owner.categories;
-      $('fnote').textContent = f.name + (off ? ' is now off for every server.' : ' is back on. Servers have what they had before.');
+      owner.servers = res.data.servers || owner.servers;
+      var now = owner.features.filter(function (x) { return x.key === f.key; })[0];
+      $('fnote').textContent = f.name + (mode === 'on' ? ' is back on. Servers have what they had before.' : mode === 'off' ? ' is now off for every server.'
+        : ' is off everywhere except ' + (now && now.keep.length ? now.keep.length + (now.keep.length === 1 ? ' server.' : ' servers.') : 'the servers you pick.'));
       say($('fnote').textContent);
+      var focusKey = doc.activeElement && doc.activeElement.id;
       drawOwner();
-    }, function () { delete owner.busy[f.key]; $('fnote').textContent = 'Saving failed. Check your connection.'; drawOwner(); });
+      var back = focusKey && $(focusKey);
+      if (back) back.focus();
+    }, function () { delete owner.busy[f.key]; $('fnote').textContent = 'Saving failed. Check your connection.'; loadOwner(); });
   }
   function loadOwner() {
     call('/api/admin/features').then(function (res) {
@@ -928,11 +1015,13 @@
       }
       owner.features = res.data.features || [];
       owner.categories = res.data.categories || [];
+      owner.servers = res.data.servers || [];
       $('fnote').textContent = '';
       drawOwner();
     }, function () { $('fstate').textContent = 'Not available'; });
   }
   $('ffind').addEventListener('input', drawOwner);
+  $('fall').addEventListener('click', toggleAll);
   loadOwner();
 
   // Suggestions: how many are waiting. The list itself has its own page.

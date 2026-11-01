@@ -922,7 +922,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=73f85aa1bf">
+<link rel="stylesheet" href="/styles.css?v=28b9a77631">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1511,6 +1511,12 @@ function cleanOwnerFeatures(d) {
     features: list.slice(0, 200).filter((f) => f && KEY_RE.test(String(f.key))).map((f) => ({
       key: String(f.key), name: str(f.name, 60), icon: str(f.icon, 12), category: KEY_RE.test(String(f.category)) ? String(f.category) : 'other',
       about: str(f.about, 400), off: f.off === true, since: Number.isFinite(f.since) ? f.since : null,
+      mode: ['on', 'off', 'except'].includes(f.mode) ? f.mode : (f.off === true ? 'off' : 'on'),
+      keep: (Array.isArray(f.keep) ? f.keep : []).map(String).filter((id) => ID_RE.test(id)).slice(0, 500),
+    })),
+    servers: (Array.isArray(d && d.servers) ? d.servers : []).slice(0, 1000).filter((g) => g && ID_RE.test(String(g.id))).map((g) => ({
+      id: String(g.id), name: str(g.name, 100), members: Number.isFinite(g.members) ? g.members : 0,
+      icon: typeof g.icon === 'string' && /^https:\/\/cdn\.discordapp\.com\//.test(g.icon) ? g.icon.slice(0, 300) : null,
     })),
     categories: (Array.isArray(d && d.categories) ? d.categories : []).slice(0, 20).filter((c) => c && KEY_RE.test(String(c.key)))
       .map((c) => ({ key: String(c.key), icon: str(c.icon, 12), name: str(c.name, 40) })),
@@ -1520,9 +1526,13 @@ function cleanOwnerFeatures(d) {
 async function ownerFeatures(request, c, s, path) {
   let res;
   if (path === '/api/admin/features/set') {
-    const body = await readJson(request, 2000);
-    if (!body || typeof body.key !== 'string' || !KEY_RE.test(body.key) || typeof body.off !== 'boolean') return json({ error: 'bad_request' }, 400);
-    res = await bot(c, '/api/owner-features', { method: 'POST', body: JSON.stringify({ key: body.key, off: body.off, by: `${s.session.user.name} (${s.session.user.id})` }) });
+    const body = await readJson(request, 40000);
+    if (!body || typeof body.key !== 'string' || !KEY_RE.test(body.key)) return json({ error: 'bad_request' }, 400);
+    // mode: on | off | except (off everywhere except the servers in keep). The older { off: true|false } still works.
+    const mode = body.mode !== undefined ? body.mode : (typeof body.off === 'boolean' ? (body.off ? 'off' : 'on') : null);
+    if (!['on', 'off', 'except'].includes(mode)) return json({ error: 'bad_request' }, 400);
+    const keep = mode === 'except' && Array.isArray(body.keep) ? [...new Set(body.keep.map(String).filter((id) => ID_RE.test(id)))].slice(0, 500) : [];
+    res = await bot(c, '/api/owner-features', { method: 'POST', body: JSON.stringify({ key: body.key, mode, keep, by: `${s.session.user.name} (${s.session.user.id})` }) });
   } else {
     res = await bot(c, '/api/owner-features');
   }

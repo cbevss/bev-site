@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.49',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Dashboard settings (Admin page)',
+        text: 'Every feature now has its own row with a Settings dropdown: On, Off everywhere, or Off everywhere except the servers you pick. A Show all settings button at the top opens or closes every row at once.' },
+    ],
+  },
+  {
     id: '4.48',
     date: '1 November 2026',
     changes: [

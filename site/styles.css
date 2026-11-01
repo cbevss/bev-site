@@ -1683,3 +1683,23 @@ table.lvl td.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monos
 .alist li .arm-sw+.arm-rm{margin-left:0}
 .alist li .arm-sw:first-of-type{margin-left:auto}
 .addadmin .row select.field{flex:0 0 auto;width:auto}
+/* Dashboard settings (Admin): one row per feature, with a Settings dropdown like the dashboard's */
+.oflist2{grid-template-columns:minmax(0,1fr)}
+.ofrow{flex-direction:column;align-items:stretch;gap:0}
+.ofhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ofmode{flex:0 0 auto;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;border:1px solid rgba(248,113,113,.6);background:rgba(127,29,29,.5);color:#fff}
+.ofmode.on{border-color:rgba(74,222,128,.6);background:rgba(22,101,52,.55)}
+.ofrow.isexcept .ofmode{border-color:rgba(251,191,36,.6);background:rgba(120,83,9,.5)}
+.ofset{margin-top:10px}
+.ofinner{display:flex;flex-direction:column;gap:10px;padding:6px 0 4px}
+.ofmodesel{max-width:340px}
+.ofkeep{display:flex;flex-direction:column;gap:8px}
+.ofkeep .field{max-width:420px}
+.ofservers{list-style:none;margin:0;padding:6px;display:flex;flex-direction:column;gap:2px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#0B1226}
+.ofsrv{display:flex;align-items:center;gap:10px;min-height:38px;padding:4px 8px;border-radius:8px;cursor:pointer}
+.ofsrv:hover{background:rgba(127,166,255,.1)}
+.ofsrv input{flex:none;width:18px;height:18px;accent-color:#3B82F6}
+.ofsn{color:#fff;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ofsm{margin-left:auto;color:var(--mut);font-size:12.5px;flex:none}
+.ofnone{padding:8px;color:var(--mut)}
+@media(max-width:420px){.ofhead{flex-wrap:wrap}.ofsm{display:none}}
