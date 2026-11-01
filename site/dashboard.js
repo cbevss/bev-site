@@ -265,11 +265,13 @@
   /* ---------- drawing the settings ---------- */
 
   // Cards that fill a whole row go after the others in their section, so the two-column grid has no gaps.
-  var WIDE = { custom_messages: true, dashboard_access: true, 'tool:members': true, brackets: true, security_timeline: true };
+  var WIDE = { custom_messages: true, dashboard_access: true, 'tool:members': true, brackets: true, security_timeline: true, insights: true, tickets: true };
   function isWide(f) { return !!WIDE[f.tool ? 'tool:' + f.key : f.key]; }
 
   function inOrder(feats) {
-    return feats.filter(function (f) { return !isWide(f); }).concat(feats.filter(isWide));
+    // The Message Designer is the biggest, so it always comes last.
+    var wide = feats.filter(isWide).sort(function (a, b) { return (a.key === 'custom_messages') - (b.key === 'custom_messages'); });
+    return feats.filter(function (f) { return !isWide(f); }).concat(wide);
   }
 
   function renderBoard() {
@@ -472,6 +474,22 @@
     if (templates) {
       card.classList.add('wide');
       card.append(designerBox(f, templates));
+      return card;
+    }
+    if (f.key === 'tickets' && state.config.ticket_inbox) {
+      card.classList.add('wide');
+      var ib = inboxBox(state.config.ticket_inbox);
+      var iset = el('div', 'fields brksettings');
+      (f.settings || []).forEach(function (s) { iset.append(fieldFor(s)); });
+      var more = el('details', 'tkset');
+      more.append(el('summary', null, 'Ticket settings'), iset);
+      ib.append(more);
+      card.append(ib);
+      return card;
+    }
+    if (f.key === 'insights' && state.config.insights) {
+      card.classList.add('wide');
+      card.append(insightsBox(state.config.insights));
       return card;
     }
     if (f.key === 'security_timeline' && state.config.security_timeline) {
@@ -3287,6 +3305,305 @@
     if (brk.pick === null && (state.config.brackets || []).length) brk.pick = state.config.brackets[0].id;
     drawBrackets();
     return outer;
+  }
+
+  /* ---------- Ticket inbox: every open ticket, a conversation view, replies, private notes, priority and closing ---------- */
+  var tk = { pick: null, view: null, busy: false, note: null, data: null };
+  function tkAgo(t) {
+    var s = Math.max(0, Math.round(Date.now() / 1000 - t));
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + ' min ago';
+    if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+    return Math.floor(s / 86400) + ' d ago';
+  }
+  function tkAct(action, values, then) {
+    if (tk.busy) return;
+    tk.busy = true;
+    tk.note = null;
+    drawInbox();
+    var guild = state.guild;
+    request('/api/action', {
+      method: 'POST',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({ guild_id: guild, owner: 'tickets', action: action, values: values })
+    }).then(function (r) {
+      tk.busy = false;
+      if (guild !== state.guild) return;
+      if (r.status === 200 && r.data && r.data.ok) {
+        var d = r.data.data || {};
+        if (d.inbox) { tk.data = d.inbox; state.config.ticket_inbox = d.inbox; }
+        if (r.data.note) { tk.note = { text: r.data.note, ok: true }; say(r.data.note); }
+        if (then) then(d);
+      } else {
+        tk.note = { text: (r.data && r.data.message) || errorText(r), ok: false };
+      }
+      drawInbox();
+    });
+  }
+  var tkHost = null;
+  function inboxBox(data) {
+    tk.data = data;
+    var outer = el('div', 'tkbox');
+    outer.id = 'ticket-inbox';
+    tkHost = el('div', 'tkinner');
+    outer.append(tkHost);
+    drawInbox();
+    return outer;
+  }
+  function tkPriorityLabel(v) {
+    var p = (tk.data.priorities || []).find(function (x) { return x.value === v; });
+    return p ? p.label : v;
+  }
+  function drawInbox() {
+    if (!tkHost) return;
+    var data = tk.data || { tickets: [], stats: {} };
+    var st = data.stats || {};
+    tkHost.replaceChildren();
+    var stats = el('div', 'tkstats');
+    [['Open', st.open || 0], ['Waiting for staff', st.waiting || 0],
+     ['First reply (30 days)', st.reply_minutes === null || st.reply_minutes === undefined ? '–' : st.reply_minutes < 60 ? Math.round(st.reply_minutes) + ' min' : (st.reply_minutes / 60).toFixed(1) + ' h'],
+     ['Rating (30 days)', st.rating ? st.rating.toFixed(1) + ' ★ (' + st.ratings + ')' : '–']].forEach(function (x) {
+      var b = el('div', 'tkstat');
+      b.append(el('span', null, x[0]), el('b', 'disp', String(x[1])));
+      stats.append(b);
+    });
+    tkHost.append(stats);
+    var wrap = el('div', 'tkwrap' + (tk.pick ? ' reading' : ''));
+    var list = el('ul', 'tklist');
+    list.setAttribute('aria-label', 'Open tickets, most urgent first');
+    if (!data.tickets.length) list.append(el('li', 'tkempty', 'No open tickets. New ones show up here as people open them.'));
+    data.tickets.forEach(function (t) {
+      var li = el('li');
+      var b = el('button', 'tkitem' + (tk.pick === t.id ? ' on' : '') + ' p-' + t.priority);
+      b.type = 'button';
+      var top = el('span', 'tktop');
+      top.append(el('b', null, t.opener), el('span', 'tkwhen', tkAgo(t.last)));
+      var tags = el('span', 'tktags');
+      tags.append(el('span', 'tkpri', tkPriorityLabel(t.priority)));
+      tags.append(el('span', 'tkans ' + (t.answered ? 'yes' : 'no'), t.answered ? 'Answered' : 'Waiting ' + tkAgo(t.opened).replace(' ago', '')));
+      if (t.notes) tags.append(el('span', 'tknotes', '📝 ' + t.notes));
+      b.append(top, el('span', 'tkname mono', '#' + t.name), tags);
+      b.addEventListener('click', function () {
+        tk.pick = t.id; tk.view = null;
+        tkAct('read', { ticket: t.id }, function (d) { tk.view = d; });
+      });
+      li.append(b);
+      list.append(li);
+    });
+    wrap.append(list);
+    var pane = el('div', 'tkpane');
+    var current = data.tickets.find(function (t) { return t.id === tk.pick; });
+    if (!current) {
+      pane.append(el('p', 'tkhint', data.tickets.length ? 'Pick a ticket to read it and reply.' : ''));
+    } else {
+      var head = el('div', 'tkhead');
+      var back = el('button', 'mini tkback', '← All tickets');
+      back.type = 'button';
+      back.addEventListener('click', function () { tk.pick = null; tk.view = null; drawInbox(); });
+      head.append(back, el('h4', 'disp', current.opener), el('span', 'mono tkname', '#' + current.name));
+      var pr = el('select', 'field tkprisel');
+      pr.setAttribute('aria-label', 'Priority');
+      (data.priorities || []).forEach(function (p) { var o = el('option', null, p.label); o.value = p.value; if (p.value === current.priority) o.selected = true; pr.append(o); });
+      pr.addEventListener('change', function () { tkAct('priority', { ticket: current.id, priority: pr.value }, function (d) { tk.view = d; }); });
+      head.append(pr);
+      pane.append(head);
+      var log = el('div', 'tklog');
+      log.setAttribute('role', 'log');
+      if (!tk.view) log.append(el('p', 'tkhint', 'Loading the conversation…'));
+      else {
+        tk.view.messages.forEach(function (m) {
+          var row = el('div', 'tkmsg w-' + m.who);
+          var name = el('span', 'tkauthor', m.author + (m.who === 'staff' ? ' • staff' : m.who === 'opener' ? ' • opened the ticket' : m.who === 'bot' ? ' • BEV' : ''));
+          row.append(name, el('div', 'tkbub', m.text || (m.files.length ? '📎 ' + m.files.join(', ') : '…')), el('span', 'tktime', new Date(m.at * 1000).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })));
+          log.append(row);
+        });
+        if (tk.view.notes.length) {
+          var nb = el('div', 'tknoteblock');
+          nb.append(el('p', 'flabel', '📝 Private notes (only staff see these)'));
+          tk.view.notes.forEach(function (n) { nb.append(el('p', 'tknote', n.author + ': ' + n.text)); });
+          log.append(nb);
+        }
+      }
+      pane.append(log);
+      var box = el('textarea', 'field tktext');
+      box.rows = 3; box.maxLength = 1900; box.placeholder = 'Write a reply, or a private note…';
+      box.setAttribute('aria-label', 'Reply or note');
+      var btns = el('div', 'tkbtns');
+      function btn(text, cls, fn) { var b = el('button', cls, text); b.type = 'button'; b.disabled = tk.busy; b.addEventListener('click', fn); return b; }
+      btns.append(btn('🔒 Close ticket', 'jrno', function () {
+        askDialog({ title: 'Close this ticket?', text: 'BEV closes #' + current.name + ' and DMs ' + current.opener + ' to rate the help from 1 to 5 stars.',
+                    ok: 'Close ticket', cancel: 'Keep it open' }).then(function (yes) {
+          if (yes) tkAct('close', { ticket: current.id }, function () { tk.pick = null; tk.view = null; });
+        });
+      }));
+      btns.append(btn('📝 Private note', 'mini', function () { if (box.value.trim()) tkAct('note', { ticket: current.id, text: box.value.trim() }, function (d) { tk.view = d; }); }));
+      btns.append(btn('➤ Send reply', 'jrok', function () { if (box.value.trim()) tkAct('reply', { ticket: current.id, text: box.value.trim() }, function (d) { tk.view = d; }); }));
+      pane.append(box, btns);
+      setTimeout(function () { log.scrollTop = log.scrollHeight; }, 0);
+    }
+    if (tk.note) { var nt = el('p', 'fnote ' + (tk.note.ok ? 'ok' : 'no'), tk.note.text); nt.setAttribute('role', 'status'); pane.append(nt); }
+    wrap.append(pane);
+    tkHost.append(wrap);
+  }
+
+  /* ---------- Insights: small charts of how the server is doing over 7, 30 or 90 days ---------- */
+  var INS_BLUE = '#5B8CFF', INS_ORANGE = '#D97706';
+  var insRange = 30;
+  try { insRange = Number(root.localStorage.getItem('bev_ins_range')) || 30; } catch (e) { /* storage blocked: default */ }
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs) { var n = document.createElementNS(SVGNS, tag); Object.keys(attrs || {}).forEach(function (k) { n.setAttribute(k, attrs[k]); }); return n; }
+  function insNum(n) { return n === null || n === undefined ? '–' : Math.abs(n) >= 10000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1) + 'k' : String(Math.round(n * 10) / 10); }
+  function insDate(day) { return new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  function insMinutes(m) { return m === null || m === undefined ? '–' : m < 60 ? Math.round(m) + ' min' : (m / 60).toFixed(1) + ' h'; }
+
+  // One small chart: bars or a line (with a soft fill), a recessive baseline, a crosshair and a tooltip on hover.
+  // kind: 'bar' | 'line' | 'diverge' (two series, the first up and the second down from the middle)
+  function insChart(days, kind, series, fmt) {
+    var W = 320, H = 96, P = 4;
+    var wrap = el('div', 'insplot');
+    var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'none', role: 'img' });
+    var n = days.length, step = (W - P * 2) / n;
+    var vals = series.map(function (s) { return days.map(function (d) { return d[s.key]; }); });
+    var known = vals[0].filter(function (v) { return v !== null && v !== undefined; });
+    var empty = !known.length || (kind !== 'line' && vals.every(function (v) { return v.every(function (x) { return !x; }); }));
+    var top = Math.max.apply(null, vals.map(function (v) { return Math.max.apply(null, v.map(function (x) { return x || 0; }).concat([1])); }));
+    var low = kind === 'line' && known.length ? Math.min.apply(null, known) : 0;
+    if (kind === 'line') { var pad = (top - low) * 0.15 || Math.max(1, top * 0.1); top += pad; low = Math.max(0, low - pad); }
+    var mid = kind === 'diverge' ? H / 2 : H - P;
+    svg.append(svgEl('line', { x1: 0, x2: W, y1: mid, y2: mid, class: 'insbase' }));
+    function y(v) { return kind === 'diverge' ? mid - (v / top) * (H / 2 - P) : (H - P) - ((v - low) / (top - low || 1)) * (H - P * 2); }
+    if (kind === 'line') {
+      var pts = [];
+      vals[0].forEach(function (v, i) { if (v !== null && v !== undefined) pts.push([P + step * i + step / 2, y(v)]); });
+      if (pts.length) {
+        var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+        svg.append(svgEl('path', { d: line + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + (H - P) + ' L' + pts[0][0].toFixed(1) + ' ' + (H - P) + ' Z', fill: series[0].color, 'fill-opacity': '0.14', stroke: 'none' }));
+        svg.append(svgEl('path', { d: line, fill: 'none', stroke: series[0].color, 'stroke-width': '2', 'vector-effect': 'non-scaling-stroke', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+      }
+    } else {
+      var bw = Math.max(1, step - 2);
+      vals.forEach(function (v, si) {
+        v.forEach(function (x, i) {
+          if (!x) return;
+          var h = Math.max(1, (x / top) * (kind === 'diverge' ? H / 2 - P : H - P * 2));
+          var yy = kind === 'diverge' ? (si === 0 ? mid - h - 1 : mid + 1) : (H - P) - h;
+          svg.append(svgEl('rect', { x: (P + step * i + 1).toFixed(1), y: yy.toFixed(1), width: bw.toFixed(1), height: h.toFixed(1), rx: Math.min(2, bw / 2), fill: series[si].color }));
+        });
+      });
+    }
+    var cross = svgEl('line', { y1: 0, y2: H, class: 'inscross', visibility: 'hidden' });
+    svg.append(cross);
+    wrap.append(svg);
+    if (empty) wrap.append(el('p', 'insempty', 'No data yet'));
+    var tip = el('div', 'instip');
+    tip.hidden = true;
+    wrap.append(tip);
+    svg.setAttribute('aria-label', series.map(function (s) { return s.name; }).join(' and ') + ', ' + insDate(days[0].day) + ' to ' + insDate(days[n - 1].day));
+    function show(clientX) {
+      var r = svg.getBoundingClientRect();
+      var i = Math.max(0, Math.min(n - 1, Math.floor((clientX - r.left) / r.width * n)));
+      var x = P + step * i + step / 2;
+      cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.setAttribute('visibility', 'visible');
+      tip.replaceChildren(el('b', null, insDate(days[i].day)));
+      series.forEach(function (s) {
+        var row = el('span', 'insrow');
+        var dot = el('i'); dot.style.background = s.color;
+        row.append(dot, document.createTextNode(s.name + ': ' + (fmt || insNum)(days[i][s.key])));
+        tip.append(row);
+      });
+      tip.hidden = false;
+      var left = (x / W) * r.width;
+      tip.style.left = Math.max(0, Math.min(r.width - tip.offsetWidth, left - tip.offsetWidth / 2)) + 'px';
+    }
+    svg.addEventListener('pointermove', function (e) { show(e.clientX); });
+    svg.addEventListener('pointerdown', function (e) { show(e.clientX); });
+    svg.addEventListener('pointerleave', function () { tip.hidden = true; cross.setAttribute('visibility', 'hidden'); });
+    return wrap;
+  }
+
+  function insTile(title, value, sub, chart, legend) {
+    var t = el('div', 'instile');
+    t.append(el('p', 'insname', title), el('p', 'insval disp', value));
+    if (sub) t.append(el('p', 'inssub', sub));
+    if (legend) {
+      var lg = el('p', 'inslegend');
+      legend.forEach(function (s) { var k = el('span'); var d = el('i'); d.style.background = s.color; k.append(d, document.createTextNode(s.name)); lg.append(k); });
+      t.append(lg);
+    }
+    if (chart) t.append(chart);
+    return t;
+  }
+
+  function insSum(days, key) { return days.reduce(function (a, d) { return a + (d[key] || 0); }, 0); }
+  function insLast(days, key) { for (var i = days.length - 1; i >= 0; i--) if (days[i][key] !== null && days[i][key] !== undefined) return days[i][key]; return null; }
+  function insFirst(days, key) { for (var i = 0; i < days.length; i++) if (days[i][key] !== null && days[i][key] !== undefined) return days[i][key]; return null; }
+  function insChange(a, b) {
+    if (a === null || b === null || !a) return null;
+    var pct = (b - a) / a * 100;
+    return (pct >= 0 ? '+' : '') + (Math.abs(pct) < 10 ? pct.toFixed(1) : Math.round(pct)) + '%';
+  }
+
+  function insightsBox(data) {
+    var box = el('div', 'insbox');
+    box.id = 'insights';
+    var bar = el('div', 'insbar');
+    var seg = el('div', 'seg insrange');
+    seg.setAttribute('role', 'group');
+    seg.setAttribute('aria-label', 'How far back');
+    var grid = el('div', 'insgrid');
+    [7, 30, 90].forEach(function (d) {
+      var b = el('button', null, d + ' days');
+      b.type = 'button';
+      b.setAttribute('aria-pressed', d === insRange ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        insRange = d;
+        try { root.localStorage.setItem('bev_ins_range', String(d)); } catch (e) { /* fine */ }
+        seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        draw();
+      });
+      seg.append(b);
+    });
+    bar.append(seg);
+    if (data.since) bar.append(el('span', 'stat', 'Recording since ' + insDate(data.since)));
+    box.append(bar, grid);
+    function draw() {
+      var days = (data.days || []).slice(-insRange);
+      grid.replaceChildren();
+      if (!days.length) { grid.append(el('p', 'fhelp', 'No data yet. Charts fill in as your server is used.')); return; }
+      var blue = [{ key: 'members', name: 'Members', color: INS_BLUE }];
+      var members = insLast(days, 'members');
+      var change = insChange(insFirst(days, 'members'), members);
+      grid.append(insTile('Members', insNum(data.now && data.now.members !== undefined ? data.now.members : members), change ? change + ' over ' + insRange + ' days' : null, insChart(days, 'line', blue)));
+      var jl = [{ key: 'joins', name: 'Joined', color: INS_BLUE }, { key: 'leaves', name: 'Left', color: INS_ORANGE }];
+      grid.append(insTile('Joins and leaves', '+' + insSum(days, 'joins') + ' / −' + insSum(days, 'leaves'), null, insChart(days, 'diverge', jl), jl));
+      var ret = (data.retention || {})[String(insRange)] || { joined: 0, stayed: 0 };
+      var retTile = insTile('New members who stay', ret.joined ? Math.round(ret.stayed / ret.joined * 100) + '%' : '–',
+        ret.joined ? ret.stayed + ' of ' + ret.joined + ' who joined were still here ' + (data.retention_after || 7) + ' days later' : 'Shows once people have been in the server for a week');
+      if (ret.joined) {
+        var meter = el('div', 'insmeter');
+        var fill = el('i'); fill.style.width = Math.round(ret.stayed / ret.joined * 100) + '%';
+        meter.append(fill);
+        retTile.append(meter);
+      }
+      grid.append(retTile);
+      grid.append(insTile('Messages', insNum(insSum(days, 'messages')), Math.round(insSum(days, 'messages') / days.length) + ' a day on average',
+        insChart(days, 'bar', [{ key: 'messages', name: 'Messages', color: INS_BLUE }])));
+      var act = days.filter(function (d) { return d.active; });
+      grid.append(insTile('Active members a day', act.length ? insNum(insSum(days, 'active') / days.length) : '–', 'on average, people who sent at least one message',
+        insChart(days, 'line', [{ key: 'active', name: 'Active', color: INS_BLUE }])));
+      grid.append(insTile('Moderation actions', insNum(insSum(days, 'mod')), 'warnings, timeouts, kicks and bans',
+        insChart(days, 'bar', [{ key: 'mod', name: 'Actions', color: INS_BLUE }])));
+      var answered = days.filter(function (d) { return d.reply_minutes !== null && d.reply_minutes !== undefined; });
+      var avg = answered.length ? answered.reduce(function (a, d) { return a + d.reply_minutes; }, 0) / answered.length : null;
+      grid.append(insTile('Ticket answer time', insMinutes(avg), insSum(days, 'tickets') + ' tickets opened • average wait for a staff reply',
+        insChart(days, 'line', [{ key: 'reply_minutes', name: 'Average wait', color: INS_BLUE }], insMinutes)));
+      var coins = data.now && data.now.coins !== undefined ? data.now.coins : insLast(days, 'coins');
+      var grew = insChange(insFirst(days, 'coins'), coins);
+      grid.append(insTile('Coins in circulation', insNum(coins), grew ? grew + ' over ' + insRange + ' days (wallets and banks)' : 'wallets and banks together',
+        insChart(days, 'line', [{ key: 'coins', name: 'Coins', color: INS_BLUE }])));
+    }
+    draw();
+    return box;
   }
 
   /* ---------- Security timeline: risky staff actions, newest first, and each person's risk score ---------- */

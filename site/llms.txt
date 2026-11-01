@@ -376,6 +376,7 @@
   - Setting: About Me.
 - Automations (also called: automation, workflows, triggers and actions, if this then that, auto roles on level, rule builder, no-code automations): Build your own rules without code: when someone joins, reaches a level, says a word, gets a role or boosts, BEV can give or take a role, give coins, post a message or DM them, only if they pass a check you choose. Each run is logged. Page: https://bevbotdiscord.com/features/automations
   - Setting: Rules. Each has: Name (only admins see it), When, Level, Word or phrase, Role, Only if, Role to check, Days or level, Then, Role, Coins, Channel, Message.
+- Insights (also called: server analytics, statistics, server stats charts, growth, retention, member growth, analytics dashboard): Charts of how your server is doing: members, joins and leaves, how many new members stay, messages and active members, moderation, how fast staff answer tickets and the coins in circulation. Over 7, 30 or 90 days. Page: https://bevbotdiscord.com/features/insights
 
 ## Dashboard tools
 

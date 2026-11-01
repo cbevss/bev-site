@@ -5,6 +5,28 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.40',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Ticket inbox',
+        text: 'The Support Tickets card on the dashboard now has an inbox: every open ticket, most urgent first, showing who\'s still waiting for staff. Read a ticket, reply (BEV posts it in the ticket), add private notes only staff see, set a priority and close it.' },
+      { title: 'Ticket ratings',
+        text: 'When a ticket closes, BEV DMs the person who opened it to rate the help from 1 to 5 stars. The inbox shows your average rating and how fast staff answer.' },
+    ],
+  },
+  {
+    id: '4.39',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Insights',
+        text: 'A new card on the dashboard with charts of how your server is doing over 7, 30 or 90 days: members, joins and leaves, how many new members stay, messages and active members a day, moderation actions, how long staff take to answer tickets, and the coins in circulation. Hover a chart to see each day.' },
+      { title: 'Music that YouTube refuses',
+        text: 'YouTube blocks some downloads, which made Spotify and YouTube songs fail. When that happens BEV now plays the same song from SoundCloud, and songs that still can\'t play are listed in one message instead of one each.' },
+      { title: 'The music player',
+        text: 'The player buttons are clean white symbols, and the progress bar is a thin line with the time underneath, so it fits on phones.' },
+    ],
+  },
+  {
     id: '4.38',
     date: '1 November 2026',
     changes: [
