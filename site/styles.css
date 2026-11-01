@@ -1679,3 +1679,7 @@ table.lvl td.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monos
 .alist li{flex-wrap:wrap}
 .alist li .nm{flex:1 1 120px}
 .alist li .arm-rm{margin-left:auto;max-width:100%;white-space:normal}
+.alist li .arm-sw{flex:none}
+.alist li .arm-sw+.arm-rm{margin-left:0}
+.alist li .arm-sw:first-of-type{margin-left:auto}
+.addadmin .row select.field{flex:0 0 auto;width:auto}

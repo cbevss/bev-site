@@ -41,7 +41,12 @@ const te = new TextEncoder();
 const td = new TextDecoder();
 
 // The Discord accounts that get the Admin tab. A SITE_ADMIN_IDS setting in Cloudflare replaces this list.
-const DEFAULT_ADMIN_IDS = ['1218359974757924934', '1443919792435363900', '1492355672988450857'];
+const DEFAULT_ADMIN_IDS = ['1218359974757924934', '382429959886602265', '1492355672988450857'];
+// Built-in regular admins: they can use /admin but can't add or remove admins. (Main admins can still remove them there.)
+const DEFAULT_REGULAR_ADMIN_IDS = ['1443919792435363900'];
+// The only accounts that can add, remove or change site admins on /admin. Fixed here on purpose: nobody can add
+// themselves to it from the page. They can't be removed or changed from the page either.
+const ADMIN_MANAGER_IDS = ['1218359974757924934', '382429959886602265', '1492355672988450857'];
 const STATS_ZONE = 'Europe/London';  // visit counts are grouped by UK days
 const SETTINGS_TTL = 10 * 1000;     // each Cloudflare copy of this file re-reads maintenance and banner settings this often
 const DURATIONS = [0, 15, 30, 60, 120, 240, 480, 720, 1440]; // maintenance lengths in minutes; 0 = until an admin turns it off
@@ -757,47 +762,76 @@ const BLANK = {
   maintenance: { on: false, message: DEFAULT_MESSAGE, minutes: 0, until: null, showUntil: true, at: 0, by: '' },
   banner: { on: false, text: '', link: '', linkText: '', style: 'info', id: '', at: 0, by: '' },
   // Site admins added or removed on /admin, on top of the main list (SITE_ADMIN_IDS or the built-in one).
-  admins: { added: [], removed: [], at: 0, by: '' },
+  admins: { added: [], mainAdded: [], demoted: [], removed: [], at: 0, by: '' },
 };
 
 const ADMINS_MAX = 25;
 
-// Who is a site admin right now. Main admins (from the setting or built-in list) manage the list; added admins
-// can use /admin but can't add or remove anyone, so nobody added later can lock the main admins out.
+// Who is a site admin right now, and which kind. Main and regular admins can both use /admin; only the accounts in
+// ADMIN_MANAGER_IDS can change who is an admin and whether each is main or regular. The built-in/Cloudflare list is
+// the starting point; what main admins change on /admin is saved as: added (regular), mainAdded, demoted, removed.
+const idList = (v) => [...new Set((Array.isArray(v) ? v : []).map(String).filter((id) => ID_RE.test(id)))];
+
+function deriveAdmins(baseMain, st) {
+  const R = new Set(idList(st.removed)), D = new Set(idList(st.demoted)), MA = new Set(idList(st.mainAdded));
+  const main = [...new Set([...baseMain, ...MA])].filter((id) => !D.has(id) && !R.has(id));
+  const regular = [...new Set([...DEFAULT_REGULAR_ADMIN_IDS, ...idList(st.added), ...D])].filter((id) => !R.has(id) && !main.includes(id));
+  return { main, regular };
+}
+
 function applyAdmins(c, site) {
-  const a = (site && site.admins) || {};
-  const removed = new Set((Array.isArray(a.removed) ? a.removed : []).map(String));
-  const added = (Array.isArray(a.added) ? a.added : []).map(String).filter((id) => ID_RE.test(id));
-  const main = c.adminIds.filter((id) => !removed.has(id));
-  c.mainAdminIds = main.length ? main : c.adminIds.slice();      // never zero admins
-  c.addedAdminIds = added.filter((id) => !c.mainAdminIds.includes(id));
+  if (!c.baseMainIds) c.baseMainIds = c.adminIds.slice();
+  const d = deriveAdmins(c.baseMainIds, (site && site.admins) || {});
+  c.mainAdminIds = d.main.length ? d.main : c.baseMainIds.slice();      // never zero main admins
+  c.addedAdminIds = d.regular.filter((id) => !c.mainAdminIds.includes(id));
   c.adminIds = [...c.mainAdminIds, ...c.addedAdminIds];
   return c;
 }
 
+// action: add (role main|regular), remove, set (role main|regular: change an existing admin's kind)
 async function changeAdmins(request, env, c, s) {
   const body = await readJson(request, 2000);
   const id = body && String(body.id || '').trim();
   const action = body && body.action;
-  if (!ID_RE.test(id || '') || (action !== 'add' && action !== 'remove')) return json({ error: 'bad_request' }, 400);
+  const role = body && body.role === 'main' ? 'main' : 'regular';
+  if (!ID_RE.test(id || '') || !['add', 'remove', 'set'].includes(action)) return json({ error: 'bad_request' }, 400);
   const me = String(s.session.user.id);
-  if (!c.mainAdminIds.includes(me)) return json({ error: 'not_main_admin' }, 403);
+  if (!ADMIN_MANAGER_IDS.includes(me)) return json({ error: 'not_manager' }, 403);
+  if (action !== 'add' && ADMIN_MANAGER_IDS.includes(id)) return json({ error: 'cant_change_manager' }, 400);
   if (!database(env)) return json({ error: 'no_database' }, 503);
-  const cur = s.site.admins || {};
-  const added = new Set((cur.added || []).map(String));
-  const removed = new Set((cur.removed || []).map(String));
   const base = config(env).adminIds;
+  const baseRegular = DEFAULT_REGULAR_ADMIN_IDS;
+  const cur = s.site.admins || {};
+  const st = { added: new Set(idList(cur.added)), mainAdded: new Set(idList(cur.mainAdded)), demoted: new Set(idList(cur.demoted)), removed: new Set(idList(cur.removed)) };
+  const isAdmin = c.adminIds.includes(id);
+  const makeRole = (kind) => {
+    st.removed.delete(id);
+    if (kind === 'main') {
+      st.demoted.delete(id); st.added.delete(id);
+      if (!base.includes(id)) st.mainAdded.add(id);
+    } else {
+      st.mainAdded.delete(id);
+      if (base.includes(id)) st.demoted.add(id);
+      else if (!baseRegular.includes(id)) st.added.add(id);
+    }
+  };
   if (action === 'add') {
-    if (c.adminIds.includes(id)) return json({ error: 'already_admin' }, 400);
-    if (base.includes(id)) removed.delete(id); else added.add(id);
-    if (added.size > ADMINS_MAX) return json({ error: 'too_many_admins' }, 400);
-  } else {
+    if (isAdmin) return json({ error: 'already_admin' }, 400);
+    makeRole(role);
+    if (st.added.size + st.mainAdded.size > ADMINS_MAX) return json({ error: 'too_many_admins' }, 400);
+  } else if (action === 'remove') {
     if (id === me) return json({ error: 'cant_remove_self' }, 400);
-    if (!c.adminIds.includes(id)) return json({ error: 'not_admin' }, 400);
-    if (added.has(id)) added.delete(id); else removed.add(id);
+    if (!isAdmin) return json({ error: 'not_admin' }, 400);
+    st.added.delete(id); st.mainAdded.delete(id); st.demoted.delete(id);
+    if (base.includes(id) || baseRegular.includes(id)) st.removed.add(id);
+  } else {
+    if (id === me) return json({ error: 'cant_change_self' }, 400);
+    if (!isAdmin) return json({ error: 'not_admin' }, 400);
+    makeRole(role);
   }
+  if (!deriveAdmins(base, Object.fromEntries(Object.entries(st).map(([k, v]) => [k, [...v]]))).main.length) return json({ error: 'need_main_admin' }, 400);
   try {
-    await saveSetting(env, 'admins', { added: [...added], removed: [...removed] }, `${s.session.user.name} (${me})`);
+    await saveSetting(env, 'admins', { added: [...st.added], mainAdded: [...st.mainAdded], demoted: [...st.demoted], removed: [...st.removed] }, `${s.session.user.name} (${me})`);
   } catch {
     return json({ error: 'database_error' }, 503);
   }
@@ -888,7 +922,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=f7d1f0b7e6">
+<link rel="stylesheet" href="/styles.css?v=73f85aa1bf">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1274,9 +1308,9 @@ async function adminState(env, c, s, site) {
     maintenance: { ...site.maintenance, active: maintenanceOn(site.maintenance) },
     banner: site.banner,
     defaults: { message: DEFAULT_MESSAGE, durations: DURATIONS, alert: DEFAULT_ALERT, alertMax: ALERT_MAX },
-    admins: (await adminProfiles(c)).map((a) => ({ ...a, main: (c.mainAdminIds || c.adminIds).includes(a.id) })),
+    admins: (await adminProfiles(c)).map((a) => ({ ...a, main: (c.mainAdminIds || c.adminIds).includes(a.id), manager: ADMIN_MANAGER_IDS.includes(a.id) })),
     adminsFromSetting: c.adminFromSetting,
-    canManageAdmins: (c.mainAdminIds || c.adminIds).includes(String(s.session.user.id)),
+    canManageAdmins: ADMIN_MANAGER_IDS.includes(String(s.session.user.id)),
     visits: await visitStats(env),
     now: Date.now(),
   };

@@ -754,8 +754,8 @@
   function renderAdmins() {
     var manage = !!state.canManageAdmins;
     $('anote').textContent = manage
-      ? 'Main admins can add and remove site admins here. You can\'t remove yourself.'
-      : 'Only main admins can add or remove site admins.';
+      ? 'You can add, remove and change site admins here. You can\'t change yourself or the other people who manage admins.'
+      : 'Only the people who manage admins can add, remove or change site admins.';
     $('aadd').hidden = !manage;
     var list = $('alist');
     list.textContent = '';
@@ -769,32 +769,38 @@
       nm.appendChild(make('span', null, a.id));
       li.appendChild(nm);
       if (state.me && state.me.id === a.id) li.appendChild(make('span', 'badge you', 'You'));
-      else if (manage) {
+      else if (manage && !a.manager) {
+        var sw = make('button', 'mini act arm-sw', a.main ? 'Make regular' : 'Make main');
+        sw.type = 'button';
+        sw.setAttribute('aria-label', (a.main ? 'Make ' : 'Make ') + (a.name || a.id) + (a.main ? ' a regular admin' : ' a main admin'));
+        sw.addEventListener('click', function () { if (arm(sw, 'Click again to confirm')) changeAdmin('set', a.id, sw, a.main ? 'regular' : 'main'); });
+        li.appendChild(sw);
         var rm = make('button', 'mini act arm-rm', 'Remove');
         rm.type = 'button';
         rm.setAttribute('aria-label', 'Remove ' + (a.name || a.id) + ' as a site admin');
         rm.addEventListener('click', function () { if (arm(rm, 'Click again to remove')) changeAdmin('remove', a.id, rm); });
         li.appendChild(rm);
       }
-      if (!a.main) li.appendChild(make('span', 'badge', 'Added'));
+      li.appendChild(make('span', a.main ? 'badge main' : 'badge', a.main ? 'Main' : 'Regular'));
       list.appendChild(li);
     });
   }
 
   var ADMIN_ERRORS = {
-    already_admin: 'They\'re already a site admin.', cant_remove_self: 'You can\'t remove yourself.', not_admin: 'They aren\'t a site admin.',
-    not_main_admin: 'Only main admins can change this.', too_many_admins: 'That\'s the most admins you can add.',
+    already_admin: 'They\'re already a site admin.', cant_remove_self: 'You can\'t remove yourself.', cant_change_self: 'You can\'t change your own kind of admin.',
+    need_main_admin: 'There has to be at least one main admin.', not_admin: 'They aren\'t a site admin.',
+    not_manager: 'Only the people who manage admins can change this.', cant_change_manager: 'The people who manage admins can\'t be changed here.', too_many_admins: 'That\'s the most admins you can add.',
     no_database: 'The site\'s database isn\'t connected, so this can\'t be saved.', bad_request: 'That isn\'t a Discord user ID.'
   };
-  function changeAdmin(action, id, button) {
+  function changeAdmin(action, id, button, role) {
     if (button) button.disabled = true;
-    call('/api/admin/admins', { action: action, id: id }).then(function (res) {
+    call('/api/admin/admins', { action: action, id: id, role: role }).then(function (res) {
       if (button) button.disabled = false;
       if (!res.ok) { toast(ADMIN_ERRORS[res.data.error] || 'That didn\'t save. Try again.'); return; }
       state.admins = res.data.admins; state.canManageAdmins = res.data.canManageAdmins;
       renderAdmins();
       if (action === 'add') $('aid').value = '';
-      toast(action === 'add' ? 'Added as a site admin.' : 'Removed as a site admin.');
+      toast(action === 'add' ? 'Added as a ' + (role === 'main' ? 'main' : 'regular') + ' admin.' : action === 'set' ? 'Changed to a ' + role + ' admin.' : 'Removed as a site admin.');
     }, function () {
       if (button) button.disabled = false;
       toast('That didn\'t save. Check your connection and try again.');
@@ -803,7 +809,7 @@
   $('aaddbtn').addEventListener('click', function () {
     var id = $('aid').value.trim();
     if (!/^\d{5,25}$/.test(id)) { toast('Paste their Discord user ID (only numbers).'); return; }
-    changeAdmin('add', id, $('aaddbtn'));
+    changeAdmin('add', id, $('aaddbtn'), $('arole').value);
   });
   $('aid').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('aaddbtn').click(); });
 

@@ -13,7 +13,7 @@ window.BEV_UPDATES = [
       { title: 'Import playlists',
         text: 'The playlist menu on /music now has "Import a playlist from a link". Paste a public Spotify playlist or album, a YouTube playlist or a SoundCloud playlist and BEV saves its songs as one of your playlists.' },
       { title: 'Site admins',
-        text: 'Main site admins can now add and remove site admins from the Admin page, using their Discord user ID.' },
+        text: 'Main site admins can now add and remove site admins from the Admin page, using their Discord user ID, as a main or regular admin, and change an admin from one to the other. Only a few chosen accounts can do this.' },
       { title: 'Levels and XP',
         text: 'Setting someone to a level in Member tools now says how much XP that level is, member tools show their total XP, and there\'s a button to see the XP each level takes.' },
     ],

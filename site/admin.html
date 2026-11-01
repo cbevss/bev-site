@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=f7d1f0b7e6">
+<link rel="stylesheet" href="/styles.css?v=73f85aa1bf">
 </head>
 <body class="admin">
 <a class="skip" href="#main">Skip to content</a>
@@ -221,8 +221,8 @@
 <ul class="alist" id="alist"></ul>
 <div class="addadmin" id="aadd" hidden>
 <label class="flabel" for="aid">Add a site admin</label>
-<div class="row"><input class="field" id="aid" type="text" inputmode="numeric" maxlength="25" placeholder="Their Discord user ID" autocomplete="off" spellcheck="false"> <button class="act save" id="aaddbtn" type="button">Add admin</button></div>
-<p class="adesc">In Discord, turn on Developer Mode, right-click their name and pick Copy User ID. Admins you add can use this page, but only main admins can add or remove people.</p>
+<div class="row"><input class="field" id="aid" type="text" inputmode="numeric" maxlength="25" placeholder="Their Discord user ID" autocomplete="off" spellcheck="false"> <select class="field" id="arole" aria-label="Kind of admin"><option value="regular">Regular admin</option><option value="main">Main admin</option></select> <button class="act save" id="aaddbtn" type="button">Add admin</button></div>
+<p class="adesc">In Discord, turn on Developer Mode, right-click their name and pick Copy User ID. Main and regular admins can both use this page, but only the people who manage admins can add, remove or change them.</p>
 </div>
 </section>
 
@@ -237,9 +237,9 @@
 <nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
 </footer>
 
-<script src="/updates.js?v=dae5bc583b" defer></script>
+<script src="/updates.js?v=54dbe646da" defer></script>
 <script src="/nav.js?v=7df73c7e34" defer></script>
 <script src="/supportchat.js?v=56ad3f5691" defer></script>
-<script src="/admin.js?v=81d3c43c0c" defer></script>
+<script src="/admin.js?v=20c578459f" defer></script>
 </body>
 </html>
