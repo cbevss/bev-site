@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<title>BEV | Tournament bracket</title>
+<meta property="og:site_name" content="BEV">
+<meta property="og:title" content="Tournament bracket">
+<meta property="og:description" content="A tournament bracket run with BEV. Only members of the server can see it.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bevbotdiscord.com/bracket">
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="A tournament bracket run with BEV. Only members of the server can see it.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=b77c15083b">
+</head>
+<body class="bracketpage">
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/discover">Discover</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise" id="gname">Tournament bracket</div>
+<h1 class="disp rise d1" id="title">Tournament bracket</h1>
+<p class="lead rise d2" id="sub">Loading…</p>
+</div>
+</div>
+
+<main id="main" class="wrap sec">
+<noscript><div class="panel deny"><h2 class="disp">JavaScript is off</h2><p>The bracket needs JavaScript to load.</p></div></noscript>
+<section id="busy" class="panel" role="status"><span class="spin" aria-hidden="true"></span><h2 class="disp">Loading the bracket</h2></section>
+<section id="err" class="panel deny" hidden><h2 class="disp" id="errh">Bracket not available</h2><p id="errmsg"></p><a class="act save" id="errin" href="/auth/login" hidden>Sign in with Discord</a> <a class="mini" href="/">BEV home</a></section>
+<section id="bview" hidden>
+<div class="bstatus" id="bstatus" aria-live="polite"></div>
+<div class="btreewrap" id="btreewrap"><div class="btree" id="btree"></div></div>
+<p class="help" id="bnote">Updates by itself every 20 seconds. Scroll sideways to see both sides, and hover a team to see its members.</p>
+</section>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/updates.js?v=c1478d15e1" defer></script>
+<script src="/nav.js?v=e48f07a589" defer></script>
+<script src="/bracket.js?v=0dd043736c" defer></script>
+</body>
+</html>

@@ -1053,6 +1053,18 @@
         });
         summary.append(plist);
       }
+      var bag = Array.isArray(d.inventory) ? d.inventory : [];
+      summary.append(el('p', 'flabel', '🎒 Inventory'));
+      if (bag.length) {
+        var blist = el('ul', 'minv');
+        bag.forEach(function (it) {
+          var li = el('li');
+          li.append(el('b', null, it.name), el('span', 'minvq', '× ' + Number(it.qty).toLocaleString()));
+          if (it.about) li.append(el('span', 'minva', it.about.replace(/<@&\d+>/g, 'a role')));
+          blist.append(li);
+        });
+        summary.append(blist);
+      } else summary.append(el('p', 'fhelp', 'Nothing in their inventory.'));
       var temp = Array.isArray(d.temp_roles) ? d.temp_roles : [];
       if (temp.length) {
         var list = el('ul', 'mtemp');
@@ -1504,6 +1516,15 @@
         row.append(top);
         var grid = el('div', 'igrid');
         // Role menus: the reaction emojis only matter for the reactions style, the layout only for buttons.
+        // Any list: a part with show_if only shows while another part of the same row has one of the given values.
+        function rowFieldShown(f) {
+          var conds = (Array.isArray(f.show_if) ? f.show_if : f.show_if ? [f.show_if] : []).filter(function (c) { return c && typeof c.key === 'string'; });
+          var item = (get() || [])[index] || {};
+          return conds.every(function (c) {
+            var want = Array.isArray(c.value) ? c.value : [c.value];
+            return want.some(function (v) { return String(item[c.key] === undefined || item[c.key] === null ? '' : item[c.key]) === String(v); });
+          });
+        }
         function menuFieldShown(key) {
           var style = ((get() || [])[index] || {}).style || 'buttons';
           return key === 'emojis' ? style === 'reactions' : key === 'layout' ? style === 'buttons' : true;
@@ -1512,6 +1533,7 @@
           if (s.key === 'role_menus' && (f.key === 'roles' || f.key === 'swap_roles')) return;     // shown as groups below
           var cell = el('div', 'icell k-' + f.kind);
           if (s.key === 'role_menus') { cell.setAttribute('data-field', f.key); cell.hidden = !menuFieldShown(f.key); }
+          else if (f.show_if) { cell.setAttribute('data-rowif', f.key); cell.hidden = !rowFieldShown(f); }
           var fid = 's-' + s.key + '-' + index + '-' + f.key;
           var lab = el('label', 'flabel sm' + (compact && index ? ' sr' : ''), f.label);
           lab.htmlFor = fid;
@@ -1522,6 +1544,10 @@
             if (!now[index]) return;
             now[index][f.key] = v;
             put(now);
+            grid.querySelectorAll('[data-rowif]').forEach(function (c) {
+              var ff = (s.fields || []).find(function (x) { return x.key === c.getAttribute('data-rowif'); });
+              if (ff) c.hidden = !rowFieldShown(ff);
+            });
             if (s.key === 'role_menus' && f.key === 'style') {
               grid.querySelectorAll('[data-field]').forEach(function (c) { c.hidden = !menuFieldShown(c.getAttribute('data-field')); });
             }
@@ -3007,10 +3033,10 @@
     chCell.append(cl, ch);
     var countCell = el('div', 'icell');
     var count = el('input', 'field');
-    count.id = 'brk-count'; count.type = 'number'; count.min = 2; count.max = 64; count.value = brk.count;
+    count.id = 'brk-count'; count.type = 'number'; count.min = 2; count.max = 1024; count.value = brk.count;
     var ql = el('label', 'flabel sm', brk.mode === 'teams' ? 'How many teams' : 'How many players'); ql.htmlFor = 'brk-count';
     count.addEventListener('change', function () {
-      var n = Math.max(2, Math.min(64, parseInt(count.value, 10) || 2));
+      var n = Math.max(2, Math.min(1024, parseInt(count.value, 10) || 2));
       count.value = n; brk.count = n; brkRowsTo(n); drawBrackets();
     });
     countCell.append(ql, count);
@@ -3028,6 +3054,34 @@
       seg.append(b);
     });
     form.append(seg);
+    // A long list is quicker to paste than to type box by box.
+    var paste = el('details', 'brkpaste');
+    paste.append(el('summary', null, '📋 Paste a list instead'));
+    var area = el('textarea', 'field');
+    area.id = 'brk-paste';
+    area.rows = 5;
+    area.placeholder = brk.mode === 'teams' ? 'One team per line, like:\nRed Rockets: @ace, @bolt\nBlue Thunder: @comet, @dash' : 'One player per line: their @username or just a name';
+    var fill = el('button', 'mini', 'Use this list');
+    fill.type = 'button';
+    fill.id = 'brk-usepaste';
+    fill.addEventListener('click', function () {
+      var lines = area.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).slice(0, 1024);
+      if (lines.length < 2) { brk.note = { text: 'Paste at least 2 lines.', ok: false }; drawBrackets(); return; }
+      brk.rows = lines.map(function (line) {
+        if (brk.mode === 'teams') {
+          var at = line.indexOf(':');
+          var name = at === -1 ? line : line.slice(0, at).trim();
+          var people = at === -1 ? [] : line.slice(at + 1).split(',').map(function (p) { return p.trim(); }).filter(Boolean);
+          return { name: name, members: people.map(function (p) { return { id: p, name: p.replace(/^@/, '') }; }) };
+        }
+        return { name: line, members: [] };
+      });
+      brk.count = brk.rows.length;
+      brk.note = { text: brk.rows.length + ' ' + (brk.mode === 'teams' ? 'teams' : 'players') + ' added from your list.', ok: true };
+      drawBrackets();
+    });
+    paste.append(area, fill);
+    form.append(paste);
     brkRowsTo(brk.count);
     var list = el('ol', 'brkrows');
     brk.rows.forEach(function (row, i) {

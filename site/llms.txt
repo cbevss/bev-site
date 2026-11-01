@@ -273,7 +273,7 @@
 - Birthdays (also called: birthday, birthday role, birthday announcements): Members save their birthday with /my-birthday. On the day, BEV posts a celebration and gives a birthday role for 24 hours. Page: https://bevbotdiscord.com/features/birthdays
   - Setting: Announcement channel.
   - Setting: Birthday role.
-- Tournament Brackets: Run tournaments for players or teams: BEV builds a single-elimination bracket (in your order or shuffled), posts it as a clean picture, and redraws it every time you pick a winner or add a score on the dashboard. Members see the standings with /bracket. Page: https://bevbotdiscord.com/features/brackets
+- Tournament Brackets (also called: tournament bracket, brackets, single elimination, tournaments, esports bracket, tourney): Run tournaments for players or teams: BEV builds a single-elimination bracket (in your order or shuffled), posts it as a clean picture, and redraws it every time you pick a winner or add a score on the dashboard. Members see the standings with /bracket. Page: https://bevbotdiscord.com/features/brackets
   - Setting: Ping players when a bracket is posted. Mentions everyone in the bracket once, when it's first posted. Updates never ping.
 
 ### Levels
@@ -313,7 +313,7 @@
   - Setting: Weekly reward.
   - Setting: Work pay (up to).
   - Setting: Allow robbing.
-  - Setting: Shop items. Each has: Item name, Type, Role (for role items), Price, Description.
+  - Setting: Shop items. Each has: Item name, Type, Role (for role items), How long they keep the role, When they get it, How long the boost lasts, Price, Description.
 - Casino (also called: casino, blackjack, slots, roulette, coinflip, gambling games): Coin games: coinflip, blackjack, slots, roulette, dice, higher-or-lower, crash and a weekly lottery. Page: https://bevbotdiscord.com/features/games
   - Setting: Biggest bet. Choices: 100 coins, 500 coins, 1,000 coins, 5,000 coins, 10,000 coins, No limit.
   - Setting: Games that are open. Choices: Coinflip, Blackjack, Slots, Roulette, Dice, Higher or lower, Crash, Lottery.
@@ -370,10 +370,12 @@
   - Setting: Profile picture (link). A link to a picture. GIFs move. Up to 8 MB.
   - Setting: Banner (link).
   - Setting: About Me.
+- Automations (also called: automation, workflows, triggers and actions, if this then that, auto roles on level, rule builder, no-code automations): Build your own rules without code: when someone joins, reaches a level, says a word, gets a role or boosts, BEV can give or take a role, give coins, post a message or DM them, only if they pass a check you choose. Each run is logged. Page: https://bevbotdiscord.com/features/automations
+  - Setting: Rules. Each has: Name (only admins see it), When, Level, Word or phrase, Role, Only if, Role to check, Days or level, Then, Role, Coins, Channel, Message.
 
 ## Dashboard tools
 
-- Member tools: Find a member, then give or take coins and XP, set their level, give them a role for a while or verify them by hand. Page: https://bevbotdiscord.com/features/members
+- Member tools: Find a member, then give or take coins, XP and items, see their inventory, set their level, give them a role for a while or verify them by hand. Page: https://bevbotdiscord.com/features/members
 - Security scan: Checks your roles, bots and server settings for risky permissions, and says how to fix each thing it finds. Page: https://bevbotdiscord.com/features/scan
 - Emojis: Add an emoji from a picture link or from another server's emoji, and remove ones you don't need any more. Page: https://bevbotdiscord.com/features/emoji
 - Health check: BEV's ping, the permissions it has, where its role sits and every switched-on feature that needs attention. Page: https://bevbotdiscord.com/features/health
@@ -418,6 +420,7 @@
 - /coinflip: Bet coins on heads or tails. Win and you double your bet, lose and it's gone.
 - /daily: Claim your daily and weekly coin rewards and keep your streak going.
 - /explore: Go fishing, hunting or mining for items you can sell for coins.
+- /inventory: See everything in your inventory and how many of each you have.
 - /leaderboard: See the top members in this server, ranked by level or by coins.
 - /market: Buy and sell items with other members.
 - /pay: Send some of your coins to another member.
@@ -426,6 +429,8 @@
 - /rob: Try to steal coins from another member's wallet. Get caught and you pay a fine.
 - /shop: Browse the shop, buy roles and items, and see or use your inventory.
 - /trade: Offer another member a swap of coins and items. Nothing moves until they accept.
+- /use: Use a role or boost from your inventory.
+- /view-inventory: Staff: see any member's inventory.
 - /vote: Vote for BEV on top.gg to get coins, and see when you can vote again.
 - /work: Work a shift for coins. Better jobs unlock as you level up.
 - /collect: Roll for anime and game characters and race to claim them.

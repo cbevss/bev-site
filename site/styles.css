@@ -1427,3 +1427,57 @@ dialog.askbox[open] :is(.pvitem,.newsitem,.newsver):nth-child(n+5){animation-del
 /* Whole sections rise without the 3D tilt: tilting something as wide as the page would poke out past its edges. */
 html section.rv:not(.rv-in),html .wrap.rv:not(.rv-in){transform:translateY(40px) scale(.97)}
 html section.rv.rv-up:not(.rv-in),html .wrap.rv.rv-up:not(.rv-in){transform:translateY(-40px) scale(.97)}
+.brkpaste summary{cursor:pointer;color:var(--ac2);font-weight:600}
+.brkpaste textarea{width:100%;margin:8px 0}
+/* A bracket's own page: two sides meeting at the final in the middle */
+.bstatus:empty{display:none}
+.bchamp{display:inline-flex;align-items:center;gap:8px;margin:0 0 16px;padding:12px 18px;border:1px solid #EAB308;border-radius:14px;background:rgba(234,179,8,.12);color:#FDE68A;font-size:17px}
+.bcup{font-size:22px}
+.btreewrap{overflow-x:auto;overflow-y:visible;padding:4px 2px 18px;overscroll-behavior-x:contain;scrollbar-color:#2563EB #04060C;scrollbar-width:thin}
+.btree{display:flex;gap:44px;min-width:max-content;margin:0 auto;--rows:1}
+.bround{display:flex;flex-direction:column;width:230px}
+.bround>.lab{margin:0 0 10px;height:18px;text-align:center}
+.bmatches,.bmid{display:grid;grid-template-rows:repeat(calc(var(--rows) / var(--span)),1fr);flex:1;height:calc(var(--rows) * 104px);min-height:220px}
+.bmid{grid-template-rows:1fr}
+.bslot{position:relative;display:flex;align-items:center}
+.bm{position:relative;width:100%;border:1px solid var(--line);border-radius:12px;background:rgba(9,15,32,.9);overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.bm.done{border-color:var(--ac2);box-shadow:0 10px 30px -18px var(--glow)}
+.bm.wait{opacity:.6}
+.bs{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border-bottom:1px solid rgba(110,160,255,.12)}
+.bs:last-child{border-bottom:0}
+.bs .bn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#DCE4FA}
+.bs.won{background:rgba(37,99,235,.3)}
+.bs.won .bn{color:#fff;font-weight:700}
+.bs.lost .bn{color:var(--mut)}
+.bsc{font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.btk{color:#7FA6FF;font-weight:800}
+/* lines: the left side flows right, the right side flows left, both into the final */
+.bl .bslot::after,.br .bslot::after{content:"";position:absolute;width:22px;height:50%;border-color:var(--line);border-style:solid;border-width:0}
+.bl .bslot::after{right:-22px;border-right-width:2px}
+.br .bslot::after{left:-22px;border-left-width:2px}
+.bl .bslot:nth-child(odd)::after,.br .bslot:nth-child(odd)::after{top:50%;border-top-width:2px}
+.bl .bslot:nth-child(even)::after,.br .bslot:nth-child(even)::after{bottom:50%;border-bottom-width:2px}
+.bl .bslot:nth-child(odd)::after{border-top-right-radius:8px}
+.bl .bslot:nth-child(even)::after{border-bottom-right-radius:8px}
+.br .bslot:nth-child(odd)::after{border-top-left-radius:8px}
+.br .bslot:nth-child(even)::after{border-bottom-left-radius:8px}
+.bl:not(.bfirst) .bslot::before,.br:not(.bfirst) .bslot::before{content:"";position:absolute;top:50%;width:22px;border-top:2px solid var(--line)}
+.bl:not(.bfirst) .bslot::before{left:-22px}
+.br:not(.bfirst) .bslot::before{right:-22px}
+/* the last round on each side has one match: a straight line into the final */
+.bl:has(+ .bcentre) .bslot::after,.bcentre + .br .bslot::after{top:50%;bottom:auto;height:0;border-width:2px 0 0 0;border-radius:0}
+.bfinalslot{justify-content:center}
+.bfinalslot .bcard{position:absolute;left:0;right:0;bottom:calc(50% + 56px);width:auto}
+.bcentre:not(.alone) .bfinalslot::before,.bcentre:not(.alone) .bfinalslot::after{content:"";position:absolute;top:50%;width:22px;border-top:2px solid var(--line)}
+.bcentre .bmid{min-height:420px}
+.bcentre .bfinalslot::before{left:-22px}
+.bcentre .bfinalslot::after{right:-22px}
+.bcentre .bfinalslot{justify-content:center}
+.bcentre .bmid{align-items:center}
+.bcard{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;padding:16px;border:2px solid var(--line);border-radius:16px;background:rgba(9,15,32,.9);color:var(--mut);text-align:center}
+.bcard .lab{margin:0}
+.bcard.won{border-color:#EAB308;background:rgba(234,179,8,.12);color:#FDE68A;box-shadow:0 0 40px -14px rgba(234,179,8,.6)}
+.bcard b{color:#fff;font-size:17px}
+.bfinalslot .bm{border-color:rgba(234,179,8,.55)}
+
+.minv{list-style:none;margin:4px 0 10px;padding:0;display:grid;gap:4px}.minv li{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.04)}.minvq{color:#93c5fd;font-weight:700}.minva{color:#94a3b8;font-size:.85em}

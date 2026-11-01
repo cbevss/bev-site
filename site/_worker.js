@@ -271,7 +271,9 @@ function login(c, url, secure) {
   const target = 'https://discord.com/oauth2/authorize?client_id=' + c.clientId +
     '&response_type=code&scope=identify%20guilds&state=' + state +
     '&redirect_uri=' + encodeURIComponent(url.origin + '/auth/callback');
-  return redirect(target, [setCookie(cookieNames(secure).state, state, STATE_TTL, secure)]);
+  const next = url.searchParams.get('next') || '';
+  const back = /^\/bracket\/\d{15,25}\/\d{1,10}$/.test(next) ? next : '';
+  return redirect(target, [setCookie(cookieNames(secure).state, state + (back ? '|' + back : ''), STATE_TTL, secure)]);
 }
 
 async function callback(request, c, url, secure) {
@@ -282,7 +284,9 @@ async function callback(request, c, url, secure) {
 
   if (url.searchParams.get('error')) return fail('cancelled');
   const state = url.searchParams.get('state') || '';
-  const expected = readCookies(request)[N.state] || '';
+  const stored = readCookies(request)[N.state] || '';
+  const expected = stored.split('|')[0];
+  const back = /^\/bracket\/\d{15,25}\/\d{1,10}$/.test(stored.split('|')[1] || '') ? stored.split('|')[1] : '';
   if (!state || !expected || !safeEqual(state, expected)) return fail('state');
   const code = url.searchParams.get('code');
   if (!code) return fail('state');
@@ -315,7 +319,7 @@ async function callback(request, c, url, secure) {
       tok: token.access_token,
       exp: Date.now() + SESSION_TTL * 1000,
     }, c.sessionSecret);
-    return redirect('/servers.html', [clearState, setCookie(N.session, session, SESSION_TTL, secure), hintCookie(true, secure)]);
+    return redirect(back || '/servers.html', [clearState, setCookie(N.session, session, SESSION_TTL, secure), hintCookie(true, secure)]);
   } catch {
     return fail('discord');
   }
@@ -463,7 +467,7 @@ async function publicApi(request, c, url) {
 }
 
 const PRIVATE = { '/api/suggest': ['POST'], '/api/me': ['GET'], '/api/servers': ['GET'], '/api/config': ['GET', 'POST'], '/api/level-roles': ['GET', 'POST'], '/api/messages': ['POST'],
-                  '/api/action': ['POST'], '/api/members': ['GET'], '/api/preview': ['POST'] };
+                  '/api/action': ['POST'], '/api/members': ['GET'], '/api/preview': ['POST'], '/api/bracket': ['GET'] };
 
 async function api(request, c, url, secure, s) {
   const path = url.pathname;
@@ -480,6 +484,15 @@ async function api(request, c, url, secure, s) {
   // "admin" only decides whether the top bar shows the Admin tab; /admin and its API check again.
   if (path === '/api/me') return json({ user: session.user, admin: s.admin });
   if (path === '/api/suggest') return sendSuggestion(request, c, s);
+  // A tournament bracket: anyone signed in can ask, and the bot only answers members of that server.
+  if (path === '/api/bracket') {
+    const guildId = url.searchParams.get('guild_id') || '';
+    const id = url.searchParams.get('id') || '';
+    if (!ID_RE.test(guildId) || !/^\d{1,10}$/.test(id)) return json({ error: 'bad_request' }, 400);
+    const res = await bot(c, '/api/bracket?guild_id=' + guildId + '&id=' + id + '&viewer_id=' + String(session.user.id));
+    if (res.status === 403 || res.status === 404) return json(res.data || { error: 'not_found' }, res.status);
+    return botAnswer(res) || json(res.data);
+  }
 
   let view;
   try {
@@ -824,7 +837,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=565ffab538">
+<link rel="stylesheet" href="/styles.css?v=b77c15083b">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1507,6 +1520,10 @@ export default {
       if (path.startsWith('/api/')) return withSecurity(await api(request, c, url, secure, s));
       if (DASHBOARD_PATHS.has(path)) return await dashboardPage(request, env, ctx, c, secure, s);
       if (ADMIN_PATHS.has(path)) return await adminPage(request, env, ctx, secure, s);
+      // A bracket's page: /bracket/<server>/<bracket> shows bracket.html, which loads the bracket itself.
+      if (/^\/bracket\/\d{15,25}\/\d{1,10}\/?$/.test(path)) {
+        return await servePage(new Request(new URL('/bracket', url), request), env, ctx, s, { noStore: true, count: false });
+      }
       return await servePage(request, env, ctx, s);
     } catch {
       return withSecurity(json({ error: 'server_error' }, 500));

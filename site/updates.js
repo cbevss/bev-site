@@ -5,6 +5,26 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.36',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Brackets: any size, on their own page',
+        text: 'Brackets can be as big as you like, and you can paste a whole list of players or teams at once. Instead of a picture, BEV now posts a link to the bracket\'s own page on the website: two sides that meet at the final in the middle, scroll sideways to see each side, and it updates by itself. Only members of the server can open it. /bracket gives the link too.' },
+      { title: '/music play by song and artist',
+        text: '/music play has a song box and an optional artist box. Type both for that exact song, or just an artist to queue a mix of their songs.' },
+      { title: 'Playlists',
+        text: 'Keep your own playlists in each server with /music playlist: add the song that\'s playing (or search one, or a whole artist), see them, play them (shuffled if you like), remove songs and delete playlists.' },
+      { title: 'Automations',
+        text: 'Build your own rules without code: when someone joins, reaches a level, says a word, gets a role or boosts, BEV can give or take a role, give coins, post a message or DM them, only if they pass a check you choose.' },
+      { title: 'Temporary shop roles',
+        text: 'Role items in the shop can last for a set time (an hour up to 30 days, or forever), and can go into the buyer\'s inventory to use later instead of straight away. Double XP boosts last as long as you pick.' },
+      { title: '/use and /inventory',
+        text: '/use uses a role or boost from your inventory (using another one of the same role adds more time). /inventory shows everything you have and how many of each. Staff can see anyone\'s with /view-inventory, and Member tools on the dashboard show a member\'s inventory and can give or take items.' },
+      { title: 'Higher or lower',
+        text: 'A tie no longer loses your pot: it goes back to your wallet.' },
+    ],
+  },
+  {
     id: '4.35',
     date: '28 October 2026',
     changes: [
