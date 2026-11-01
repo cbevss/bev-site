@@ -95,7 +95,7 @@
   /* ---------- page ---------- */
 
   var doc = root.document;
-  var state = { user: null, servers: [], guild: null, config: null, original: null, draft: null, saving: false, token: 0, dismissed: null, keep: {}, barWanted: false };
+  var state = { user: null, servers: [], guild: null, config: null, original: null, draft: null, saving: false, token: 0, dismissed: null, keep: {}, barWanted: false, userNames: {} };
   var problems = {};
 
   function $(id) { return doc.getElementById(id); }
@@ -1293,7 +1293,8 @@
   function nameOf(kind, idValue) {
     var list = kind === 'role' ? state.config.roles : state.config.channels;
     var found = (list || []).find(function (x) { return x.id === idValue; });
-    if (!found) return kind === 'user' ? idValue : 'deleted (' + idValue + ')';
+    if (kind === 'user') return (state.userNames && state.userNames[idValue]) || idValue;
+    if (!found) return 'deleted (' + idValue + ')';
     return kind === 'role' ? '@' + found.name : channelLabel(found);
   }
 
@@ -1316,6 +1317,7 @@
       });
       return node;
     }
+    if (kind === 'multi' && s.options.some(function (o) { return o.value === 'all'; })) return areaChecks(s, id, get, put);
     if (kind === 'multi') {
       node = el('div', 'checks' + (s.options.length > 20 ? ' long' : ''));
       node.id = id;
@@ -1419,6 +1421,57 @@
     return el('p', 'help', 'This setting can be changed in Discord.');
   }
 
+  // Which parts of the dashboard: a Select all / Unselect all button and a box for each part. When every part (Dashboard
+  // Access aside) is ticked it's saved as "all", so parts added to BEV later are included too.
+  function areaChecks(s, id, get, put) {
+    var parts = s.options.filter(function (o) { return o.value !== 'all'; });
+    var others = parts.filter(function (o) { return o.value !== 'dashboard_access'; });
+    var wrap = el('div', 'areapick');
+    var toggle = el('button', 'mini areaall');
+    toggle.type = 'button';
+    var node = el('div', 'checks long');
+    node.id = id;
+    var boxes = [];
+    function ticked() {
+      var v = get() || [];
+      var all = v.indexOf('all') !== -1;
+      return parts.filter(function (o) { return v.indexOf(o.value) !== -1 || (all && o.value !== 'dashboard_access'); }).map(function (o) { return o.value; });
+    }
+    function save(values) {
+      var everything = others.every(function (o) { return values.indexOf(o.value) !== -1; });
+      var out = everything ? ['all'] : values.filter(function (v) { return v !== 'dashboard_access'; });
+      if (values.indexOf('dashboard_access') !== -1) out.push('dashboard_access');
+      put(out);
+    }
+    function sync() {
+      var now = ticked();
+      boxes.forEach(function (b) { b.box.checked = now.indexOf(b.value) !== -1; });
+      var allOn = parts.every(function (o) { return now.indexOf(o.value) !== -1; });
+      toggle.textContent = allOn ? 'Unselect all' : 'Select all';
+      toggle.setAttribute('aria-pressed', allOn ? 'true' : 'false');
+    }
+    parts.forEach(function (o) {
+      var lab = el('label', 'chk');
+      var box = el('input');
+      box.type = 'checkbox';
+      box.addEventListener('change', function () {
+        save(boxes.filter(function (b) { return b.box.checked; }).map(function (b) { return b.value; }));
+        sync();
+      });
+      lab.append(box, el('span', null, o.label));
+      node.append(lab);
+      boxes.push({ box: box, value: o.value });
+    });
+    toggle.addEventListener('click', function () {
+      var allOn = parts.every(function (o) { return ticked().indexOf(o.value) !== -1; });
+      save(allOn ? [] : parts.map(function (o) { return o.value; }));
+      sync();
+    });
+    wrap.append(toggle, node);
+    sync();
+    return wrap;
+  }
+
   // Several channels, roles or members: chips with a remove button, and a way to add more.
   function pickList(s, id, get, put) {
     var box = el('div', 'picklist');
@@ -1446,24 +1499,84 @@
       }
     }
     if (kind === 'user') {
-      var row = el('div', 'row');
+      // Type a name (or paste an ID) and pick from the members that match.
+      var row = el('div', 'msearch upick');
+      var line = el('div', 'row');
       adder = el('input', 'field');
       adder.id = id;
-      adder.placeholder = 'Paste a member ID';
-      adder.inputMode = 'numeric';
-      var add = el('button', 'mini', 'Add');
-      add.type = 'button';
-      add.addEventListener('click', function () {
-        var v = adder.value.trim();
-        if (!ID_RE.test(v)) { adder.setCustomValidity('Paste a member’s ID: right-click them in Discord (with Developer Mode on) and Copy User ID.'); adder.reportValidity(); return; }
-        adder.setCustomValidity('');
+      adder.type = 'search';
+      adder.autocomplete = 'off';
+      adder.placeholder = 'Type a name, or paste a member ID';
+      var found = el('ul', 'mfound');
+      found.hidden = true;
+      adder.setAttribute('aria-controls', id + '-found');
+      found.id = id + '-found';
+      var timer = null, asked = 0;
+      function addUser(m) {
+        if (m.display || m.name) state.userNames[m.id] = m.display || m.name;
         var values = get() || [];
-        if (values.indexOf(v) === -1) put(values.concat([v]));
+        if (values.indexOf(m.id) === -1 && values.length < (s.max_items || 25)) put(values.concat([m.id]));
         adder.value = '';
+        found.hidden = true;
+        found.replaceChildren();
         draw();
+        adder.focus();
+      }
+      function search(text) {
+        var n = ++asked;
+        request('/api/members?guild_id=' + encodeURIComponent(state.guild) + '&q=' + encodeURIComponent(text)).then(function (r) {
+          if (n !== asked) return;
+          found.replaceChildren();
+          var list = r.status === 200 && r.data && Array.isArray(r.data.members) ? r.data.members : null;
+          if (!list) { found.append(el('li', 'empty', errorText(r))); found.hidden = false; return; }
+          var taken = get() || [];
+          list = list.filter(function (m) { return taken.indexOf(m.id) === -1; });
+          if (!list.length) { found.append(el('li', 'empty', 'Nobody else in the server matches that.')); found.hidden = false; return; }
+          list.forEach(function (m) {
+            var li = el('li');
+            var b = el('button', 'mpick');
+            b.type = 'button';
+            b.append(avatarNode(m.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(m.avatar) ? m.avatar : null, m.display, 'av xs'), el('b', null, m.display), el('span', 'mname', '@' + m.name));
+            b.addEventListener('click', function () { addUser(m); });
+            li.append(b);
+            found.append(li);
+          });
+          found.hidden = false;
+        });
+      }
+      adder.addEventListener('input', function () {
+        root.clearTimeout(timer);
+        var text = adder.value.trim();
+        if (text.length < 2 && !/^\d+$/.test(text)) { found.hidden = true; found.replaceChildren(); return; }
+        timer = root.setTimeout(function () { search(text); }, 250);
       });
-      row.append(adder, add);
+      // Add: a pasted ID goes in as it is (they don't have to be in the server); a typed name picks the first match.
+      function addTyped() {
+        var v = adder.value.trim();
+        if (ID_RE.test(v)) { adder.setCustomValidity(''); addUser({ id: v }); return; }
+        var first = found.querySelector('.mpick');
+        if (first && !found.hidden) { first.click(); return; }
+        adder.setCustomValidity(v ? 'Pick someone from the list, or paste a member ID.' : 'Type a name or paste a member ID first.');
+        adder.reportValidity();
+      }
+      adder.addEventListener('keydown', function (e) {
+        adder.setCustomValidity('');
+        if (e.key === 'Enter') { e.preventDefault(); addTyped(); } else if (e.key === 'Escape') { found.hidden = true; }
+      });
+      var addBtn = el('button', 'mini', 'Add');
+      addBtn.type = 'button';
+      addBtn.addEventListener('click', addTyped);
+      line.append(adder, addBtn);
+      row.append(line, found);
       box.append(chips, row);
+      // Members picked before (or saved by ID) show their names once the bot says who they are.
+      (get() || []).forEach(function (v) {
+        if (state.userNames[v]) return;
+        request('/api/members?guild_id=' + encodeURIComponent(state.guild) + '&q=' + encodeURIComponent(v)).then(function (r) {
+          var m = r.status === 200 && r.data && Array.isArray(r.data.members) ? r.data.members.find(function (x) { return x.id === v; }) : null;
+          if (m) { state.userNames[v] = m.display || m.name; draw(); }
+        });
+      });
     } else {
       adder = el('select', 'field');
       adder.id = id;

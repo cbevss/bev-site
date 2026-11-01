@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.44',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Who manages Dashboard Access',
+        text: 'The server owner can pick a role or members who manage Dashboard Access, even if they aren\'t admins. They can change who else uses the dashboard, but never the owner\'s own settings. Dashboard Access is also now a part you can tick when giving people access (or when the owner takes parts away).' },
+      { title: 'Select all',
+        text: 'Choosing which parts of the dashboard someone gets now has a Select all / Unselect all button. Anyone with everything ticked also gets features added later.' },
+      { title: 'Find members by name',
+        text: 'Wherever the dashboard asks for members, type part of their name and pick them from the list (or still paste an ID). Members show by name instead of their ID.' },
+    ],
+  },
+  {
     id: '4.43',
     date: '1 November 2026',
     changes: [

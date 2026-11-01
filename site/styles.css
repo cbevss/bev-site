@@ -1655,3 +1655,5 @@ body:has(#savebar:not([hidden])) .totop{bottom:172px}
 .mtoplist b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mtopv{font-size:13px;color:var(--ac2);white-space:nowrap}
 .mtop{display:block;flex:1 0 100%;width:100%;grid-column:1/-1}.mtop .mtopsel{display:block;width:100%}
+.upick{display:grid;gap:6px}.upick .mfound{position:static;margin:0}
+.areapick{display:grid;gap:10px}.areaall{justify-self:start}
