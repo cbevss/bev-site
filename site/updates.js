@@ -5,6 +5,24 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.35',
+    date: '28 October 2026',
+    changes: [
+      { title: 'Build your server with AI',
+        text: 'In the Server Builder, describe your server (like "a Rocket League club with ranked, tournaments and clips") and BEV designs every category, channel and who can see or post in each, and points BEV\'s features at the right channels. You see the whole plan first, and nothing changes until you press Build it.' },
+      { title: 'BEV\'s look in your server',
+        text: 'A new Utility feature gives BEV its own nickname, profile picture, banner and About Me in your server only.' },
+      { title: 'Bluesky and Mastodon',
+        text: 'News Feeds can now post new Bluesky and Mastodon posts, alongside YouTube, Reddit, websites and free games.' },
+      { title: '500 designed messages',
+        text: 'The Message Designer now keeps up to 500 messages per server, up from 10.' },
+      { title: 'Tournament Brackets',
+        text: 'Run tournaments for players or teams (teams list their members\' Discord usernames). BEV builds the bracket in your order or shuffled, posts it as a clean picture, and redraws the same message whenever you pick a winner or add a score on the dashboard. Every winner is confirmed first, and a misclick can be changed. Anyone can see the standings with /bracket.' },
+      { title: 'A page for every feature',
+        text: 'Every feature and dashboard tool now has its own page on the website, with every setting, its commands and the other names people know it by, so whatever you search for, you\'ll find it.' },
+    ],
+  },
+  {
     id: '4.34',
     date: '28 October 2026',
     changes: [

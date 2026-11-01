@@ -265,7 +265,7 @@
   /* ---------- drawing the settings ---------- */
 
   // Cards that fill a whole row go after the others in their section, so the two-column grid has no gaps.
-  var WIDE = { custom_messages: true, dashboard_access: true, 'tool:members': true };
+  var WIDE = { custom_messages: true, dashboard_access: true, 'tool:members': true, brackets: true };
   function isWide(f) { return !!WIDE[f.tool ? 'tool:' + f.key : f.key]; }
 
   function inOrder(feats) {
@@ -472,6 +472,17 @@
     if (templates) {
       card.classList.add('wide');
       card.append(designerBox(f, templates));
+      return card;
+    }
+    if (f.key === 'brackets' && Array.isArray(state.config.brackets)) {
+      card.classList.add('wide');
+      var bb = bracketBox(f);
+      if (f.settings && f.settings.length) {
+        var bset = el('div', 'fields brksettings');
+        f.settings.forEach(function (s) { bset.append(fieldFor(s)); });
+        bb.prepend(bset);
+      }
+      card.append(bb);
       return card;
     }
     if (f.settings && f.settings.length) {
@@ -2787,6 +2798,10 @@
     var was = staff.value;
     optionsFor(staff, (state.config.roles || []).map(function (r) { return { value: r.id, label: '@' + r.name }; }), was, 'No staff role');
     builderSummary();
+    if (aib && !aib.busy && !$('baibuildrow').hidden) {
+      $('baibuild').textContent = builder.wipe ? '🏗️ Delete everything and build it' : '🏗️ Build it';
+      $('baibuild').classList.toggle('danger', !!builder.wipe);
+    }
   }
 
   // What ticking those adds: new categories and channels, against Discord's 500 channel limit.
@@ -2877,6 +2892,442 @@
       if (r.status === 504) builder.changed = true;     // still going on the bot
       builderNote((r.data && r.data.message) || errorText(r), false);
       drawBuilder();
+    });
+  }
+
+
+
+  /* ---------- Tournament brackets: make one, then pick winners (with a confirm), add scores and fix misclicks ---------- */
+  var brk = { pick: null, mode: 'players', count: 4, rows: [], random: false, scores: false, busy: false, note: null };
+  function brkAct(action, values, then) {
+    if (brk.busy) return;
+    brk.busy = true;
+    var guild = state.guild;
+    request('/api/action', {
+      method: 'POST',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({ guild_id: guild, owner: 'brackets', action: action, values: values })
+    }).then(function (r) {
+      brk.busy = false;
+      if (guild !== state.guild) return;
+      if (r.status === 200 && r.data && r.data.ok) {
+        brk.note = { text: r.data.note || 'Done.', ok: true };
+        say(brk.note.text);
+        then(r.data.data || {});
+      } else {
+        brk.note = { text: (r.data && r.data.message) || errorText(r), ok: false };
+      }
+      drawBrackets();
+    });
+  }
+  function brkPeople(b, ids) {
+    return (ids || []).map(function (id) { return '@' + ((b.names || {})[id] || 'member'); }).join(', ');
+  }
+  function memberPicker(chosen, single, onChange) {
+    // Search the server's members by name and pick them; picked members show as chips that can be removed.
+    var wrap = el('div', 'brkpick');
+    var chips = el('div', 'brkchips');
+    var input = el('input', 'field');
+    input.type = 'search';
+    input.autocomplete = 'off';
+    input.placeholder = single ? 'Name, or search a member' : 'Add a member: type their username';
+    var found = el('ul', 'mfound');
+    found.hidden = true;
+    function drawChips() {
+      chips.replaceChildren();
+      chosen.forEach(function (m, i) {
+        var c = el('span', 'pchip', '@' + m.name);
+        var x = el('button', 'x', '×');
+        x.type = 'button';
+        x.setAttribute('aria-label', 'Remove ' + m.name);
+        x.addEventListener('click', function () { chosen.splice(i, 1); drawChips(); onChange(); });
+        c.append(x);
+        chips.append(c);
+      });
+      chips.hidden = !chosen.length;
+    }
+    var timer = null, asked = 0;
+    input.addEventListener('input', function () {
+      root.clearTimeout(timer);
+      var text = input.value.trim().replace(/^@/, '');
+      if (single) onChange(input.value);
+      if (text.length < 2) { found.hidden = true; return; }
+      timer = root.setTimeout(function () {
+        var n = ++asked;
+        request('/api/members?guild_id=' + encodeURIComponent(state.guild) + '&q=' + encodeURIComponent(text)).then(function (r) {
+          if (n !== asked) return;
+          found.replaceChildren();
+          var list = r.status === 200 && r.data && Array.isArray(r.data.members) ? r.data.members.slice(0, 6) : [];
+          list.forEach(function (m) {
+            var li = el('li');
+            var b = el('button', 'mpick');
+            b.type = 'button';
+            b.append(el('b', null, m.display), el('span', 'mname', '@' + m.name));
+            b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+            b.addEventListener('click', function () {
+              if (single) { chosen.length = 0; input.value = m.display; }
+              else input.value = '';
+              if (!chosen.some(function (c) { return c.id === m.id; })) chosen.push({ id: m.id, name: m.name });
+              found.hidden = true;
+              drawChips();
+              onChange(single ? input.value : undefined);
+            });
+            li.append(b);
+            found.append(li);
+          });
+          found.hidden = !list.length;
+        });
+      }, 220);
+    });
+    input.addEventListener('blur', function () { root.setTimeout(function () { found.hidden = true; }, 150); });
+    wrap.append(input, found, chips);
+    drawChips();
+    return { node: wrap, input: input };
+  }
+  function brkRowsTo(n) {
+    while (brk.rows.length < n) brk.rows.push({ name: '', members: [] });
+    brk.rows.length = n;
+  }
+  function brkNewForm(f) {
+    var form = el('div', 'brkform');
+    var top = el('div', 'igrid');
+    var nameCell = el('div', 'icell');
+    var nameIn = el('input', 'field');
+    nameIn.id = 'brk-name'; nameIn.maxLength = 80; nameIn.placeholder = 'Like: Spring Cup 2v2';
+    nameIn.value = brk.title || '';
+    nameIn.addEventListener('input', function () { brk.title = nameIn.value; });
+    var nl = el('label', 'flabel sm', 'Name'); nl.htmlFor = 'brk-name';
+    nameCell.append(nl, nameIn);
+    var chCell = el('div', 'icell');
+    var ch = el('select', 'field');
+    ch.id = 'brk-channel';
+    optionsFor(ch, channelChoices(['text']), brk.channel || '', 'Pick a channel…');
+    ch.addEventListener('change', function () { brk.channel = ch.value; });
+    var cl = el('label', 'flabel sm', 'Post it in'); cl.htmlFor = 'brk-channel';
+    chCell.append(cl, ch);
+    var countCell = el('div', 'icell');
+    var count = el('input', 'field');
+    count.id = 'brk-count'; count.type = 'number'; count.min = 2; count.max = 64; count.value = brk.count;
+    var ql = el('label', 'flabel sm', brk.mode === 'teams' ? 'How many teams' : 'How many players'); ql.htmlFor = 'brk-count';
+    count.addEventListener('change', function () {
+      var n = Math.max(2, Math.min(64, parseInt(count.value, 10) || 2));
+      count.value = n; brk.count = n; brkRowsTo(n); drawBrackets();
+    });
+    countCell.append(ql, count);
+    top.append(nameCell, chCell, countCell);
+    form.append(top);
+    var seg = el('div', 'seg brkmode');
+    seg.setAttribute('role', 'group');
+    seg.setAttribute('aria-label', 'Players or teams');
+    [['players', '🧍 Players'], ['teams', '👥 Teams']].forEach(function (o) {
+      var b = el('button', null, o[1]);
+      b.type = 'button';
+      b.setAttribute('data-mode', o[0]);
+      b.setAttribute('aria-pressed', brk.mode === o[0] ? 'true' : 'false');
+      b.addEventListener('click', function () { brk.mode = o[0]; brk.rows.forEach(function (x) { x.members = []; }); drawBrackets(); });
+      seg.append(b);
+    });
+    form.append(seg);
+    brkRowsTo(brk.count);
+    var list = el('ol', 'brkrows');
+    brk.rows.forEach(function (row, i) {
+      var li = el('li', 'brkrow');
+      if (brk.mode === 'teams') {
+        var tn = el('input', 'field brkteam');
+        tn.placeholder = 'Team ' + (i + 1) + ' name';
+        tn.maxLength = 40;
+        tn.value = row.name;
+        tn.setAttribute('aria-label', 'Team ' + (i + 1) + ' name');
+        tn.addEventListener('input', function () { row.name = tn.value; });
+        var picker = memberPicker(row.members, false, function () {});
+        picker.input.setAttribute('aria-label', 'Members of team ' + (i + 1));
+        li.append(tn, picker.node);
+      } else {
+        var picker1 = memberPicker(row.members, true, function (typed) { if (typed !== undefined) { row.name = typed; if (row.members.length && typed !== row.members[0].display) row.members.length = 0; } });
+        picker1.input.value = row.name;
+        picker1.input.setAttribute('aria-label', 'Player ' + (i + 1));
+        li.append(picker1.node);
+      }
+      list.append(li);
+    });
+    form.append(list);
+    var opts = el('div', 'brkopts');
+    [['random', '🎲 Random matchups (shuffle the order)'], ['scores', '🔢 Keep scores for each match']].forEach(function (o) {
+      var lab = el('label', 'chk');
+      var box = el('input');
+      box.type = 'checkbox';
+      box.checked = !!brk[o[0]];
+      box.id = 'brk-' + o[0];
+      box.addEventListener('change', function () { brk[o[0]] = box.checked; });
+      lab.append(box, ' ' + o[1]);
+      opts.append(lab);
+    });
+    form.append(opts);
+    var go = el('button', 'act save', '🏆 Make the bracket');
+    go.type = 'button';
+    go.id = 'brk-make';
+    go.disabled = brk.busy || !f.enabled;
+    if (!f.enabled) form.append(el('p', 'help', 'Switch Tournament Brackets on and save first.'));
+    go.addEventListener('click', function () {
+      var entrants = brk.rows.map(function (row) {
+        return brk.mode === 'teams' ? { name: row.name.trim(), members: row.members.map(function (m) { return m.id; }) }
+          : { name: (row.name || '').trim(), members: row.members.map(function (m) { return m.id; }) };
+      });
+      brkAct('create', { name: (brk.title || '').trim(), channel: brk.channel || '', mode: brk.mode, entrants: JSON.stringify(entrants),
+                         random: brk.random ? 'yes' : 'no', scores: brk.scores ? 'yes' : 'no' }, function (b) {
+        state.config.brackets.unshift(b);
+        brk.pick = b.id;
+        brk.rows = []; brk.title = '';
+      });
+    });
+    form.append(go);
+    return form;
+  }
+  function brkSideName(b, side) {
+    if (side === 'bye') return 'BYE';
+    if (typeof side !== 'number') return 'TBD';
+    return b.entrants[side].name;
+  }
+  function brkView(b) {
+    var view = el('div', 'brkview');
+    var head = el('div', 'brkhead');
+    var title = el('div');
+    title.append(el('h3', 'disp', '🏆 ' + b.name));
+    var sub = el('p', 'help', b.entrants.length + ' ' + (b.mode === 'teams' ? 'teams' : 'players') + (b.channel_name ? ' • posted in #' + b.channel_name : ''));
+    if (b.url) {
+      var open = el('a', 'inl', 'Open in Discord');
+      open.href = b.url; open.target = '_blank'; open.rel = 'noopener noreferrer';
+      sub.append(' • ', open);
+    }
+    title.append(sub);
+    head.append(title);
+    var tools = el('div', 'row brktools');
+    var sc = el('label', 'chk');
+    var scBox = el('input');
+    scBox.type = 'checkbox'; scBox.checked = !!b.scores; scBox.id = 'brk-scores-on';
+    scBox.addEventListener('change', function () {
+      brkAct('settings', { bracket: String(b.id), scores: scBox.checked ? 'yes' : 'no' }, function (nb) { Object.assign(b, nb); });
+    });
+    sc.append(scBox, ' Scores');
+    var again = el('button', 'mini', '📤 Post again');
+    again.type = 'button';
+    again.addEventListener('click', function () { brkAct('repost', { bracket: String(b.id) }, function (nb) { Object.assign(b, nb); }); });
+    var del = el('button', 'mini danger', 'Delete');
+    del.type = 'button';
+    del.addEventListener('click', function () {
+      askDialog({ title: 'Delete ' + b.name + '?', text: 'It’s removed from the dashboard and can’t be updated any more. The message in Discord stays.', ok: 'Delete it', cancel: 'Keep it' })
+        .then(function (yes) {
+          if (!yes) return;
+          brkAct('delete', { bracket: String(b.id) }, function () {
+            state.config.brackets = state.config.brackets.filter(function (x) { return x.id !== b.id; });
+            brk.pick = null;
+          });
+        });
+    });
+    tools.append(sc, again, del);
+    head.append(tools);
+    view.append(head);
+    if (typeof b.champion === 'number') view.append(el('p', 'brkchamp', '🏆 Champion: ' + brkSideName(b, b.champion)));
+    var board = el('div', 'brkboard');
+    b.rounds.forEach(function (matches, r) {
+      var col = el('div', 'brkcol');
+      col.append(el('p', 'lab', b.round_names[r]));
+      matches.forEach(function (m, i) {
+        var real = typeof m.a === 'number' && typeof m.b === 'number';
+        var card = el('div', 'brkmatch' + (m.w ? ' done' : '') + (real ? '' : ' wait'));
+        card.setAttribute('data-r', r);
+        card.setAttribute('data-m', i);
+        ['a', 'b'].forEach(function (side) {
+          var row = el('div', 'brkside' + (m.w === side ? ' won' : m.w ? ' lost' : ''));
+          row.append(el('span', 'bn', brkSideName(b, m[side])));
+          var who = typeof m[side] === 'number' && b.mode === 'teams' ? brkPeople(b, b.entrants[m[side]].members) : '';
+          if (who) row.title = who;
+          if (b.scores && real) {
+            var score = el('input', 'field brkscore');
+            score.type = 'number'; score.min = 0; score.max = 9999;
+            score.value = m[side === 'a' ? 'sa' : 'sb'] === null || m[side === 'a' ? 'sa' : 'sb'] === undefined ? '' : m[side === 'a' ? 'sa' : 'sb'];
+            score.setAttribute('aria-label', 'Score for ' + brkSideName(b, m[side]));
+            score.addEventListener('change', function () {
+              var inputs = card.querySelectorAll('.brkscore');
+              brkAct('score', { bracket: String(b.id), round: String(r), match: String(i), sa: inputs[0].value, sb: inputs[1].value }, function (nb) { Object.assign(b, nb); });
+            });
+            row.append(score);
+          }
+          if (real && m.w !== side) {
+            var win = el('button', 'mini brkwin', 'Won');
+            if (m.w) win.title = 'Make ' + brkSideName(b, m[side]) + ' the winner instead';
+            win.type = 'button';
+            win.addEventListener('click', function () {
+              var name = brkSideName(b, m[side]);
+              var other = brkSideName(b, m[side === 'a' ? 'b' : 'a']);
+              askDialog({ title: 'Confirm the winner', text: 'Did ' + name + ' beat ' + other + '? BEV will update the bracket in Discord.',
+                          hint: m.w ? 'This changes the result. Any later matches that depended on it are reset.' : null,
+                          ok: '✅ Yes, ' + name + ' won', cancel: 'Go back' }).then(function (yes) {
+                if (!yes) return;
+                brkAct('winner', { bracket: String(b.id), round: String(r), match: String(i), side: side, confirm: 'yes' }, function (nb) { Object.assign(b, nb); });
+              });
+            });
+            row.append(win);
+          }
+          if (m.w === side) row.append(el('span', 'brktick', '✓'));
+          card.append(row);
+        });
+        if (real && m.w) {
+          var undo = el('button', 'mini ghost brkundo', 'Clear result');
+          undo.type = 'button';
+          undo.addEventListener('click', function () {
+            askDialog({ title: 'Clear this result?', text: 'The match goes back to having no winner, and later matches that depended on it are reset.', ok: 'Clear it', cancel: 'Keep it' })
+              .then(function (yes) { if (yes) brkAct('undo', { bracket: String(b.id), round: String(r), match: String(i) }, function (nb) { Object.assign(b, nb); }); });
+          });
+          card.append(undo);
+        }
+        col.append(card);
+      });
+      board.append(col);
+    });
+    view.append(board);
+    return view;
+  }
+  var brkHost = null, brkFeature = null;
+  function drawBrackets() {
+    if (!brkHost) return;
+    var f = brkFeature;
+    // Let go of a focused box first: its own blur handling (like a dropdown closing) mustn't run while it's being removed.
+    if (doc.activeElement && brkHost.contains(doc.activeElement)) doc.activeElement.blur();
+    brkHost.replaceChildren();
+    var tabs = el('div', 'mtabs');
+    (state.config.brackets || []).forEach(function (b) {
+      var t = el('button', 'mtab' + (brk.pick === b.id ? ' on' : ''), (typeof b.champion === 'number' ? '🏆 ' : '') + b.name);
+      t.type = 'button';
+      t.addEventListener('click', function () { brk.pick = b.id; brk.note = null; drawBrackets(); });
+      tabs.append(t);
+    });
+    var add = el('button', 'mini add mnew' + (brk.pick === null ? ' on' : ''), 'New bracket');
+    add.type = 'button';
+    add.addEventListener('click', function () { brk.pick = null; brk.note = null; drawBrackets(); });
+    tabs.append(add);
+    brkHost.append(tabs);
+    if (brk.note) {
+      var n = el('p', 'fnote' + (brk.note.ok ? ' ok' : ' no'), brk.note.text);
+      n.setAttribute('role', 'status');
+      brkHost.append(n);
+    }
+    var current = (state.config.brackets || []).find(function (b) { return b.id === brk.pick; });
+    brkHost.append(current ? brkView(current) : brkNewForm(f));
+  }
+  function bracketBox(f) {
+    brkFeature = f;
+    var outer = el('div', 'brkbox');
+    outer.id = 'brackets';
+    brkHost = el('div', 'brkinner');
+    outer.append(brkHost);
+    if (brk.pick === null && (state.config.brackets || []).length) brk.pick = state.config.brackets[0].id;
+    drawBrackets();
+    return outer;
+  }
+
+  /* ---------- Build with AI: describe the server, see the plan, build it ---------- */
+  var aib = { plan: null, busy: false };
+  function aiNote(text, ok) {
+    var n = $('bainote');
+    n.hidden = !text;
+    n.textContent = text || '';
+    n.className = 'fnote' + (ok === true ? ' ok' : ok === false ? ' no' : '');
+  }
+  function drawAiPlan(shown) {
+    var grid = $('baiplan');
+    grid.replaceChildren();
+    grid.hidden = !shown;
+    $('baibuildrow').hidden = !shown;
+    if (!shown) return;
+    shown.categories.forEach(function (c) {
+      var tile = el('div', 'bset aiset');
+      var head = el('div', 'bsh');
+      var title = el('div', 'bst');
+      title.append(el('h3', null, c.name), el('span', 'bacc', (ACCESS_MARK[c.access] || '') + ' ' + c.access_text));
+      head.append(title);
+      tile.append(head);
+      if (c.about) tile.append(el('p', 'babout', c.about));
+      var list = el('ul', 'bch');
+      c.channels.forEach(function (ch) {
+        var li = el('li', ch.exists ? 'have' : null);
+        li.append(el('span', 'bk', ch.kind === 'voice' ? '🔊' : '#'), el('span', 'bn', ch.name));
+        if (ch.exists) li.append(el('span', 'btag', 'already there'));
+        else {
+          if (ch.readonly && c.access !== 'readonly') li.append(el('span', 'btag ro', 'read-only'));
+          if (ch.for_text) li.append(el('span', 'btag use', 'for ' + ch.for_text));
+        }
+        if (ch.topic) li.title = ch.topic;
+        list.append(li);
+      });
+      tile.append(list);
+      grid.append(tile);
+    });
+    var data = builderData();
+    var fresh = shown.categories.reduce(function (n, c) { return n + c.channels.filter(function (x) { return !x.exists; }).length; }, 0);
+    $('baibuild').disabled = aib.busy || !fresh || (data && data.can === false);
+    $('baibuild').textContent = aib.busy ? 'Building…' : builder.wipe ? '🏗️ Delete everything and build it' : '🏗️ Build it (' + plural(fresh, 'new channel') + ')';
+    $('baibuild').classList.toggle('danger', !!builder.wipe);
+  }
+  function aiAsk(values, action, then) {
+    var guild = state.guild;
+    return request('/api/action', {
+      method: 'POST',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({ guild_id: guild, owner: 'builder', action: action, values: values })
+    }).then(function (r) { if (guild === state.guild) then(r); });
+  }
+  function aiPlan() {
+    var prompt = $('baiprompt').value.trim();
+    if (aib.busy) return;
+    if (prompt.length < 3) { aiNote('Describe your server in a few words first.', false); $('baiprompt').focus(); return; }
+    aib.busy = true;
+    $('baigo').disabled = true;
+    $('baigo').textContent = '✨ Planning…';
+    aiNote('BEV is designing your server. This takes about 10 to 30 seconds…', null);
+    drawAiPlan(null);
+    aiAsk({ prompt: prompt }, 'ai_plan', function (r) {
+      aib.busy = false;
+      $('baigo').disabled = false;
+      $('baigo').textContent = '✨ Plan it with AI';
+      if (r.status === 200 && r.data && r.data.ok && r.data.data && r.data.data.plan) {
+        aib.plan = r.data.data.plan;
+        aiNote(r.data.note, true);
+        drawAiPlan(r.data.data.shown);
+        $('baiplan').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } else aiNote((r.data && r.data.message) || errorText(r), false);
+    });
+  }
+  function aiBuild() {
+    if (!aib.plan || aib.busy) return;
+    var typed = '';
+    if (builder.wipe) {
+      typed = root.prompt('This deletes EVERY channel and category in ' + state.config.guild.name + ', then builds the AI plan.\n\nType the server’s name to confirm:') || '';
+      if (typed.trim().replace(/\s+/g, ' ').toLowerCase() !== String(state.config.guild.name).trim().replace(/\s+/g, ' ').toLowerCase()) {
+        aiNote(typed ? 'That isn’t the server’s name, so nothing was deleted.' : 'Cancelled. Nothing was deleted.', false);
+        return;
+      }
+    } else if (!root.confirm('Build this plan in ' + state.config.guild.name + '? Nothing that’s already in the server is changed.')) return;
+    aib.busy = true;
+    aiNote(builder.wipe ? 'BEV is deleting the old channels, then building. This can take a few minutes…' : 'BEV is building. This can take up to a minute…', null);
+    $('baibuild').disabled = true;
+    $('baibuild').textContent = 'Building…';
+    aiAsk({ plan: JSON.stringify(aib.plan), staff_role: $('bstaff').value || '', hook: $('bhook').checked ? 'yes' : 'no',
+            wipe: builder.wipe ? 'yes' : 'no', confirm_name: typed }, 'ai_build', function (r) {
+      aib.busy = false;
+      if (r.status === 200 && r.data && r.data.ok) {
+        builder.changed = true;
+        builder.wipe = false;
+        if ($('bwipe')) $('bwipe').checked = false;
+        aiNote(r.data.note || 'Done.', true);
+        drawAiPlan(r.data.data);
+        say(r.data.note || 'Done.');
+      } else {
+        if (r.status === 504) builder.changed = true;
+        aiNote((r.data && r.data.message) || errorText(r), false);
+        $('baibuild').disabled = false;
+        $('baibuild').textContent = '🏗️ Build it';
+      }
     });
   }
 
@@ -3035,6 +3486,13 @@
     $('bopen').addEventListener('click', function () { openBuilder(false); });
     $('bback').addEventListener('click', function () { closeBuilder(false); });
     $('bgo').addEventListener('click', buildNow);
+    $('baigo').addEventListener('click', aiPlan);
+    $('baibuild').addEventListener('click', aiBuild);
+    $('baiagain').addEventListener('click', function () { aib.plan = null; drawAiPlan(null); aiNote('', null); $('baiprompt').focus(); });
+    $('baiprompt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); aiPlan(); } });
+    Array.prototype.forEach.call(doc.querySelectorAll('#baibox [data-ex]'), function (b) {
+      b.addEventListener('click', function () { $('baiprompt').value = b.getAttribute('data-ex'); $('baiprompt').focus(); });
+    });
     $('bwipe').addEventListener('change', function () {
       var box = this;
       if (!box.checked) { builder.wipe = false; drawBuilder(); return; }
