@@ -54,7 +54,7 @@ const PAGES = { '/suggest': 'Suggest an idea', '/discover': 'Find a server', '/'
 const NOT_A_PERSON = /bot|crawl|spider|slurp|preview|monitor|uptime|curl|wget|python|httpclient|headless|lighthouse|facebookexternalhit|embedly|whatsapp/i;
 const STATIC_FILE = /^\/[\w.-]+\.(?:css|js|png|jpe?g|gif|svg|ico|webp|txt|xml|webmanifest|woff2?)$/;
 const DASHBOARD_PATHS = new Set(['/dashboard', '/dashboard/', '/dashboard.html', '/jail-requests', '/jail-requests/', '/jail-requests.html']);
-const ADMIN_PATHS = new Set(['/admin', '/admin/', '/admin.html', '/admin-suggestions', '/admin-suggestions/', '/admin-suggestions.html']);
+const ADMIN_PATHS = new Set(['/admin', '/admin/', '/admin.html', '/admin-suggestions', '/admin-suggestions/', '/admin-suggestions.html', '/admin-support', '/admin-support/', '/admin-support.html']);
 const BANNER_STYLES = ['info', 'warning', 'success'];
 
 class Upstream extends Error {
@@ -467,7 +467,9 @@ async function publicApi(request, c, url) {
 }
 
 const PRIVATE = { '/api/suggest': ['POST'], '/api/me': ['GET'], '/api/servers': ['GET'], '/api/config': ['GET', 'POST'], '/api/level-roles': ['GET', 'POST'], '/api/messages': ['POST'],
-                  '/api/action': ['POST'], '/api/members': ['GET'], '/api/preview': ['POST'], '/api/bracket': ['GET'] };
+                  '/api/action': ['POST'], '/api/members': ['GET'], '/api/preview': ['POST'], '/api/bracket': ['GET'],
+                  '/api/support/mine': ['GET'], '/api/support/new': ['POST'], '/api/support/ticket': ['GET'], '/api/support/topic': ['POST'],
+                  '/api/support/send': ['POST'], '/api/support/close': ['POST'] };
 
 async function api(request, c, url, secure, s) {
   const path = url.pathname;
@@ -484,6 +486,7 @@ async function api(request, c, url, secure, s) {
   // "admin" only decides whether the top bar shows the Admin tab; /admin and its API check again.
   if (path === '/api/me') return json({ user: session.user, admin: s.admin });
   if (path === '/api/suggest') return sendSuggestion(request, c, s);
+  if (path.startsWith('/api/support/')) return supportChat(request, c, url, s, path);
   // A tournament bracket: anyone signed in can ask, and the bot only answers members of that server.
   if (path === '/api/bracket') {
     const guildId = url.searchParams.get('guild_id') || '';
@@ -837,7 +840,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=b77c15083b">
+<link rel="stylesheet" href="/styles.css?v=ce1caf045e">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1046,6 +1049,7 @@ const ADMIN_ROUTES = {
   '/api/admin/state': 'GET', '/api/admin/maintenance': 'POST', '/api/admin/banner': 'POST', '/api/admin/check': 'POST',
   '/api/admin/alert': 'GET', '/api/admin/alert/send': 'POST', '/api/admin/inbox': 'GET', '/api/admin/inbox/mark': 'POST',
   '/api/admin/features': 'GET', '/api/admin/features/set': 'POST', '/api/admin/suggestions': 'GET', '/api/admin/suggestions/answer': 'POST',
+  '/api/admin/support': 'GET', '/api/admin/support/act': 'POST',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1364,6 +1368,7 @@ async function adminApi(request, env, c, url, secure, s) {
   if (path === '/api/admin/inbox/mark') return markInbox(request, env, s);
   if (path === '/api/admin/features' || path === '/api/admin/features/set') return ownerFeatures(request, c, s, path);
   if (path === '/api/admin/suggestions' || path === '/api/admin/suggestions/answer') return adminSuggestions(request, c, s, path);
+  if (path === '/api/admin/support' || path === '/api/admin/support/act') return adminSupport(request, c, s, path);
 
   const body = await readJson(request, 20000);
   if (!body) return json({ error: 'bad_request' }, 400);
@@ -1489,6 +1494,94 @@ async function sendSuggestion(request, c, s) {
   if (res.status === 404) return json({ error: 'bot_outdated', message: "This needs the newest version of BEV. Try again later." }, 501);
   if (res.status !== 200 || !res.data) return json({ error: 'bot_error', message: 'Something went wrong. Try again in a minute.' }, 502);
   return json({ ok: true, id: Number(res.data.id) || 0 });
+}
+
+/* ---------- the support chat: tickets with BEV's AI, passed to site admins when someone asks for a person ---------- */
+
+const SUPPORT_WHO = new Set(['user', 'bev', 'agent', 'system', 'note']);
+const SUPPORT_STATUS = new Set(['bot', 'waiting', 'agent', 'closed']);
+
+function cleanTicket(t, admin, me) {
+  t = t || {};
+  const out = {
+    id: Number(t.id) || 0, topic: ['question', 'suggestion'].includes(t.topic) ? t.topic : null, topic_label: str(t.topic_label, 60) || null,
+    status: SUPPORT_STATUS.has(t.status) ? t.status : 'bot', created: Number(t.created) || 0, updated: Number(t.updated) || 0,
+    with: t.with === 'Support Agent' ? 'Support Agent' : 'BEV',
+    messages: (Array.isArray(t.messages) ? t.messages : []).slice(-300).filter(m => m && SUPPORT_WHO.has(m.who) && (admin || m.who !== 'note'))
+      .map(m => Object.assign({ id: Number(m.id) || 0, who: m.who, text: str(m.text, 4000), at: Number(m.at) || 0 }, admin && m.agent ? { agent: str(m.agent, 80) } : {})),
+  };
+  if (admin) Object.assign(out, {
+    user_id: ID_RE.test(String(t.user_id)) ? String(t.user_id) : '', username: str(t.username, 64), display: str(t.display, 64),
+    avatar: typeof t.avatar === 'string' && /^https:\/\/cdn\.discordapp\.com\//.test(t.avatar) ? t.avatar.slice(0, 300) : null,
+    agent: str(t.agent, 80) || null, agent_is_me: !!me && t.status === 'agent' && String(t.agent_id || '') === me, escalated: Number(t.escalated) || null, closed_by: str(t.closed_by, 80) || null,
+  });
+  return out;
+}
+
+function cleanTicketSummary(t) {
+  t = t || {};
+  return { id: Number(t.id) || 0, topic_label: str(t.topic_label, 60) || 'New ticket', status: SUPPORT_STATUS.has(t.status) ? t.status : 'bot',
+           updated: Number(t.updated) || 0, created: Number(t.created) || 0, with: t.with === 'Support Agent' ? 'Support Agent' : 'BEV', last: str(t.last, 120) };
+}
+
+function supportError(res) {
+  if (res.error) return json({ error: res.error, message: "BEV didn't answer. Try again in a minute." }, 503);
+  if (res.status === 404 && !(res.data && res.data.error)) return json({ error: 'bot_outdated', message: 'This needs the newest version of BEV. Try again later.' }, 501);
+  if ([400, 404, 429].includes(res.status)) return json({ error: 'refused', message: str(res.data && res.data.error, 300) }, res.status);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error', message: 'Something went wrong. Try again in a minute.' }, 502);
+  return null;
+}
+
+// Who the person is always comes from their sign-in, never from the page.
+async function supportChat(request, c, url, s, path) {
+  const u = s.session.user;
+  const uid = String(u.id);
+  let res;
+  if (path === '/api/support/mine') {
+    res = await bot(c, '/api/site-support/mine?user_id=' + uid);
+    return supportError(res) || json({ tickets: (Array.isArray(res.data.tickets) ? res.data.tickets : []).slice(0, 50).map(cleanTicketSummary) });
+  }
+  if (path === '/api/support/ticket') {
+    const id = url.searchParams.get('id') || '';
+    if (!/^\d{1,10}$/.test(id)) return json({ error: 'bad_request' }, 400);
+    res = await bot(c, '/api/site-support/ticket?user_id=' + uid + '&id=' + id);
+    return supportError(res) || json({ ticket: cleanTicket(res.data.ticket, false) });
+  }
+  const body = (await readJson(request, 6000)) || {};
+  if (path === '/api/support/new') {
+    const avatar = u.avatar && /^[\w]+$/.test(u.avatar) ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : null;
+    res = await bot(c, '/api/site-support/new', { method: 'POST', body: JSON.stringify({ user_id: uid, username: u.username || u.name, display: u.name, avatar }) });
+    return supportError(res) || json({ ticket: cleanTicket(res.data.ticket, false) });
+  }
+  if (!Number.isInteger(body.id)) return json({ error: 'bad_request' }, 400);
+  const send = { user_id: uid, id: body.id };
+  if (path === '/api/support/topic') {
+    if (!['question', 'suggestion', 'nevermind'].includes(body.topic)) return json({ error: 'bad_request' }, 400);
+    send.topic = body.topic;
+  }
+  if (path === '/api/support/send') {
+    if (typeof body.text !== 'string' || !body.text.trim() || body.text.length > 2000) return json({ error: 'invalid', message: 'Write a message (at most 2,000 characters).' }, 400);
+    send.text = body.text;
+  }
+  res = await bot(c, '/api/site-support/' + path.slice('/api/support/'.length), { method: 'POST', body: JSON.stringify(send) });
+  const bad = supportError(res);
+  if (bad) return bad;
+  if (res.data.deleted) return json({ deleted: true });
+  return json({ ticket: cleanTicket(res.data.ticket, false) });
+}
+
+async function adminSupport(request, c, s, path) {
+  let res;
+  if (path === '/api/admin/support/act') {
+    const body = await readJson(request, 6000);
+    if (!body || !Number.isInteger(body.id) || !['accept', 'reply', 'note', 'close'].includes(body.action)) return json({ error: 'bad_request' }, 400);
+    res = await bot(c, '/api/site-support/admin/act', { method: 'POST', body: JSON.stringify({
+      id: body.id, action: body.action, text: str(body.text, 2000), by: s.session.user.name, by_id: String(s.session.user.id) }) });
+    return supportError(res) || json({ ticket: cleanTicket(res.data.ticket, true, String(s.session.user.id)) });
+  }
+  res = await bot(c, '/api/site-support/admin');
+  return supportError(res) || json({ tickets: (Array.isArray(res.data.tickets) ? res.data.tickets : []).slice(0, 200).map(t => cleanTicket(t, true, String(s.session.user.id))),
+                                     waiting: Number(res.data.waiting) || 0 });
 }
 
 /* ---------- entry ---------- */

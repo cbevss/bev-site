@@ -117,6 +117,10 @@
   - Setting: Share unbans too.
 - Dashboard Access (also called: dashboard permissions, staff dashboard access, web panel access): Lets people who aren't admins use this server's dashboard: pick a role or members, then what they can see and change. Only admins can change this card, and people given access never see it. Page: https://bevbotdiscord.com/features/dashboard-access
   - Setting: Who else can use the dashboard. Each one gives a role, or up to 10 members, access to the parts of the dashboard you tick. Someone in more than one gets all of their parts Each has: Role, Members, What they can see and change.
+- Security Timeline (also called: audit log, staff abuse, rogue staff, risk score, security log, admin abuse alerts, BEV Shield): One timeline of every risky thing staff do (bans, kicks, deleted channels and roles, admin handed out, bots and webhooks added) with a risk score for each staff member. BEV warns you when someone's score climbs too fast. Page: https://bevbotdiscord.com/features/security-timeline
+  - Setting: Warn when someone's risk score in an hour reaches. Each action adds to the score: a ban 3, deleting a channel or role 4, adding a bot 5, giving out admin 6. Scores only count the last hour. Choices: 8 (very strict), 15, 25, 40 (relaxed).
+  - Setting: Also DM the owner.
+  - Setting: Count the server owner too.
 
 ### Moderation
 - Warnings (also called: warn, warn system, infractions, strikes, case history): Admins give official warnings with /warn. BEV keeps a case history for every member and can punish automatically when warnings add up. Page: https://bevbotdiscord.com/features/warnings

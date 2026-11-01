@@ -904,6 +904,16 @@
     $('sgstate').textContent = n ? n + ' waiting' : 'All answered';
   }, function () { $('sgstate').textContent = 'Not available'; });
 
+  // Support chats: how many are waiting for someone. The chats themselves have their own page.
+  call('/api/admin/support').then(function (res) {
+    if (!res.ok) { $('spstate').textContent = res.data.error === 'bot_outdated' ? 'Bot needs updating' : 'Not available'; return; }
+    var n = Number(res.data.waiting) || 0;
+    $('spwait').textContent = String(n);
+    $('spwait').className = 'jrn' + (n ? '' : ' zero');
+    $('spwait').setAttribute('aria-label', n === 1 ? '1 waiting' : n + ' waiting');
+    $('spstate').textContent = n ? n + ' waiting' : 'Nobody waiting';
+  }, function () { $('spstate').textContent = 'Not available'; });
+
   var resizeTimer = null;
   root.addEventListener('resize', function () {
     root.clearTimeout(resizeTimer);

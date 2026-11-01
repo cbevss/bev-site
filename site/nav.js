@@ -528,6 +528,7 @@
     });
 
     var ticking = false;
+    var closedHeight = 0;
     function update() {
       ticking = false;
       if (page.classList.contains('newsopen')) return;
@@ -540,7 +541,10 @@
       }
       page.style.setProperty('--navh', fix ? nav.offsetHeight + 'px' : '0px');
       // How tall the pinned bar is (or will be), so a link to a section never hides its heading under the bar.
-      page.style.setProperty('--navfix', (fix ? nav.offsetHeight : Math.max(0, nav.offsetHeight - 20)) + 'px');
+      // The ☰ menu closes when a link is followed, so the closed bar's height is the one that counts.
+      if (!nav.classList.contains('open')) closedHeight = nav.offsetHeight;
+      var barHeight = closedHeight || nav.offsetHeight;
+      page.style.setProperty('--navfix', (fix ? barHeight : Math.max(0, barHeight - 20)) + 'px');
       var long = doc.documentElement.scrollHeight > root.innerHeight * 2.5;
       up.hidden = !(long && y > root.innerHeight * 0.8);
     }
@@ -551,7 +555,8 @@
     root.addEventListener('resize', function () { if (!nav.classList.contains('fixed')) measure(); onScroll(); });
     root.addEventListener('load', function () { measure(); update(); });
     // The top bar can change height when the account pill or Admin tab appears.
-    if (root.ResizeObserver) new root.ResizeObserver(function () { measure(); }).observe(nav);
+    // (and when the ☰ menu opens or closes), so the space kept for it under section links is always up to date.
+    if (root.ResizeObserver) new root.ResizeObserver(function () { measure(); onScroll(); }).observe(nav);
   }
 
   navExtras();

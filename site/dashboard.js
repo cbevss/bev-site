@@ -265,7 +265,7 @@
   /* ---------- drawing the settings ---------- */
 
   // Cards that fill a whole row go after the others in their section, so the two-column grid has no gaps.
-  var WIDE = { custom_messages: true, dashboard_access: true, 'tool:members': true, brackets: true };
+  var WIDE = { custom_messages: true, dashboard_access: true, 'tool:members': true, brackets: true, security_timeline: true };
   function isWide(f) { return !!WIDE[f.tool ? 'tool:' + f.key : f.key]; }
 
   function inOrder(feats) {
@@ -472,6 +472,15 @@
     if (templates) {
       card.classList.add('wide');
       card.append(designerBox(f, templates));
+      return card;
+    }
+    if (f.key === 'security_timeline' && state.config.security_timeline) {
+      card.classList.add('wide');
+      var tb = timelineBox(state.config.security_timeline);
+      var tset = el('div', 'fields brksettings');
+      (f.settings || []).forEach(function (s) { tset.append(fieldFor(s)); });
+      tb.prepend(tset);
+      card.append(tb);
       return card;
     }
     if (f.key === 'brackets' && Array.isArray(state.config.brackets)) {
@@ -3278,6 +3287,45 @@
     if (brk.pick === null && (state.config.brackets || []).length) brk.pick = state.config.brackets[0].id;
     drawBrackets();
     return outer;
+  }
+
+  /* ---------- Security timeline: risky staff actions, newest first, and each person's risk score ---------- */
+  function timelineBox(t) {
+    var box = el('div', 'tlbox');
+    var events = Array.isArray(t.events) ? t.events : [];
+    var scores = Array.isArray(t.scores) ? t.scores : [];
+    var limit = Number(t.limit) || 15;
+    box.append(el('p', 'flabel', 'Risk scores (last hour, out of your limit of ' + limit + ')'));
+    if (!scores.length) box.append(el('p', 'fhelp', 'Nothing risky recorded yet. Actions show up here as staff do them.'));
+    var sl = el('ul', 'tlscores');
+    scores.forEach(function (r) {
+      var li = el('li', r.hour >= limit ? 'hot' : r.hour >= limit / 2 ? 'warm' : '');
+      li.append(el('b', null, r.actor || 'Someone'));
+      var bar = el('span', 'tlbar');
+      var fill = el('i');
+      fill.style.width = Math.min(100, Math.round(r.hour / limit * 100)) + '%';
+      bar.append(fill);
+      li.append(bar, el('span', 'tlnum', r.hour + ' now • ' + r.day + ' today'));
+      sl.append(li);
+    });
+    box.append(sl);
+    box.append(el('p', 'flabel', 'Timeline'));
+    if (!events.length) box.append(el('p', 'fhelp', 'Empty so far.'));
+    var list = el('ol', 'tllist');
+    events.forEach(function (e) {
+      var li = el('li', e.weight >= 4 ? 'big' : '');
+      li.append(el('span', 'tlicon', e.icon || '•'));
+      var txt = el('div', 'tltx');
+      var line = el('p');
+      line.append(el('b', null, e.actor), document.createTextNode(' ' + String(e.action).charAt(0).toLowerCase() + String(e.action).slice(1) + (e.target ? ' ' + e.target : '')));
+      txt.append(line);
+      if (e.detail) txt.append(el('span', 'tldetail', e.detail));
+      txt.append(el('span', 'tlwhen', new Date(e.at * 1000).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) + (e.weight ? ' • +' + e.weight + ' risk' : '')));
+      li.append(txt);
+      list.append(li);
+    });
+    box.append(list);
+    return box;
   }
 
   /* ---------- Build with AI: describe the server, see the plan, build it ---------- */

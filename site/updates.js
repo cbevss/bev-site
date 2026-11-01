@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.37',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Support chat',
+        text: 'There\'s a chat bubble in the corner of every page. Open a support ticket, say whether you have a question or a suggestion, and BEV answers straight away. Ask for a real person and the BEV team takes over in the same chat. Your old tickets are kept there too.' },
+      { title: 'Security Timeline',
+        text: 'A new Security feature: one timeline of every risky thing staff do (bans, kicks, deleted channels and roles, admin handed out, bots and webhooks added), with a risk score for each staff member. BEV warns your mod log, and you by DM, when someone\'s score climbs too fast.' },
+      { title: 'Voice rooms: everyone can talk again',
+        text: 'In some servers nobody could speak in a voice room made with Create a room, not even its owner. Rooms now keep the same permissions as the Create a room channel, and everyone who can join can talk, use voice activity and stream.' },
+    ],
+  },
+  {
     id: '4.36',
     date: '1 November 2026',
     changes: [
