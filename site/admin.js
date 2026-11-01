@@ -752,10 +752,11 @@
   /* ---------- admins ---------- */
 
   function renderAdmins() {
-    $('anote').textContent = state.adminsFromSetting
-      ? 'These accounts come from the SITE_ADMIN_IDS setting in Cloudflare. To change who can open this page, edit that setting, then upload the site again.'
-      : 'These accounts are built into the site. To change who can open this page, add a SITE_ADMIN_IDS setting in Cloudflare with their Discord user IDs '
-        + 'separated by commas, then upload the site again.';
+    var manage = !!state.canManageAdmins;
+    $('anote').textContent = manage
+      ? 'Main admins can add and remove site admins here. You can\'t remove yourself.'
+      : 'Only main admins can add or remove site admins.';
+    $('aadd').hidden = !manage;
     var list = $('alist');
     list.textContent = '';
     (state.admins || []).forEach(function (a) {
@@ -768,9 +769,43 @@
       nm.appendChild(make('span', null, a.id));
       li.appendChild(nm);
       if (state.me && state.me.id === a.id) li.appendChild(make('span', 'badge you', 'You'));
+      else if (manage) {
+        var rm = make('button', 'mini act arm-rm', 'Remove');
+        rm.type = 'button';
+        rm.setAttribute('aria-label', 'Remove ' + (a.name || a.id) + ' as a site admin');
+        rm.addEventListener('click', function () { if (arm(rm, 'Click again to remove')) changeAdmin('remove', a.id, rm); });
+        li.appendChild(rm);
+      }
+      if (!a.main) li.appendChild(make('span', 'badge', 'Added'));
       list.appendChild(li);
     });
   }
+
+  var ADMIN_ERRORS = {
+    already_admin: 'They\'re already a site admin.', cant_remove_self: 'You can\'t remove yourself.', not_admin: 'They aren\'t a site admin.',
+    not_main_admin: 'Only main admins can change this.', too_many_admins: 'That\'s the most admins you can add.',
+    no_database: 'The site\'s database isn\'t connected, so this can\'t be saved.', bad_request: 'That isn\'t a Discord user ID.'
+  };
+  function changeAdmin(action, id, button) {
+    if (button) button.disabled = true;
+    call('/api/admin/admins', { action: action, id: id }).then(function (res) {
+      if (button) button.disabled = false;
+      if (!res.ok) { toast(ADMIN_ERRORS[res.data.error] || 'That didn\'t save. Try again.'); return; }
+      state.admins = res.data.admins; state.canManageAdmins = res.data.canManageAdmins;
+      renderAdmins();
+      if (action === 'add') $('aid').value = '';
+      toast(action === 'add' ? 'Added as a site admin.' : 'Removed as a site admin.');
+    }, function () {
+      if (button) button.disabled = false;
+      toast('That didn\'t save. Check your connection and try again.');
+    });
+  }
+  $('aaddbtn').addEventListener('click', function () {
+    var id = $('aid').value.trim();
+    if (!/^\d{5,25}$/.test(id)) { toast('Paste their Discord user ID (only numbers).'); return; }
+    changeAdmin('add', id, $('aaddbtn'));
+  });
+  $('aid').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('aaddbtn').click(); });
 
   /* ---------- wiring ---------- */
 

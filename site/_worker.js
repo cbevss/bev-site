@@ -756,7 +756,55 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '
 const BLANK = {
   maintenance: { on: false, message: DEFAULT_MESSAGE, minutes: 0, until: null, showUntil: true, at: 0, by: '' },
   banner: { on: false, text: '', link: '', linkText: '', style: 'info', id: '', at: 0, by: '' },
+  // Site admins added or removed on /admin, on top of the main list (SITE_ADMIN_IDS or the built-in one).
+  admins: { added: [], removed: [], at: 0, by: '' },
 };
+
+const ADMINS_MAX = 25;
+
+// Who is a site admin right now. Main admins (from the setting or built-in list) manage the list; added admins
+// can use /admin but can't add or remove anyone, so nobody added later can lock the main admins out.
+function applyAdmins(c, site) {
+  const a = (site && site.admins) || {};
+  const removed = new Set((Array.isArray(a.removed) ? a.removed : []).map(String));
+  const added = (Array.isArray(a.added) ? a.added : []).map(String).filter((id) => ID_RE.test(id));
+  const main = c.adminIds.filter((id) => !removed.has(id));
+  c.mainAdminIds = main.length ? main : c.adminIds.slice();      // never zero admins
+  c.addedAdminIds = added.filter((id) => !c.mainAdminIds.includes(id));
+  c.adminIds = [...c.mainAdminIds, ...c.addedAdminIds];
+  return c;
+}
+
+async function changeAdmins(request, env, c, s) {
+  const body = await readJson(request, 2000);
+  const id = body && String(body.id || '').trim();
+  const action = body && body.action;
+  if (!ID_RE.test(id || '') || (action !== 'add' && action !== 'remove')) return json({ error: 'bad_request' }, 400);
+  const me = String(s.session.user.id);
+  if (!c.mainAdminIds.includes(me)) return json({ error: 'not_main_admin' }, 403);
+  if (!database(env)) return json({ error: 'no_database' }, 503);
+  const cur = s.site.admins || {};
+  const added = new Set((cur.added || []).map(String));
+  const removed = new Set((cur.removed || []).map(String));
+  const base = config(env).adminIds;
+  if (action === 'add') {
+    if (c.adminIds.includes(id)) return json({ error: 'already_admin' }, 400);
+    if (base.includes(id)) removed.delete(id); else added.add(id);
+    if (added.size > ADMINS_MAX) return json({ error: 'too_many_admins' }, 400);
+  } else {
+    if (id === me) return json({ error: 'cant_remove_self' }, 400);
+    if (!c.adminIds.includes(id)) return json({ error: 'not_admin' }, 400);
+    if (added.has(id)) added.delete(id); else removed.add(id);
+  }
+  try {
+    await saveSetting(env, 'admins', { added: [...added], removed: [...removed] }, `${s.session.user.name} (${me})`);
+  } catch {
+    return json({ error: 'database_error' }, 503);
+  }
+  const site = await loadSite(env);
+  const fresh = applyAdmins(config(env), site);
+  return json(await adminState(env, fresh, { ...s, site }, site));
+}
 
 function database(env) {
   const db = env.SITE_DB;
@@ -840,7 +888,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=8ddb6f6fe8">
+<link rel="stylesheet" href="/styles.css?v=f7d1f0b7e6">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1049,7 +1097,7 @@ const ADMIN_ROUTES = {
   '/api/admin/state': 'GET', '/api/admin/maintenance': 'POST', '/api/admin/banner': 'POST', '/api/admin/check': 'POST',
   '/api/admin/alert': 'GET', '/api/admin/alert/send': 'POST', '/api/admin/inbox': 'GET', '/api/admin/inbox/mark': 'POST',
   '/api/admin/features': 'GET', '/api/admin/features/set': 'POST', '/api/admin/suggestions': 'GET', '/api/admin/suggestions/answer': 'POST',
-  '/api/admin/support': 'GET', '/api/admin/support/act': 'POST',
+  '/api/admin/support': 'GET', '/api/admin/support/act': 'POST', '/api/admin/admins': 'POST',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1226,8 +1274,9 @@ async function adminState(env, c, s, site) {
     maintenance: { ...site.maintenance, active: maintenanceOn(site.maintenance) },
     banner: site.banner,
     defaults: { message: DEFAULT_MESSAGE, durations: DURATIONS, alert: DEFAULT_ALERT, alertMax: ALERT_MAX },
-    admins: await adminProfiles(c),
+    admins: (await adminProfiles(c)).map((a) => ({ ...a, main: (c.mainAdminIds || c.adminIds).includes(a.id) })),
     adminsFromSetting: c.adminFromSetting,
+    canManageAdmins: (c.mainAdminIds || c.adminIds).includes(String(s.session.user.id)),
     visits: await visitStats(env),
     now: Date.now(),
   };
@@ -1369,6 +1418,7 @@ async function adminApi(request, env, c, url, secure, s) {
   if (path === '/api/admin/features' || path === '/api/admin/features/set') return ownerFeatures(request, c, s, path);
   if (path === '/api/admin/suggestions' || path === '/api/admin/suggestions/answer') return adminSuggestions(request, c, s, path);
   if (path === '/api/admin/support' || path === '/api/admin/support/act') return adminSupport(request, c, s, path);
+  if (path === '/api/admin/admins') return changeAdmins(request, env, c, s);
 
   const body = await readJson(request, 20000);
   if (!body) return json({ error: 'bad_request' }, 400);
@@ -1600,6 +1650,7 @@ export default {
       if (STATIC_FILE.test(path)) return env.ASSETS.fetch(request);
 
       const site = await loadSite(env);
+      applyAdmins(c, site);
       const session = await readSession(request, c, secure);
       const admin = !!session && c.adminIds.includes(String(session.user.id));
       const s = { site, session, admin, down: maintenanceOn(site.maintenance) };

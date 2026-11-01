@@ -1011,6 +1011,38 @@
     return box;
   }
 
+  // Member tools → XP and level: a button that shows how much XP each level takes.
+  function levelTable(rows) {
+    var box = el('div', 'lvltable');
+    var btn = el('button', 'mini', '📊 XP needed for each level');
+    btn.type = 'button';
+    btn.id = 'mt-levels';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'mt-levels-list');
+    var wrap = el('div', 'lvlwrap');
+    wrap.id = 'mt-levels-list';
+    wrap.hidden = true;
+    var table = el('table', 'lvl');
+    var head = el('tr');
+    ['Level', 'XP from the level before', 'Total XP'].forEach(function (h) { head.append(el('th', null, h)); });
+    var thead = el('thead'); thead.append(head);
+    var tbody = el('tbody');
+    rows.forEach(function (r) {
+      var tr = el('tr');
+      tr.append(el('td', null, r.name || ('Level ' + r.level)), el('td', 'mono', Number(r.needed).toLocaleString()), el('td', 'mono', Number(r.total).toLocaleString()));
+      tbody.append(tr);
+    });
+    table.append(thead, tbody);
+    wrap.append(el('p', 'fhelp', 'Setting someone to a level gives them exactly its total XP.'), table);
+    btn.addEventListener('click', function () {
+      wrap.hidden = !wrap.hidden;
+      btn.setAttribute('aria-expanded', String(!wrap.hidden));
+      btn.textContent = wrap.hidden ? '📊 XP needed for each level' : '📊 Hide the XP for each level';
+    });
+    box.append(btn, wrap);
+    return box;
+  }
+
   function memberTool(t, meta, body) {
     var picked = null;
     var wrap = el('div', 'msearch');
@@ -1038,6 +1070,7 @@
     });
     meta.append(wrap);
     body.append(summary, actions);
+    if (Array.isArray(t.level_table) && t.level_table.length) body.append(levelTable(t.level_table));
     if (Array.isArray(t.boards) && t.boards.length) body.append(topBoard(t.boards));
 
     var timer = null;
@@ -1098,6 +1131,7 @@
       var facts = el('dl', 'finfo');
       function line(name, value) { var row = el('div'); row.append(el('dt', null, name), el('dd', null, value)); facts.append(row); }
       line('Level', d.level_name + (d.level >= 100 ? '' : ' (' + Number(d.xp).toLocaleString() + ' / ' + Number(d.needed).toLocaleString() + ' XP)'));
+      if (d.total_xp !== undefined) line('Total XP', Number(d.total_xp).toLocaleString());
       line('Coins', Number(d.wallet).toLocaleString() + ' in their wallet, ' + Number(d.bank).toLocaleString() + ' in the bank');
       line('Warnings', String(d.warnings) + (d.jailed ? ' • in jail right now' : ''));
       if (d.verified !== null && d.verified !== undefined) line('Verified', d.verified ? 'Yes' : 'Not yet');

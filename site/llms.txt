@@ -377,7 +377,8 @@
 - Auto-Publish (also called: auto publish, announcement channel crosspost, auto crosspost): Publishes new posts in your announcement channels straight away, so every server that follows them gets them without staff pressing Publish. Page: https://bevbotdiscord.com/features/auto-publish
   - Setting: Announcement channels. Leave empty to publish in every announcement channel. Only announcement channels can be published
   - Setting: Publish posts from bots too.
-- Translate (also called: translate, translation, language translator): Translate messages with /translate or by right-clicking a message (Apps > Translate message). Page: https://bevbotdiscord.com/features/translate
+- Translate (also called: translate, translation, language translator): Translate messages with /translate or by right-clicking a message (Apps > Translate message). Pick the language BEV replies in here; members can choose their own with /set language. Page: https://bevbotdiscord.com/features/translate
+  - Setting: Language BEV replies in. BEV's replies in this server are translated into this language. Members can pick their own with /set language Choices: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Ukrainian, Turkish, Arabic, Hindi, Japanese, Korean, Chinese (Simplified), Chinese (Traditional), Vietnamese, Thai, Indonesian, Swedish, Norwegian, Danish, Finnish, Greek, Czech, Romanian, Hungarian, Hebrew, Persian, Bengali, Urdu, Malay, Filipino.
 - AI Assistant (also called: AI chat, ask AI, chatbot, Claude, AI assistant): Members ask questions with /ask and get answers in chat. Needs ANTHROPIC_API_KEY in the bot's settings (paid per use). Page: https://bevbotdiscord.com/features/ai
   - Setting: Only allow in these channels.
   - Setting: Questions per member per day. Choices: 5, 10, 25, 50.
@@ -473,6 +474,7 @@
 - /music: Play music from Spotify, SoundCloud or YouTube, with a player to control it.
 - /radio: Play an internet radio station in your voice channel.
 - /remind: Set a reminder and BEV will ping you when it's time.
+- /set: Your own BEV settings, like the language BEV replies to you in.
 - /snipe: Show the last deleted message in this channel.
 - /time: Set your time zone, or see what time it is for another member.
 - /translate: Translate any text into another language.

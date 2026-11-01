@@ -5,6 +5,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.48',
+    date: '1 November 2026',
+    changes: [
+      { title: 'BEV speaks your language',
+        text: 'Server owners can pick the language BEV replies in, on the Translate card. Members can pick their own with /set language, which beats the server\'s. Things members wrote, like confessions and polls, stay as they were.' },
+      { title: 'Import playlists',
+        text: 'The playlist menu on /music now has "Import a playlist from a link". Paste a public Spotify playlist or album, a YouTube playlist or a SoundCloud playlist and BEV saves its songs as one of your playlists.' },
+      { title: 'Site admins',
+        text: 'Main site admins can now add and remove site admins from the Admin page, using their Discord user ID.' },
+      { title: 'Levels and XP',
+        text: 'Setting someone to a level in Member tools now says how much XP that level is, member tools show their total XP, and there\'s a button to see the XP each level takes.' },
+    ],
+  },
+  {
     id: '4.47',
     date: '1 November 2026',
     changes: [

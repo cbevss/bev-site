@@ -1664,3 +1664,18 @@ body:has(#savebar:not([hidden])) .totop{bottom:172px}
 /* How many players / teams: just the number, no up and down arrows */
 #brk-count{-moz-appearance:textfield;appearance:textfield}
 #brk-count::-webkit-outer-spin-button,#brk-count::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.alist li .arm-rm{margin-left:auto;flex:none}
+.alist li .badge{flex:none}
+.addadmin{margin-top:18px}
+.addadmin .row{display:flex;gap:10px;flex-wrap:wrap}
+.addadmin .field{flex:1 1 220px;min-width:0}
+.lvltable{width:100%;margin-top:14px}
+.lvlwrap{margin-top:10px;max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.lvlwrap .fhelp{margin:10px 12px}
+table.lvl{width:100%;border-collapse:collapse;font-size:14px}
+table.lvl th,table.lvl td{padding:7px 12px;text-align:left;border-top:1px solid var(--line)}
+table.lvl th{position:sticky;top:0;background:#0b0f1a;color:var(--mut);font-weight:600}
+table.lvl td.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+.alist li{flex-wrap:wrap}
+.alist li .nm{flex:1 1 120px}
+.alist li .arm-rm{margin-left:auto;max-width:100%;white-space:normal}
