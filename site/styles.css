@@ -1657,3 +1657,10 @@ body:has(#savebar:not([hidden])) .totop{bottom:172px}
 .mtop{display:block;flex:1 0 100%;width:100%;grid-column:1/-1}.mtop .mtopsel{display:block;width:100%}
 .upick{display:grid;gap:6px}.upick .mfound{position:static;margin:0}
 .areapick{display:grid;gap:10px}.areaall{justify-self:start}
+
+/* long tick lists (badges, dashboard parts): a tidy grid instead of rows of uneven pills */
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;align-content:start}
+.checks .chk{width:100%;min-height:44px}
+/* How many players / teams: just the number, no up and down arrows */
+#brk-count{-moz-appearance:textfield;appearance:textfield}
+#brk-count::-webkit-outer-spin-button,#brk-count::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}

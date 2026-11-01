@@ -5,6 +5,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.46',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Music: better SoundCloud backup',
+        text: 'When YouTube won\'t send a song, BEV now tries SoundCloud\'s top few copies (skipping 30-second previews) instead of just the first, and the skip message says why, including whether BEV has a YouTube account set up. Bot owners can give BEV a YouTube account so YouTube and Spotify songs play from YouTube again.' },
+      { title: 'Tidier lists',
+        text: 'Long lists of ticks on the dashboard, like the badges in Achievements and the parts in Dashboard Access, are now a neat grid.' },
+    ],
+  },
+  {
     id: '4.44',
     date: '1 November 2026',
     changes: [
