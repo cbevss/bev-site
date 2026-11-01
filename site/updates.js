@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.43',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Owners can take dashboard parts away',
+        text: 'On the Dashboard Access card, the server owner can pick members or a role and take parts of the dashboard away from them, even if they\'re admins: whole cards, or just single settings and buttons inside a card. Only the owner sees and changes that list, and the owner can never be locked out.' },
+      { title: 'Top members',
+        text: 'Member tools on the dashboard now show who has the most coins (or wallet, or bank), the highest level, the most XP this week, messages, rep, items, badges, time in voice and warnings.' },
+      { title: 'Money badges to Trillionaire',
+        text: 'New badges for having 10 million, 1 billion, 10 billion and 1 trillion coins: Multi-Millionaire, Billionaire, Multi-Billionaire and Trillionaire.' },
+    ],
+  },
+  {
     id: '4.42',
     date: '1 November 2026',
     changes: [

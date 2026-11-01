@@ -970,6 +970,47 @@
   }
 
   // Member tools: find someone, see their numbers, then use the buttons on them.
+  // Member tools → Top members: who has the most coins, XP, levels, messages… (25 at most).
+  function topBoard(boards) {
+    var box = el('div', 'mtop');
+    box.id = 'mt-top';
+    box.append(el('p', 'flabel', '🏆 Top members'));
+    var pick = el('select', 'field mtopsel');
+    pick.setAttribute('aria-label', 'Who has the most');
+    boards.forEach(function (b) { var o = el('option', null, b.label); o.value = b.value; pick.append(o); });
+    var list = el('ol', 'mtoplist');
+    var note = el('p', 'fhelp', 'Loading…');
+    box.append(pick, note, list);
+    function load() {
+      note.hidden = false; note.textContent = 'Loading…';
+      var guild = state.guild;
+      request('/api/action', {
+        method: 'POST',
+        headers: { accept: 'application/json', 'content-type': 'application/json' },
+        body: JSON.stringify({ guild_id: guild, owner: 'members', action: 'top', values: { board: pick.value } })
+      }).then(function (r) {
+        if (guild !== state.guild) return;
+        list.replaceChildren();
+        if (!(r.status === 200 && r.data && r.data.ok && r.data.data)) { note.textContent = (r.data && r.data.message) || errorText(r); return; }
+        var rows = r.data.data.rows || [];
+        note.hidden = rows.length > 0;
+        note.textContent = 'Nobody yet.';
+        rows.forEach(function (row, i) {
+          var li = el('li');
+          li.append(el('span', 'mtopn mono', String(i + 1)));
+          var av = el('img', 'mtopav'); av.alt = ''; av.referrerPolicy = 'no-referrer';
+          av.addEventListener('error', function () { av.hidden = true; });
+          if (row.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(row.avatar)) av.src = row.avatar; else av.hidden = true;
+          li.append(av, el('b', null, row.name), el('span', 'mtopv', row.value));
+          list.append(li);
+        });
+      });
+    }
+    pick.addEventListener('change', load);
+    load();
+    return box;
+  }
+
   function memberTool(t, meta, body) {
     var picked = null;
     var wrap = el('div', 'msearch');
@@ -997,6 +1038,7 @@
     });
     meta.append(wrap);
     body.append(summary, actions);
+    if (Array.isArray(t.boards) && t.boards.length) body.append(topBoard(t.boards));
 
     var timer = null;
     var asked = 0;

@@ -1643,3 +1643,15 @@ body:has(#savebar:not([hidden])) .totop{bottom:172px}
 .tkset{margin-top:16px}.tkset summary{cursor:pointer;color:var(--ac2);font-weight:600}
 @media(max-width:760px){.tkwrap{grid-template-columns:1fr}.tkwrap.reading .tklist{display:none}.tkwrap:not(.reading) .tkpane{display:none}.tkback{display:inline-flex}}
 .tkpane .tktext{max-width:none;width:100%}
+
+/* Member tools: top members */
+.mtop{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.mtopsel{max-width:360px}
+.mtoplist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px;max-height:420px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2563EB #04060C}
+.mtoplist li{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(9,15,32,.6)}
+.mtopn{width:24px;text-align:center;color:var(--mut);font-size:13px}
+.mtoplist li:nth-child(1) .mtopn{color:#FBBF24;font-weight:700}.mtoplist li:nth-child(2) .mtopn{color:#CBD5E1;font-weight:700}.mtoplist li:nth-child(3) .mtopn{color:#D97706;font-weight:700}
+.mtopav{width:28px;height:28px;border-radius:50%}
+.mtoplist b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtopv{font-size:13px;color:var(--ac2);white-space:nowrap}
+.mtop{display:block;flex:1 0 100%;width:100%;grid-column:1/-1}.mtop .mtopsel{display:block;width:100%}
