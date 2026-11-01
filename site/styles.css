@@ -1586,3 +1586,4 @@ body:has(#savebar:not([hidden])) .totop{bottom:172px}
 .tldetail{display:block;font-size:13px;color:#FBBF24}
 .tlwhen{display:block;font-size:12px;color:var(--mut)}
 @media(max-width:520px){.tlscores li{grid-template-columns:1fr auto}.tlbar{grid-column:1/-1;grid-row:2}}
+.subhead{margin:8px 0 2px;font-size:13px;color:var(--mut)}.btnchip{display:inline-flex;align-items:center;padding:2px 10px;border:1px solid var(--line);border-radius:8px;background:rgba(37,99,235,.14);color:#fff}

@@ -5,6 +5,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.38',
+    date: '1 November 2026',
+    changes: [
+      { title: 'A new music player',
+        text: '/music opens a panel only you can see: pick Spotify, SoundCloud or YouTube, type a song and/or an artist (an artist on its own plays their songs), pick one of your playlists or make a new one, shuffle if you like, and press Play. While music plays, BEV keeps a player in the channel with the song, a bar that fills up as it plays, previous, pause and play, next, shuffle and repeat (green when on), the queue, volume, Add to playlist and Stop.' },
+      { title: 'One command, one panel',
+        text: '/bet, /game, /fun, /image, /market, /pet, /collect and /roleplay are now one command each. It opens a panel with a button for everything it does, and BEV asks for anything else it needs, like who to play against.' },
+    ],
+  },
+  {
     id: '4.37',
     date: '1 November 2026',
     changes: [

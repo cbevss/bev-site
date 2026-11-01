@@ -206,7 +206,7 @@
   - Setting: Invite people to. BEV makes a never-expiring invite to this channel for the listing
   - Setting: Use my own invite link. Use your own invite (like a vanity link) instead of the one BEV makes
   - Setting: Your invite link. The part after discord.gg/, like your-server. Make it never expire.
-- Roleplay Characters (also called: roleplay, tupper, character proxy, RP characters, webhook characters): For roleplay: members save characters with a name, picture and tag (like k:) using /roleplay add. A message that starts with the tag is reposted as that character. Right-click a reposted message → Apps → Who posted this? shows who wrote it. BEV needs Manage Webhooks. Page: https://bevbotdiscord.com/features/proxy
+- Roleplay Characters (also called: roleplay, tupper, character proxy, RP characters, webhook characters): For roleplay: members save characters with a name, picture and tag (like k:) using /roleplay → Add. A message that starts with the tag is reposted as that character. Right-click a reposted message → Apps → Who posted this? shows who wrote it. BEV needs Manage Webhooks. Page: https://bevbotdiscord.com/features/proxy
   - Setting: Only in these channels. Leave empty to allow it everywhere
 - Starboard (also called: starboard, hall of fame, best messages, pin board): Messages that get enough star reactions are reposted to a hall-of-fame channel. Page: https://bevbotdiscord.com/features/starboard
   - Setting: Starboard channel.
@@ -331,10 +331,10 @@
 - Trading & Market (also called: trading, marketplace, auction, trade items): Members swap coins and items safely with /trade (both have to agree), and sell items to each other on the /market. Items listed for sale are held by BEV until they're bought or taken back. Page: https://bevbotdiscord.com/features/trading
   - Setting: Market fee. Taken from what the seller gets, so coins slowly leave the economy Choices: No fee, 5% of the price, 10% of the price.
   - Setting: Items one member can have for sale.
-- Pets & Battles (also called: pets, pet battles, virtual pet): Members catch pets of different rarities with /pet catch, pick a team of 3, and battle each other's teams for coins. Pets level up as they battle. Page: https://bevbotdiscord.com/features/pets
+- Pets & Battles (also called: pets, pet battles, virtual pet): Members catch pets of different rarities with /pet → Catch, pick a team of 3, and battle each other's teams for coins. Pets level up as they battle. Page: https://bevbotdiscord.com/features/pets
   - Setting: Wait between catches. Choices: 10 minutes, 30 minutes, 1 hour, 3 hours.
   - Setting: Biggest bet on a battle. 0 means battles are just for fun
-- Character Collecting (also called: collectibles, cards, gacha, collection): Members roll for anime and game characters with /collect roll and race to claim them: each character can only belong to one member here. Build a collection and give characters away. Page: https://bevbotdiscord.com/features/collecting
+- Character Collecting (also called: collectibles, cards, gacha, collection): Members roll for anime and game characters with /collect → Roll and race to claim them: each character can only belong to one member here. Build a collection and give characters away. Page: https://bevbotdiscord.com/features/collecting
   - Setting: Rolls per hour. Choices: 5, 10, 15, 25.
   - Setting: Wait between claims. Choices: 1 hour, 3 hours, 6 hours, 12 hours.
 - Vote & Bump Rewards (also called: vote rewards, bump rewards, top.gg vote): Gives coins to members who vote for BEV on top.gg (double at weekends) and to whoever bumps the server with Disboard. Members see when they can vote again with /vote. Needs Economy switched on. Page: https://bevbotdiscord.com/features/rewards
@@ -346,7 +346,7 @@
 - Custom Commands (also called: custom commands, custom slash replies, command builder): Make your own commands, like !rules or !apply. Each can reply (with a random answer if you give several), give, take or swap a role, or DM the member. Use {user}, {name}, {server}, {channel}, {count} and {args} in the reply. Page: https://bevbotdiscord.com/features/custom-commands
   - Setting: Command prefix. What custom commands start with, like ! or ?
   - Setting: Commands. Each has: Command name, Reply, Also, Role (for role actions), Only for people with, Delete the command message, Wait between uses (seconds).
-- Music Player (also called: music bot, play music, SoundCloud, music queue, DJ): Play songs in voice with /music play: search SoundCloud by name or paste a SoundCloud or direct audio link. There's a queue, skip, pause, loop, shuffle and volume. YouTube and Spotify can't be played (their rules forbid bots playing them). Page: https://bevbotdiscord.com/features/music
+- Music Player (also called: music bot, play music, SoundCloud, music queue, DJ): Play songs in voice with /music: search SoundCloud by name or paste a SoundCloud or direct audio link. There's a queue, skip, pause, loop, shuffle and volume. YouTube and Spotify can't be played (their rules forbid bots playing them). Page: https://bevbotdiscord.com/features/music
   - Setting: DJ role. Optional. If set, only admins and this role can skip, stop or change other people's songs
   - Setting: Longest queue.
   - Setting: Longest song (minutes).
@@ -444,7 +444,7 @@
 - /pet: Catch pets, build a team of 3 and battle other members.
 - /afk: Set yourself as away. Anyone who pings you is told why.
 - /ask: Ask BEV's AI assistant a question.
-- /music: Play YouTube, Spotify or SoundCloud songs in voice, with a queue.
+- /music: Play music from Spotify, SoundCloud or YouTube, with a player to control it.
 - /radio: Play an internet radio station in your voice channel.
 - /remind: Set a reminder and BEV will ping you when it's time.
 - /snipe: Show the last deleted message in this channel.

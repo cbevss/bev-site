@@ -355,11 +355,21 @@
     }
     function scan() {
       var fold = innerHeight;
+      // Something that was small when first seen (like the dashboard before it loads) can grow far taller than the screen.
+      // It can't fade in as one block then, so it stops being one, and its parts are picked up below instead.
+      doc.querySelectorAll('.rv').forEach(function (el) {
+        if (el.getBoundingClientRect().height > fold * 1.5) {
+          io.unobserve(el);
+          el.classList.remove('rv', 'rv-in', 'rv-up', 'rv-snap');
+          el.style.transitionDelay = '';
+        }
+      });
       blocks(doc.body, []).forEach(function (el) {
         if (seen.has(el) || el.closest(SKIP)) return;
         seen.add(el);
         if (el.parentElement && el.parentElement.closest('.rv')) return;
         var r = el.getBoundingClientRect();
+        if (r.height > fold * 1.5) return;      // too tall to fade in as one block (see above)
         if (r.top < fold * 0.92 && r.bottom > 0) el.classList.add('rv-snap', 'rv-in');   // already on screen: no flash
         el.classList.add('rv');
         io.observe(el);
