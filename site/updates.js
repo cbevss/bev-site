@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.47',
+    date: '1 November 2026',
+    changes: [
+      { title: 'Steadier background jobs',
+        text: 'A full check of the bot found that some background jobs (like music downloads and timed messages) could be cleared away by Python before they finished. BEV now holds on to every job until it\'s done.' },
+    ],
+  },
+  {
     id: '4.46',
     date: '1 November 2026',
     changes: [
