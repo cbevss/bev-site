@@ -1744,3 +1744,11 @@ h4.brkpart{margin:18px 0 8px;color:#B9D0FF;font-size:15px}
 #bextra .bcheckin{margin-top:12px;padding:14px 16px;border:1px solid rgba(74,222,128,.45);border-radius:12px;background:rgba(22,101,52,.25)}
 /* A row whose picker or menu is open sits above the rows after it, even while they're still sliding in. */
 .rv:focus-within,.brkrow:focus-within{position:relative;z-index:6}
+/* 4.57: BEV's data on the Admin page */
+.dpick{display:grid;gap:6px;max-width:520px;margin:10px 0}
+.dlist{list-style:none;margin:0;padding:4px;max-height:220px;overflow:auto;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(0,0,0,.18)}
+.dlist li button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.dlist li button:hover,.dlist li button:focus-visible,.dlist li button[aria-selected="true"]{background:rgba(37,99,235,.35)}
+.dlist li button span{opacity:.7;font-size:13px;white-space:nowrap}
+.dtable td,.dtable th{max-width:260px;overflow-wrap:anywhere;font-size:13px;text-align:left}
+#dfile{max-width:100%}

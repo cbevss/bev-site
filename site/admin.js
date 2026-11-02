@@ -170,6 +170,7 @@
     renderBanner(fillForms);
     renderVisits();
     renderAdmins();
+    renderData();
   }
 
   /* ---------- maintenance mode ---------- */
@@ -944,6 +945,116 @@
     });
   }
   $('hrun').addEventListener('click', runHealth);
+
+  /* ---------- BEV's data: download, upload and look through it (main admins) ---------- */
+  var bdata = { overview: null, guild: '', table: '', page: 0, total: 0 };
+  function mb(n) { return n === null || n === undefined ? 'Unknown' : (n / 1048576).toFixed(1) + ' MB'; }
+  function dataError(res) {
+    var e = res.data && res.data.error;
+    return e === 'need_main_admin' ? 'Only main admins can do this.' : e === 'not_manager' ? 'Only the 3 admin managers can upload a database.' :
+      e === 'bot_outdated' ? 'The bot needs updating before this works.' : e === 'too_big' ? 'That file is over 95 MB.' :
+      (res.data && res.data.detail) || 'BEV didn’t answer. Try again in a minute.';
+  }
+  function renderData() {
+    var main = !!(state && state.isMainAdmin);
+    $('dnomain').hidden = main;
+    $('dmain').hidden = !main;
+    $('dup-d').hidden = !(state && state.canManageAdmins);
+  }
+  function serverList() {
+    var q = $('dserverq').value.trim().toLowerCase();
+    var list = $('dservers'); list.textContent = '';
+    var all = [{ id: '', name: 'All servers', rows: null }].concat(bdata.overview ? bdata.overview.servers : []);
+    all.filter(function (g) { return !q || (g.name || '').toLowerCase().indexOf(q) >= 0 || g.id.indexOf(q) >= 0; }).slice(0, 100).forEach(function (g) {
+      var li = make('li'); var b = make('button');
+      b.type = 'button'; b.setAttribute('role', 'option'); b.setAttribute('aria-selected', String(g.id === bdata.guild));
+      b.append(make('b', null, g.id ? (g.name || 'Server BEV has left') : g.name), make('span', null, g.id ? g.id + ' • ' + g.rows + ' rows' : ''));
+      b.addEventListener('click', function () { bdata.guild = g.id; bdata.page = 0; serverList(); tableOptions(); loadRows(); });
+      li.append(b); list.append(li);
+    });
+  }
+  function tableOptions() {
+    var sel = $('dtablesel'); sel.textContent = '';
+    (bdata.overview ? bdata.overview.tables : []).filter(function (t) { return !bdata.guild || t.per_server; }).forEach(function (t) {
+      var o = make('option', null, t.name + ' (' + t.rows + ')'); o.value = t.name; sel.append(o);
+    });
+    if (![].some.call(sel.options, function (o) { return o.value === bdata.table; })) bdata.table = sel.options.length ? sel.options[0].value : '';
+    sel.value = bdata.table;
+  }
+  function loadData() {
+    var b = $('dload'); b.disabled = true; $('dnote').textContent = 'Asking BEV…';
+    call('/api/admin/data').then(function (res) {
+      b.disabled = false; $('dnote').textContent = '';
+      if (!res.ok) { $('dstate').textContent = 'Not available'; toast(dataError(res)); return; }
+      var d = bdata.overview = res.data;
+      $('dbody').hidden = false;
+      var rows = d.tables.reduce(function (n, t) { return n + t.rows; }, 0);
+      $('dstate').textContent = mb(d.db_bytes);
+      var facts = $('dfacts'); facts.textContent = '';
+      function line(name, value) { var row = make('div'); row.append(make('dt', null, name), make('dd', null, value)); facts.append(row); }
+      line('Size', mb(d.db_bytes)); line('Tables', String(d.tables.length)); line('Rows', rows.toLocaleString());
+      line('Servers with data', String(d.servers.length)); line('Kept on a disk', d.disk ? 'Yes' : 'No: set DB_PATH so it survives restarts');
+      var tb = $('dtables').querySelector('tbody'); tb.textContent = '';
+      d.tables.forEach(function (t) { var tr = make('tr'); tr.append(make('td', null, t.name), make('td', 'n', t.rows.toLocaleString())); tb.append(tr); });
+      serverList(); tableOptions(); loadRows();
+      say('Loaded BEV’s data');
+    }, function () { b.disabled = false; $('dnote').textContent = ''; toast('BEV didn’t answer. Check your connection and try again.'); });
+  }
+  function loadRows() {
+    if (!bdata.table) return;
+    var path = '/api/admin/data/table?name=' + encodeURIComponent(bdata.table) + '&page=' + bdata.page + (bdata.guild ? '&guild=' + bdata.guild : '');
+    $('dpage').textContent = 'Loading…';
+    call(path).then(function (res) {
+      if (!res.ok) { $('dpage').textContent = ''; toast(dataError(res)); return; }
+      var d = res.data; bdata.total = d.total;
+      var head = $('drows').querySelector('thead'), body = $('drows').querySelector('tbody');
+      head.textContent = ''; body.textContent = '';
+      var hr = make('tr'); d.columns.forEach(function (c) { var th = make('th', null, c); th.scope = 'col'; hr.append(th); }); head.append(hr);
+      d.rows.forEach(function (r) { var tr = make('tr'); r.forEach(function (v) { tr.append(make('td', null, v === null ? '—' : String(v))); }); body.append(tr); });
+      if (!d.rows.length) { var tr = make('tr'); var td = make('td', null, 'Nothing stored here.'); td.colSpan = d.columns.length || 1; tr.append(td); body.append(tr); }
+      var pages = Math.max(1, Math.ceil(d.total / d.per_page));
+      $('dpage').textContent = 'Page ' + (d.page + 1) + ' of ' + pages + ' • ' + d.total.toLocaleString() + ' rows';
+      $('dprev').disabled = d.page <= 0; $('dnext').disabled = d.page + 1 >= pages;
+      var g = bdata.guild && bdata.overview.servers.filter(function (x) { return x.id === bdata.guild; })[0];
+      $('dpicked').textContent = bdata.table + (g ? ' for ' + (g.name || g.id) : ' for all servers');
+    }, function () { $('dpage').textContent = ''; toast('BEV didn’t answer. Try again.'); });
+  }
+  function downloadData() {
+    var b = $('ddown'); b.disabled = true; $('dnote').textContent = 'Making a copy… this can take a moment.';
+    root.fetch('/api/admin/data/download', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return {}; }).then(function (d) { throw { data: d }; });
+      var name = ((r.headers.get('content-disposition') || '').match(/filename="([^"]+)"/) || [])[1] || 'bev-data.db';
+      return r.blob().then(function (blob) {
+        var a = make('a'); a.href = URL.createObjectURL(blob); a.download = name; doc.body.append(a); a.click(); a.remove();
+        root.setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+        $('dnote').textContent = '✅ Downloaded ' + name + ' (' + mb(blob.size) + '). Keep it private: it has every server’s data.';
+      });
+    }).catch(function (e) { $('dnote').textContent = ''; toast(dataError(e && e.data ? e : { data: {} })); }).then(function () { b.disabled = false; });
+  }
+  function uploadData() {
+    var file = $('dfile').files[0], b = $('dsend');
+    if (!file) return;
+    if (file.size > 95 * 1048576) { toast('That file is over 95 MB.'); return; }
+    if (!arm(b, 'Click again: replace ALL of BEV’s data')) return;
+    b.disabled = true; $('dupnote').textContent = 'Uploading ' + file.name + '…';
+    root.fetch('/api/admin/data/upload', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/octet-stream' }, body: file })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, data: d || {} }; }); })
+      .then(function (res) {
+        if (!res.ok) { $('dupnote').textContent = '❌ ' + dataError(res); return; }
+        $('dupnote').textContent = '✅ Done: ' + res.data.tables + ' tables and ' + res.data.servers + ' servers. The old data was kept as ' + res.data.backup +
+          '. BEV is restarting and will be back in about a minute.';
+        say('Database replaced');
+      }, function () { $('dupnote').textContent = '❌ The upload didn’t finish. Check your connection and try again.'; })
+      .then(function () { b.disabled = !$('dfile').files.length; });
+  }
+  $('dload').addEventListener('click', loadData);
+  $('ddown').addEventListener('click', downloadData);
+  $('dsend').addEventListener('click', uploadData);
+  $('dfile').addEventListener('change', function () { $('dsend').disabled = !this.files.length; $('dupnote').textContent = ''; });
+  $('dserverq').addEventListener('input', serverList);
+  $('dtablesel').addEventListener('change', function () { bdata.table = this.value; bdata.page = 0; loadRows(); });
+  $('dprev').addEventListener('click', function () { if (bdata.page > 0) { bdata.page--; loadRows(); } });
+  $('dnext').addEventListener('click', function () { bdata.page++; loadRows(); });
   $('irefresh').addEventListener('click', loadInbox);
 
   /* ---------- Dashboard settings: a row per feature; On, Off everywhere, or Off everywhere except some servers ---------- */

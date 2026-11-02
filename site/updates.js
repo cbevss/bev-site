@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.57',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Admin page: BEV\'s data',
+        text: 'Main admins can download BEV\'s whole database, look through what\'s stored for each server (with passwords, tokens and keys hidden), and the admin managers can upload a database to move BEV to another computer. The old data is always kept as a backup.' },
+    ],
+  },
+  {
     id: '4.56',
     date: '2 November 2026',
     changes: [

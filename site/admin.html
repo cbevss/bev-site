@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=d6585484ad">
+<link rel="stylesheet" href="/styles.css?v=33366b69ab">
 </head>
 <body class="admin">
 <a class="skip" href="#main">Skip to content</a>
@@ -58,7 +58,7 @@
 
 <div class="bar">
 <div class="me"><span class="av sm" id="meav" aria-hidden="true"></span><p>Signed in as <strong id="who">a site admin</strong></p></div>
-<nav class="jump" aria-label="Sections"><a class="pill" href="#maint">Maintenance</a> <a class="pill" href="#alert">Discord alert</a> <a class="pill" href="#bann">Banner</a> <a class="pill" href="#visits">Visits</a> <a class="pill" href="#health">Health</a> <a class="pill" href="#check">Connection</a> <a class="pill" href="#admins">Admins</a></nav>
+<nav class="jump" aria-label="Sections"><a class="pill" href="#maint">Maintenance</a> <a class="pill" href="#alert">Discord alert</a> <a class="pill" href="#bann">Banner</a> <a class="pill" href="#visits">Visits</a> <a class="pill" href="#health">Health</a> <a class="pill" href="#bdata">Data</a> <a class="pill" href="#check">Connection</a> <a class="pill" href="#admins">Admins</a></nav>
 </div>
 
 <p class="toast" id="toast" role="alert" hidden></p>
@@ -220,6 +220,36 @@
 </div>
 </section>
 
+<section class="asec" id="bdata" aria-labelledby="bdata-h">
+<div class="ahead"><h2 class="disp" id="bdata-h">BEV's data</h2><span class="stat" id="dstate">Not loaded</span></div>
+<p class="adesc">Everything BEV stores is in one database file. Download it to keep a copy or to move BEV to another computer, upload it there to bring every server's settings across, and look through what's stored. Main admins only. Passwords, tokens and keys are hidden.</p>
+<p class="note" id="dnomain" hidden>Only main admins can see or move BEV's data.</p>
+<div id="dmain">
+<div class="row gap"><button class="act save" id="ddown" type="button">⬇️ Download database</button><button class="act" id="dload" type="button">Show what's stored</button><span class="note" id="dnote"></span></div>
+<details class="fset gap" id="dup-d"><summary>Upload a database (replaces everything)</summary>
+<p class="adesc">Use this on the new computer, with a file from <b>Download database</b>. BEV checks the file is a real BEV database, keeps the current data as a backup file, swaps in the upload and restarts (about a minute). Only the 3 admin managers can do this.</p>
+<div class="row gap"><input class="field" id="dfile" type="file" accept=".db,.sqlite,.sqlite3,application/octet-stream" aria-label="Database file"><button class="act" id="dsend" type="button" disabled>Upload and replace</button></div>
+<p class="note" id="dupnote" role="status"></p>
+</details>
+<div id="dbody" hidden>
+<dl class="finfo hfacts" id="dfacts"></dl>
+<details class="fset hsect" id="dtables-d"><summary>Tables</summary><div class="vtwrap"><table class="vtable" id="dtables"><thead><tr><th scope="col">Table</th><th scope="col" class="n">Rows</th></tr></thead><tbody></tbody></table></div></details>
+<details class="fset hsect" id="dbrowse-d" open><summary>Look through the data</summary>
+<div class="dpick">
+<label class="flabel sm" for="dserverq">Server</label>
+<input class="field" id="dserverq" type="search" placeholder="Search servers, or leave empty for all" autocomplete="off" aria-controls="dservers">
+<ul class="dlist" id="dservers" role="listbox" aria-label="Servers"></ul>
+<label class="flabel sm" for="dtablesel">Table</label>
+<select class="field" id="dtablesel"></select>
+</div>
+<p class="note" id="dpicked"></p>
+<div class="vtwrap"><table class="vtable dtable" id="drows"><thead></thead><tbody></tbody></table></div>
+<div class="row gap"><button class="act" id="dprev" type="button">← Previous</button><button class="act" id="dnext" type="button">Next →</button><span class="note" id="dpage"></span></div>
+</details>
+</div>
+</div>
+</section>
+
 <section class="asec" id="check" aria-labelledby="check-h">
 <div class="ahead"><h2 class="disp" id="check-h">Connection check</h2></div>
 <p class="adesc">Tests every link between this website and BEV: the sign-in settings, the bot token, the bot's address, the shared key and the site database. If something on the site isn't working, start here.</p>
@@ -249,9 +279,9 @@
 <nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
 </footer>
 
-<script src="/updates.js?v=7e6fa134df" defer></script>
+<script src="/updates.js?v=38669e6fb8" defer></script>
 <script src="/nav.js?v=a85f8420b7" defer></script>
 <script src="/supportchat.js?v=56ad3f5691" defer></script>
-<script src="/admin.js?v=f72509dbfc" defer></script>
+<script src="/admin.js?v=dfa2422feb" defer></script>
 </body>
 </html>

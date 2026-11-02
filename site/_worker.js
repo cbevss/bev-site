@@ -925,7 +925,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=d6585484ad">
+<link rel="stylesheet" href="/styles.css?v=33366b69ab">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1135,6 +1135,7 @@ const ADMIN_ROUTES = {
   '/api/admin/alert': 'GET', '/api/admin/alert/send': 'POST', '/api/admin/inbox': 'GET', '/api/admin/inbox/mark': 'POST',
   '/api/admin/features': 'GET', '/api/admin/features/set': 'POST', '/api/admin/suggestions': 'GET', '/api/admin/suggestions/answer': 'POST',
   '/api/admin/support': 'GET', '/api/admin/support/act': 'POST', '/api/admin/admins': 'POST', '/api/admin/health': 'GET',
+  '/api/admin/data': 'GET', '/api/admin/data/table': 'GET', '/api/admin/data/download': 'GET', '/api/admin/data/upload': 'POST',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1314,6 +1315,7 @@ async function adminState(env, c, s, site) {
     admins: (await adminProfiles(c)).map((a) => ({ ...a, main: (c.mainAdminIds || c.adminIds).includes(a.id), manager: ADMIN_MANAGER_IDS.includes(a.id) })),
     adminsFromSetting: c.adminFromSetting,
     canManageAdmins: ADMIN_MANAGER_IDS.includes(String(s.session.user.id)),
+    isMainAdmin: (c.mainAdminIds || c.adminIds).includes(String(s.session.user.id)),
     visits: await visitStats(env),
     now: Date.now(),
   };
@@ -1457,6 +1459,7 @@ async function adminApi(request, env, c, url, secure, s) {
   if (path === '/api/admin/support' || path === '/api/admin/support/act') return adminSupport(request, c, s, path);
   if (path === '/api/admin/admins') return changeAdmins(request, env, c, s);
   if (path === '/api/admin/health') return botHealth(c);
+  if (path.startsWith('/api/admin/data')) return botData(request, c, s, url, path);
 
   const body = await readJson(request, 20000);
   if (!body) return json({ error: 'bad_request' }, 400);
@@ -1470,6 +1473,57 @@ async function adminApi(request, env, c, url, secure, s) {
   }
   const site = await loadSite(env);
   return json(await adminState(env, c, s, site));
+}
+
+/* ---------- BEV's data: download, upload (admin managers only) and a read-only browser (main admins only) ---------- */
+
+const DATA_UPLOAD_MAX = 95 * 1024 * 1024;
+const TABLE_RE = /^[A-Za-z_][A-Za-z0-9_]{0,63}$/;
+
+async function botData(request, c, s, url, path) {
+  const me = String(s.session.user.id);
+  if (!(c.mainAdminIds || c.adminIds).includes(me)) return json({ error: 'need_main_admin' }, 403);
+  if (!c.botApiBase || !c.botApiKey) return json({ error: 'bot_not_configured' }, 503);
+  const headers = { 'x-api-key': c.botApiKey };
+  if (path === '/api/admin/data/download') {
+    let r;
+    try { r = await fetch(c.botApiBase + '/api/data/download', { headers, signal: AbortSignal.timeout(120000) }); } catch { return json({ error: 'bot_unreachable' }, 503); }
+    if (r.status === 404) return json({ error: 'bot_outdated' }, 501);
+    if (r.status !== 200) return json({ error: 'bot_error' }, 502);
+    const day = new Date().toISOString().slice(0, 10);
+    return new Response(r.body, { status: 200, headers: { 'content-type': 'application/octet-stream', 'cache-control': 'no-store',
+      'content-disposition': `attachment; filename="bev-data-${day}.db"`, 'x-content-type-options': 'nosniff' } });
+  }
+  if (path === '/api/admin/data/upload') {
+    if (!ADMIN_MANAGER_IDS.includes(me)) return json({ error: 'not_manager' }, 403);
+    if (Number(request.headers.get('content-length') || 0) > DATA_UPLOAD_MAX) return json({ error: 'too_big' }, 413);
+    const body = await request.arrayBuffer();
+    if (!body.byteLength) return json({ error: 'empty' }, 400);
+    if (body.byteLength > DATA_UPLOAD_MAX) return json({ error: 'too_big' }, 413);
+    let r;
+    try {
+      r = await fetch(c.botApiBase + '/api/data/upload', { method: 'POST', body, headers: { ...headers, 'content-type': 'application/octet-stream' },
+        signal: AbortSignal.timeout(120000) });
+    } catch { return json({ error: 'bot_unreachable' }, 503); }
+    let d = null;
+    try { d = await r.json(); } catch { d = null; }
+    if (r.status === 404) return json({ error: 'bot_outdated' }, 501);
+    if (r.status !== 200 || !d || !d.ok) return json({ error: (d && str(d.error, 40)) || 'bot_error', detail: d ? str(d.detail, 300) : '' }, r.status >= 400 && r.status < 500 ? 400 : 502);
+    return json({ ok: true, tables: Number(d.tables) || 0, servers: Number(d.servers) || 0, backup: str(d.backup, 200) });
+  }
+  let target = '/api/data/overview';
+  if (path === '/api/admin/data/table') {
+    const name = url.searchParams.get('name') || '';
+    const guild = url.searchParams.get('guild') || '';
+    const page = Math.max(0, Math.min(100000, parseInt(url.searchParams.get('page') || '0', 10) || 0));
+    if (!TABLE_RE.test(name) || (guild && !ID_RE.test(guild))) return json({ error: 'bad_request' }, 400);
+    target = `/api/data/table?name=${encodeURIComponent(name)}&page=${page}` + (guild ? `&guild=${guild}` : '');
+  }
+  const res = await bot(c, target);
+  if (res.error) return json({ error: res.error }, 503);
+  if (res.status === 404) return json({ error: path === '/api/admin/data/table' ? 'unknown_table' : 'bot_outdated' }, path === '/api/admin/data/table' ? 404 : 501);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
+  return json(res.data);
 }
 
 /* ---------- bot health: each part of BEV, its background jobs and recent errors (site admins only) ---------- */
