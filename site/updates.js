@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.55',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Member anniversaries',
+        text: 'Celebrate each member\'s join anniversary every year with a message, coins if you like, and a role for reaching each year.' },
+      { title: 'Copy & export settings',
+        text: 'A new tool downloads every setting as a file, or copies the switches and settings from another server you run with BEV. Channels and roles are matched by name, and every copied change can be undone.' },
+      { title: 'Permission conflicts in the security scan',
+        text: 'The security scan now spots private channels that nearly everyone can see, jail or mute roles that can still talk somewhere, and blocks on Administrator roles that do nothing.' },
+    ],
+  },
+  {
     id: '4.54',
     date: '2 November 2026',
     changes: [

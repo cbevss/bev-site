@@ -902,7 +902,7 @@
     if (t.key === 'members') memberTool(t, meta, body);
     else if (t.key === 'emoji') emojiTool(t, meta, body);
     else {
-      var draw = t.key === 'scan' ? scanResults : t.key === 'health' ? healthResults : t.key === 'changes' ? changeResults : null;
+      var draw = t.key === 'scan' ? scanResults : t.key === 'health' ? healthResults : t.key === 'changes' ? changeResults : t.key === 'transfer' ? transferResult : null;
       meta.append(actionRow(t.key, t.buttons || [], { onResult: function (answer) { if (draw && answer.data) body.replaceChildren(draw(answer.data)); } }));
     }
     var lower = el('div', 'tbody');
@@ -929,6 +929,19 @@
     });
     wrap.append(list);
     return wrap;
+  }
+
+  // Copy & export settings (4.55): Download settings saves the file straight away.
+  function transferResult(d) {
+    var box = el('div', 'results');
+    if (!d || !d.export) return box;
+    var name = String(d.filename || 'bev-settings.json').replace(/[^\w.-]/g, '-');
+    var url = URL.createObjectURL(new Blob([JSON.stringify(d.export, null, 2)], { type: 'application/json' }));
+    var a = el('a', 'mini', '⬇️ Download ' + name);
+    a.href = url; a.download = name; a.id = 'transfer-file';
+    box.append(a);
+    setTimeout(function () { try { a.click(); } catch (e) { /* the link stays there to press */ } }, 0);
+    return box;
   }
 
   // Change history (4.51): who changed what, and when; undone changes are marked.

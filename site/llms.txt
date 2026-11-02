@@ -294,6 +294,11 @@
   - Setting: Birthday role.
 - Tournament Brackets (also called: tournament bracket, brackets, single elimination, tournaments, esports bracket, tourney): Run tournaments for players or teams, as big as you like: BEV builds a single-elimination bracket (in your order or shuffled) and posts a link to its own page on the website, which only members of your server can open and which updates every time you pick a winner or add a score on the dashboard. Members find it again with /bracket. Page: https://bevbotdiscord.com/features/brackets
   - Setting: Ping players when a bracket is posted. Mentions everyone in the bracket once, when it's first posted. Updates never ping.
+- Member Anniversaries: Celebrates each member's join anniversary every year: a message in your channel, coins if you like, and a role for reaching each year. Page: https://bevbotdiscord.com/features/anniversaries
+  - Setting: Where to celebrate.
+  - Setting: Message. Placeholders: {user}, {name}, {server}, {years}
+  - Setting: Coins to give (0 for none).
+  - Setting: Roles for each year. Like 1 year → @Veteran. Members keep the roles for every year they've reached Each has: Years, Role.
 
 ### Levels
 - Leveling & XP (also called: levels, XP, rank card, leaderboard, level roles, level up rewards, MEE6 levels): Members earn XP for chatting and talking in voice. Add level-up rewards, XP boosts for roles, double XP events and a weekly top chatter role. Page: https://bevbotdiscord.com/features/leveling
@@ -433,6 +438,7 @@
 - Emojis: Add an emoji from a picture link or from another server's emoji, and remove ones you don't need any more. Page: https://bevbotdiscord.com/features/emoji
 - Health check: BEV's ping, the permissions it has, where its role sits and every switched-on feature that needs attention. Page: https://bevbotdiscord.com/features/health
 - Change history: Who changed which setting or switched a feature on or off, and when. Undo puts one change back the way it was. Page: https://bevbotdiscord.com/features/changes
+- Copy & export settings: Download every setting as a file, or copy the switches and settings from another server you run with BEV. Channels and roles are matched by name. Page: https://bevbotdiscord.com/features/transfer
 - Server Builder (with AI): Add ready-made categories and channels with the right permissions in one click, or describe your server (like a Rocket League community) and BEV's AI designs every category, channel and permission for it. You see the plan first; nothing changes until you build it. Page: https://bevbotdiscord.com/features/builder
 
 ## Slash commands
