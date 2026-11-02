@@ -1719,3 +1719,4 @@ table.lvl td.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monos
 .chist .chchange{display:block;color:#fff;font-size:14.5px;margin:2px 0;overflow-wrap:anywhere}
 .chist .bhitem.undone{opacity:.65}
 .chist .bhitem.undone .chchange{text-decoration:line-through}
+.tksaved{max-width:320px;margin:8px 0 6px}

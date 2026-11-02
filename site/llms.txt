@@ -199,6 +199,9 @@
   - Setting: Category for ticket channels.
   - Setting: Channel with the ticket button.
   - Setting: Staff role that sees tickets.
+  - Setting: Saved replies. Pick one in the ticket inbox to fill in the reply. {user} is the person's name, {server} the server's Each has: Name, Reply.
+  - Setting: Escalate unanswered tickets after. BEV raises the priority and posts a reminder in the ticket when nobody from the staff has answered Choices: Never, 1 hour, 4 hours, 12 hours, 1 day, 2 days.
+  - Setting: Ping this role when escalating. Optional
 - Giveaways (also called: giveaway, raffle, contest, prize draw): Run giveaways: members press a button to enter and BEV picks the winners when the timer ends. Reroll winners or end early any time. Page: https://bevbotdiscord.com/features/giveaways
   - Setting: Roles to ping for giveaways.
   - Setting: Default giveaway channel.
@@ -334,8 +337,11 @@
   - Setting: Streak bonus per day (all 3 done). Finishing all 3 quests gives this many coins for each day in a row, up to 7 days
 
 ### Economy & games
-- Economy & Shop (also called: economy, coins, currency, shop, daily reward, work command, bank): Coins for chatting, /daily rewards, /work, /pay, a bank, robbing and a shop selling roles and items. Page: https://bevbotdiscord.com/features/economy
+- Economy & Shop (also called: economy, coins, currency, shop, daily reward, work command, bank): Your own currency (coins, or whatever you call it) for chatting, /daily rewards, /work, /pay, a bank, robbing and a shop selling roles and items. Page: https://bevbotdiscord.com/features/economy
   - Setting: Pause the shop.
+  - Setting: Currency name. What BEV calls your money, like gems or credits
+  - Setting: Currency name for one. As in “1 gem”
+  - Setting: Currency icon. An emoji, or one of your server's emojis written like <:gem:123456789012345678>
   - Setting: Starting coins.
   - Setting: Daily reward.
   - Setting: Weekly reward.
@@ -379,10 +385,12 @@
 - Custom Commands (also called: custom commands, custom slash replies, command builder): Make your own commands, like !rules or !apply. Each can reply (with a random answer if you give several), give, take or swap a role, or DM the member. Use {user}, {name}, {server}, {channel}, {count} and {args} in the reply. Page: https://bevbotdiscord.com/features/custom-commands
   - Setting: Command prefix. What custom commands start with, like ! or ?
   - Setting: Commands. Each has: Command name, Reply, Also, Role (for role actions), Only for people with, Delete the command message, Wait between uses (seconds).
-- Music Player (also called: music bot, play music, SoundCloud, music queue, DJ): Play songs in voice with /music: search SoundCloud by name or paste a SoundCloud or direct audio link. There's a queue, skip, pause, loop, shuffle and volume. YouTube and Spotify can't be played (their rules forbid bots playing them). Page: https://bevbotdiscord.com/features/music
+- Music Player (also called: music bot, play music, SoundCloud, music queue, DJ): Play songs in voice with /music: search by name, or paste a YouTube, Spotify, SoundCloud or audio link. There's a queue, playlists, skip (with voting), pause, loop, shuffle, volume, a song-request channel and a history of what played. Page: https://bevbotdiscord.com/features/music
   - Setting: DJ role. Optional. If set, only admins and this role can skip, stop or change other people's songs
   - Setting: Longest queue.
   - Setting: Longest song (minutes).
+  - Setting: Vote to skip. People who can't skip on their own vote instead. The song is skipped when half the listeners have voted
+  - Setting: Song-request channel. Anything typed here is searched and added to the queue, like /music play. Leave empty for none
 - Auto-Publish (also called: auto publish, announcement channel crosspost, auto crosspost): Publishes new posts in your announcement channels straight away, so every server that follows them gets them without staff pressing Publish. Page: https://bevbotdiscord.com/features/auto-publish
   - Setting: Announcement channels. Leave empty to publish in every announcement channel. Only announcement channels can be published
   - Setting: Publish posts from bots too.
@@ -408,8 +416,8 @@
   - Setting: Profile picture (link). A link to a picture. GIFs move. Up to 8 MB.
   - Setting: Banner (link).
   - Setting: About Me.
-- Automations (also called: automation, workflows, triggers and actions, if this then that, auto roles on level, rule builder, no-code automations): Build your own rules without code: when someone joins, reaches a level, says a word, gets a role or boosts, BEV can give or take a role, give coins, post a message or DM them, only if they pass a check you choose. Each run is logged. Page: https://bevbotdiscord.com/features/automations
-  - Setting: Rules. Each has: Name (only admins see it), When, Level, Word or phrase, Role, Only if, Role to check, Days or level, Then, Role, Coins, Channel, Message.
+- Automations (also called: automation, workflows, triggers and actions, if this then that, auto roles on level, rule builder, no-code automations): Build your own rules without code: when someone joins, reaches a level, says a word, gets a role or boosts, BEV can do up to three things (give or take a role, give coins, post a message or DM them), straight away or after a wait, only if they pass the checks you choose. Every run is kept in Recent runs. Page: https://bevbotdiscord.com/features/automations
+  - Setting: Rules. Each has: Name (only admins see it), When, Level, Word or phrase, Role, Only if, Role to check, Days or level, And only if, Role to check, Days or level, Then, Role, Coins, Channel, Message, Step 2: then also, Step 2: when, Step 2: role, Step 2: coins, Step 2: channel, Step 2: message, Step 3: then also, Step 3: when, Step 3: role, Step 3: coins, Step 3: channel, Step 3: message.
 - Insights (also called: server analytics, statistics, server stats charts, growth, retention, member growth, analytics dashboard): Charts of how your server is doing: members, joins and leaves, how many new members stay, messages and active members, moderation, how fast staff answer tickets and the coins in circulation. Over 7, 30 or 90 days. Page: https://bevbotdiscord.com/features/insights
 
 ## Dashboard tools

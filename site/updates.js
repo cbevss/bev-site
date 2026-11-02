@@ -5,6 +5,22 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.52',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Automations with steps',
+        text: 'A rule can now do up to three things, straight away or after a wait from a minute to a week, and check two things before it runs. Recent runs on the Automations card shows what ran and anything that went wrong.' },
+      { title: 'Music: vote to skip and song requests',
+        text: 'People who can\'t skip on their own can vote, and the song skips when half the listeners agree. Pick a song-request channel and anything typed there is queued. /music history shows what played.' },
+      { title: 'Ticket saved replies and escalation',
+        text: 'Keep answers you use often and drop them into a ticket reply in one click. Tickets nobody answers in time can be raised in priority, with a reminder that pings your support role.' },
+      { title: 'Repeating events and waiting lists',
+        text: 'Events can repeat daily, weekly, every 2 weeks or monthly. When an event is full, Going puts people on a waiting list, and the first one moves up when someone drops out.' },
+      { title: 'Your own currency',
+        text: 'Call your money gems, credits or anything else, and give it its own icon, on the Economy card.' },
+    ],
+  },
+  {
     id: '4.51',
     date: '2 November 2026',
     changes: [

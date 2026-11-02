@@ -3644,6 +3644,23 @@
       }));
       btns.append(btn('📝 Private note', 'mini', function () { if (box.value.trim()) tkAct('note', { ticket: current.id, text: box.value.trim() }, function (d) { tk.view = d; }); }));
       btns.append(btn('➤ Send reply', 'jrok', function () { if (box.value.trim()) tkAct('reply', { ticket: current.id, text: box.value.trim() }, function (d) { tk.view = d; }); }));
+      // Saved replies (4.52): pick one to fill in the box, with {user} and {server} filled in for this ticket.
+      var saved = Array.isArray(data.saved_replies) ? data.saved_replies : [];
+      if (saved.length) {
+        var pick = el('select', 'field tksaved');
+        pick.setAttribute('aria-label', 'Insert a saved reply');
+        var first = el('option', null, '💾 Insert a saved reply…'); first.value = ''; pick.append(first);
+        saved.forEach(function (r, i) { var o = el('option', null, r.title); o.value = String(i); pick.append(o); });
+        pick.addEventListener('change', function () {
+          var r = saved[Number(pick.value)];
+          if (!r) return;
+          var text = r.text.replace(/\{user\}/g, current.opener || '').replace(/\{server\}/g, data.server || '');
+          box.value = box.value.trim() ? box.value.replace(/\s*$/, '\n') + text : text;
+          pick.value = '';
+          box.focus();
+        });
+        pane.append(pick);
+      }
       pane.append(box, btns);
       setTimeout(function () { log.scrollTop = log.scrollHeight; }, 0);
     }
