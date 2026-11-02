@@ -5,6 +5,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.54',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Seasons',
+        text: 'Switch on Seasons for a fresh leaderboard every few weeks or months. When a season ends BEV announces the winners, gives them a role and keeps them in a Hall of Fame. Members check the standings with /season.' },
+      { title: 'AI server audit',
+        text: 'Audit with AI on the Security scan card looks over your channels, roles and settings and suggests the most useful improvements.' },
+      { title: 'Double-elimination brackets and check-in',
+        text: 'Brackets can now be double elimination, with a losers bracket and a grand final (and a deciding match if needed). Turn on check-in and players press Check in on the bracket\'s message; when you press Start, anyone who didn\'t is taken out.' },
+      { title: 'Bot health (Admin page)',
+        text: 'The Admin page can now show how each part of BEV is doing: errors in the last day, when each background job last ran, and the latest errors.' },
+    ],
+  },
+  {
     id: '4.52',
     date: '2 November 2026',
     changes: [

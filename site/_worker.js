@@ -925,7 +925,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=a37904eb4a">
+<link rel="stylesheet" href="/styles.css?v=d6585484ad">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1134,7 +1134,7 @@ const ADMIN_ROUTES = {
   '/api/admin/state': 'GET', '/api/admin/maintenance': 'POST', '/api/admin/banner': 'POST', '/api/admin/check': 'POST',
   '/api/admin/alert': 'GET', '/api/admin/alert/send': 'POST', '/api/admin/inbox': 'GET', '/api/admin/inbox/mark': 'POST',
   '/api/admin/features': 'GET', '/api/admin/features/set': 'POST', '/api/admin/suggestions': 'GET', '/api/admin/suggestions/answer': 'POST',
-  '/api/admin/support': 'GET', '/api/admin/support/act': 'POST', '/api/admin/admins': 'POST',
+  '/api/admin/support': 'GET', '/api/admin/support/act': 'POST', '/api/admin/admins': 'POST', '/api/admin/health': 'GET',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1456,6 +1456,7 @@ async function adminApi(request, env, c, url, secure, s) {
   if (path === '/api/admin/suggestions' || path === '/api/admin/suggestions/answer') return adminSuggestions(request, c, s, path);
   if (path === '/api/admin/support' || path === '/api/admin/support/act') return adminSupport(request, c, s, path);
   if (path === '/api/admin/admins') return changeAdmins(request, env, c, s);
+  if (path === '/api/admin/health') return botHealth(c);
 
   const body = await readJson(request, 20000);
   if (!body) return json({ error: 'bad_request' }, 400);
@@ -1469,6 +1470,29 @@ async function adminApi(request, env, c, url, secure, s) {
   }
   const site = await loadSite(env);
   return json(await adminState(env, c, s, site));
+}
+
+/* ---------- bot health: each part of BEV, its background jobs and recent errors (site admins only) ---------- */
+
+async function botHealth(c) {
+  const res = await bot(c, '/api/health-details');
+  if (res.error) return json({ error: res.error }, 503);
+  if (res.status === 404) return json({ error: 'bot_outdated' }, 501);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
+  const d = res.data;
+  const num = (v) => (Number.isFinite(v) ? v : null);
+  const b = d.backup && typeof d.backup === 'object' ? d.backup : null;
+  return json({
+    version: str(d.version, 20), online: d.online === true, uptime_s: num(d.uptime_s), latency_ms: num(d.latency_ms), servers: num(d.servers),
+    db_bytes: num(d.db_bytes), music_players: num(d.music_players), errors_24h: num(d.errors_24h) || 0,
+    backup: b ? { at: num(b.at), ok: b.ok === true, bytes: num(b.bytes), note: str(b.note, 200) } : null,
+    areas: (Array.isArray(d.areas) ? d.areas : []).slice(0, 60).map((a) => ({ area: str(a.area, 80), errors_24h: num(a.errors_24h) || 0,
+      last_at: num(a.last_at), last_message: str(a.last_message, 300) })),
+    recent: (Array.isArray(d.recent) ? d.recent : []).slice(0, 40).map((r) => ({ at: num(r.at), area: str(r.area, 80), kind: str(r.kind, 60),
+      message: str(r.message, 300) })),
+    jobs: (Array.isArray(d.jobs) ? d.jobs : []).slice(0, 80).map((j) => ({ name: str(j.name, 60), every: num(j.every), last_run: num(j.last_run),
+      seconds: num(j.seconds), ok: j.ok === true ? true : j.ok === false ? false : null, error: str(j.error, 200) || null, runs: num(j.runs) || 0, late: j.late === true })),
+  });
 }
 
 /* ---------- what's new: which update each person last pressed "Got it" on ---------- */

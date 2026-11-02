@@ -335,6 +335,12 @@
   - Setting: Coins per quest.
   - Setting: XP per quest.
   - Setting: Streak bonus per day (all 3 done). Finishing all 3 quests gives this many coins for each day in a row, up to 7 days
+- Seasons: Run seasons with their own leaderboard: XP earned during the season counts, and when it ends BEV announces the winners, gives them a role and keeps the results in a Hall of Fame. Members check the standings with /season. Page: https://bevbotdiscord.com/features/seasons
+  - Setting: How long a season lasts. Choices: 2 weeks, 1 month, 2 months, 3 months.
+  - Setting: Where to announce the winners.
+  - Setting: Role for the winners. Taken off last season's winners when a new season ends. Optional
+  - Setting: How many winners get the role. Choices: Just the top member, The top 3, The top 5, The top 10.
+  - Setting: Start the next season by itself.
 
 ### Economy & games
 - Economy & Shop (also called: economy, coins, currency, shop, daily reward, work command, bank): Your own currency (coins, or whatever you call it) for chatting, /daily rewards, /work, /pay, a bank, robbing and a shop selling roles and items. Page: https://bevbotdiscord.com/features/economy
@@ -476,6 +482,7 @@
 - /quests: See today's 3 daily quests, your progress and your streak.
 - /rank: Show a member's level, XP progress and place on the server leaderboard.
 - /rob: Try to steal coins from another member's wallet. Get caught and you pay a fine.
+- /season: This season's leaderboard, how long is left and last season's winners.
 - /shop: Browse the shop, buy roles and items, and see or use your inventory.
 - /trade: Offer another member a swap of coins and items. Nothing moves until they accept.
 - /use: Use a role or boost from your inventory.

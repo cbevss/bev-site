@@ -3339,7 +3339,8 @@
     });
     form.append(list);
     var opts = el('div', 'brkopts');
-    [['random', '🎲 Random matchups (shuffle the order)'], ['scores', '🔢 Keep scores for each match']].forEach(function (o) {
+    [['random', '🎲 Random matchups (shuffle the order)'], ['scores', '🔢 Keep scores for each match'], ['double', '🔁 Double elimination (out after 2 losses)'],
+     ['checkin', '✅ Check-in first (only players who check in play)']].forEach(function (o) {
       var lab = el('label', 'chk');
       var box = el('input');
       box.type = 'checkbox';
@@ -3361,7 +3362,8 @@
           : { name: (row.name || '').trim(), members: row.members.map(function (m) { return m.id; }) };
       });
       brkAct('create', { name: (brk.title || '').trim(), channel: brk.channel || '', mode: brk.mode, entrants: JSON.stringify(entrants),
-                         random: brk.random ? 'yes' : 'no', scores: brk.scores ? 'yes' : 'no' }, function (b) {
+                         random: brk.random ? 'yes' : 'no', scores: brk.scores ? 'yes' : 'no', format: brk.double ? 'double' : 'single',
+                         checkin: brk.checkin ? 'yes' : 'no' }, function (b) {
         state.config.brackets.unshift(b);
         brk.pick = b.id;
         brk.rows = []; brk.title = '';
@@ -3415,13 +3417,15 @@
     head.append(tools);
     view.append(head);
     if (typeof b.champion === 'number') view.append(el('p', 'brkchamp', '🏆 Champion: ' + brkSideName(b, b.champion)));
+    function boardFor(rounds, names, part) {
     var board = el('div', 'brkboard');
-    b.rounds.forEach(function (matches, r) {
+    rounds.forEach(function (matches, r) {
       var col = el('div', 'brkcol');
-      col.append(el('p', 'lab', b.round_names[r]));
+      col.append(el('p', 'lab', names[r]));
       matches.forEach(function (m, i) {
         var real = typeof m.a === 'number' && typeof m.b === 'number';
         var card = el('div', 'brkmatch' + (m.w ? ' done' : '') + (real ? '' : ' wait'));
+        card.setAttribute('data-part', part);
         card.setAttribute('data-r', r);
         card.setAttribute('data-m', i);
         ['a', 'b'].forEach(function (side) {
@@ -3436,7 +3440,7 @@
             score.setAttribute('aria-label', 'Score for ' + brkSideName(b, m[side]));
             score.addEventListener('change', function () {
               var inputs = card.querySelectorAll('.brkscore');
-              brkAct('score', { bracket: String(b.id), round: String(r), match: String(i), sa: inputs[0].value, sb: inputs[1].value }, function (nb) { Object.assign(b, nb); });
+              brkAct('score', { bracket: String(b.id), part: part, round: String(r), match: String(i), sa: inputs[0].value, sb: inputs[1].value }, function (nb) { Object.assign(b, nb); });
             });
             row.append(score);
           }
@@ -3451,7 +3455,7 @@
                           hint: m.w ? 'This changes the result. Any later matches that depended on it are reset.' : null,
                           ok: '✅ Yes, ' + name + ' won', cancel: 'Go back' }).then(function (yes) {
                 if (!yes) return;
-                brkAct('winner', { bracket: String(b.id), round: String(r), match: String(i), side: side, confirm: 'yes' }, function (nb) { Object.assign(b, nb); });
+                brkAct('winner', { bracket: String(b.id), part: part, round: String(r), match: String(i), side: side, confirm: 'yes' }, function (nb) { Object.assign(b, nb); });
               });
             });
             row.append(win);
@@ -3464,7 +3468,7 @@
           undo.type = 'button';
           undo.addEventListener('click', function () {
             askDialog({ title: 'Clear this result?', text: 'The match goes back to having no winner, and later matches that depended on it are reset.', ok: 'Clear it', cancel: 'Keep it' })
-              .then(function (yes) { if (yes) brkAct('undo', { bracket: String(b.id), round: String(r), match: String(i) }, function (nb) { Object.assign(b, nb); }); });
+              .then(function (yes) { if (yes) brkAct('undo', { bracket: String(b.id), part: part, round: String(r), match: String(i) }, function (nb) { Object.assign(b, nb); }); });
           });
           card.append(undo);
         }
@@ -3472,7 +3476,33 @@
       });
       board.append(col);
     });
-    view.append(board);
+    return board;
+    }
+    // Check-in (4.54): who's in, and Start the bracket.
+    if (b.phase === 'checkin') {
+      var ci = el('div', 'brkcheckin');
+      var inN = (b.checkin || []).filter(function (c) { return c.in; }).length;
+      ci.append(el('p', 'flabel', '✅ Check-in is open: ' + inN + ' of ' + (b.checkin || []).length + ' in. Players press Check in on the bracket\u2019s message.'));
+      var ul = el('ul', 'brkcilist');
+      (b.checkin || []).forEach(function (c) { ul.append(el('li', c.in ? 'in' : 'out', (c.in ? '✅ ' : '⏳ ') + c.name + (c.can ? '' : ' (no Discord account, always in)'))); });
+      var start = el('button', 'act save', '▶️ Start the bracket');
+      start.type = 'button'; start.id = 'brk-start';
+      start.addEventListener('click', function () {
+        askDialog({ title: 'Start ' + b.name + '?', text: 'Everyone who hasn\u2019t checked in is taken out, and the matchups are made.', ok: 'Start it', cancel: 'Not yet' })
+          .then(function (yes) { if (yes) brkAct('start', { bracket: String(b.id) }, function (nb) { Object.assign(b, nb); }); });
+      });
+      ci.append(ul, start);
+      view.append(ci);
+      return view;
+    }
+    var double = b.format === 'double';
+    if (double) view.append(el('h4', 'brkpart', 'Winners bracket'));
+    view.append(boardFor(b.rounds, b.round_names, 'w'));
+    if (double) {
+      if ((b.losers || []).length) { view.append(el('h4', 'brkpart', 'Losers bracket')); view.append(boardFor(b.losers, b.loser_names || [], 'l')); }
+      view.append(el('h4', 'brkpart', 'Grand final'));
+      view.append(boardFor((b.grand || []).map(function (m) { return [m]; }), ['Grand final', 'Deciding match'], 'g'));
+    }
     return view;
   }
   var brkHost = null, brkFeature = null;

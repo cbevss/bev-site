@@ -1720,3 +1720,27 @@ table.lvl td.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monos
 .chist .bhitem.undone{opacity:.65}
 .chist .bhitem.undone .chchange{text-decoration:line-through}
 .tksaved{max-width:320px;margin:8px 0 6px}
+
+/* Admin → Bot health (4.53) */
+.hfacts{margin-top:14px}
+.hsect{margin-top:12px}
+.hlist{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.hlist li{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(9,15,32,.6);min-width:0}
+.hlist li.bad{border-color:rgba(248,113,113,.45)}
+.hlist li.good{border-color:rgba(74,222,128,.35)}
+.hlist b{color:#fff;font-size:14.5px;overflow-wrap:anywhere}
+.hlist span{color:var(--mut);font-size:13.5px;overflow-wrap:anywhere}
+/* Brackets 4.54: double elimination and check-in */
+h4.brkpart{margin:18px 0 8px;color:#B9D0FF;font-size:15px}
+.brkcheckin{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.brkcilist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:6px}
+.brkcilist li{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(9,15,32,.6);overflow-wrap:anywhere}
+.brkcilist li.in{border-color:rgba(74,222,128,.45)}
+#bextra .bpart{margin-top:22px}
+#bextra .bpartrow{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;overscroll-behavior-x:contain}
+#bextra .bmatches.plain{display:flex;flex-direction:column;gap:10px;height:auto;min-height:0;grid-template-rows:none}
+#bextra .bslot::before,#bextra .bslot::after{display:none}
+#bextra .bround{flex:none}
+#bextra .bcheckin{margin-top:12px;padding:14px 16px;border:1px solid rgba(74,222,128,.45);border-radius:12px;background:rgba(22,101,52,.25)}
+/* A row whose picker or menu is open sits above the rows after it, even while they're still sliding in. */
+.rv:focus-within,.brkrow:focus-within{position:relative;z-index:6}

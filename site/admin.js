@@ -877,6 +877,73 @@
     showDay((chart.index >= 0 ? chart.index : chart.data.length - 1) + moves[e.key], true);
   });
   $('crun').addEventListener('click', runCheck);
+
+  /* ---------- bot health ---------- */
+  function ago(t) {
+    if (!t) return 'never';
+    var s = Math.max(0, Math.round(Date.now() / 1000 - t));
+    if (s < 90) return s + 's ago';
+    if (s < 5400) return Math.round(s / 60) + ' min ago';
+    if (s < 129600) return Math.round(s / 3600) + 'h ago';
+    return Math.round(s / 86400) + ' days ago';
+  }
+  function every(sec) { return sec >= 3600 ? 'every ' + Math.round(sec / 3600) + 'h' : sec >= 60 ? 'every ' + Math.round(sec / 60) + ' min' : 'every ' + sec + 's'; }
+  function runHealth() {
+    var button = $('hrun');
+    button.disabled = true;
+    $('hnote').textContent = 'Asking BEV…';
+    call('/api/admin/health').then(function (res) {
+      button.disabled = false;
+      $('hnote').textContent = '';
+      if (!res.ok) {
+        $('hstate').textContent = 'Not available';
+        toast(res.data.error === 'bot_outdated' ? 'The bot needs updating before this works.' : 'BEV didn’t answer. Try again in a minute.');
+        return;
+      }
+      var d = res.data;
+      $('hbody').hidden = false;
+      var late = d.jobs.filter(function (x) { return x.late || x.ok === false; }).length;
+      $('hstate').textContent = d.errors_24h ? plural(d.errors_24h, 'error today', 'errors today') : late ? plural(late, 'job needs a look', 'jobs need a look') : 'Healthy';
+      $('hstate').className = 'stat' + (d.errors_24h || late ? ' warnstat' : ' here');
+      var facts = $('hfacts'); facts.textContent = '';
+      function line(name, value) { var row = make('div'); row.append(make('dt', null, name), make('dd', null, value)); facts.append(row); }
+      line('Version', 'BEV ' + d.version + (d.online ? ' • online' : ' • offline'));
+      line('Up for', d.uptime_s === null ? 'Unknown' : (d.uptime_s >= 86400 ? Math.floor(d.uptime_s / 86400) + 'd ' : '') + Math.floor((d.uptime_s % 86400) / 3600) + 'h');
+      line('Ping', d.latency_ms === null ? 'Unknown' : d.latency_ms + ' ms');
+      line('Servers', String(d.servers));
+      line('Database', d.db_bytes === null ? 'Unknown' : (d.db_bytes / 1048576).toFixed(1) + ' MB');
+      line('Last offsite backup', d.backup ? (d.backup.ok ? '✅ ' : '❌ ') + ago(d.backup.at) + (d.backup.ok ? '' : ': ' + d.backup.note) : 'None yet');
+      var areas = $('hareas'); areas.textContent = '';
+      d.areas.forEach(function (a) {
+        var li = make('li', 'bad');
+        li.append(make('b', null, a.area + ': ' + plural(a.errors_24h, 'error', 'errors')), make('span', null, 'Latest ' + ago(a.last_at) + ': ' + a.last_message));
+        areas.append(li);
+      });
+      if (!d.areas.length) areas.append(make('li', 'good', '✅ No errors in the last 24 hours.'));
+      $('hareas-d').open = d.areas.length > 0;
+      var jobs = $('hjobs'); jobs.textContent = '';
+      d.jobs.forEach(function (x) {
+        var li = make('li', x.ok === false || x.late ? 'bad' : x.ok ? 'good' : '');
+        var state = x.ok === false ? '❌ failed: ' + (x.error || 'unknown error') : x.late ? '⏰ hasn’t run for a while' : x.ok ? '✅ worked' : '➖ hasn’t run yet';
+        li.append(make('b', null, x.name), make('span', null, every(x.every) + ' • last ran ' + ago(x.last_run) + (x.seconds !== null ? ' (' + x.seconds + 's)' : '') + ' • ' + state));
+        jobs.append(li);
+      });
+      $('hjobs-d').open = late > 0;
+      var recent = $('hrecent'); recent.textContent = '';
+      d.recent.forEach(function (r) {
+        var li = make('li');
+        li.append(make('b', null, r.area + ' • ' + r.kind), make('span', null, ago(r.at) + ': ' + r.message));
+        recent.append(li);
+      });
+      if (!d.recent.length) recent.append(make('li', 'good', 'No errors kept.'));
+      say($('hstate').textContent);
+    }, function () {
+      button.disabled = false;
+      $('hnote').textContent = '';
+      toast('BEV didn’t answer. Check your connection and try again.');
+    });
+  }
+  $('hrun').addEventListener('click', runHealth);
   $('irefresh').addEventListener('click', loadInbox);
 
   /* ---------- Dashboard settings: a row per feature; On, Off everywhere, or Off everywhere except some servers ---------- */

@@ -32,7 +32,7 @@
     doc.title = b.name + ' | BEV bracket';
     $('title').textContent = b.name;
     $('gname').textContent = b.guild.name;
-    $('sub').textContent = b.entrants.length + ' ' + (b.mode === 'teams' ? 'teams' : 'players') + ' • single elimination';
+    $('sub').textContent = b.entrants.length + ' ' + (b.mode === 'teams' ? 'teams' : 'players') + ' • ' + (b.format === 'double' ? 'double' : 'single') + ' elimination';
     var status = $('bstatus');
     status.replaceChildren();
     if (typeof b.champion === 'number') {
@@ -93,6 +93,34 @@
     for (var q = last - 1; q >= 0; q--) {
       var mq = b.rounds[q];
       tree.append(column('br' + (q === 0 ? ' bfirst' : ''), b.round_names[q], mq.slice(mq.length / 2), Math.pow(2, q)));
+    }
+    // Double elimination (4.54): the losers bracket and the grand final, below the main tree.
+    var extra = $('bextra');
+    extra.replaceChildren();
+    if (b.phase === 'checkin') {
+      var ci = el('div', 'bcheckin');
+      var inN = (b.checkin || []).filter(function (c) { return c.in; }).length;
+      ci.append(el('p', null, '✅ Check-in is open: ' + inN + ' of ' + (b.checkin || []).length + ' checked in. The matchups are made when the host starts the bracket.'));
+      extra.append(ci);
+    }
+    if (b.format === 'double') {
+      function strip(title, rounds, names) {
+        var sec = el('section', 'bpart');
+        sec.append(el('h2', 'disp', title));
+        var row = el('div', 'bpartrow');
+        rounds.forEach(function (ms, r) {
+          var col = el('div', 'bround');
+          col.append(el('p', 'lab', names[r] || ''));
+          var list = el('div', 'bmatches plain');
+          ms.forEach(function (m) { var slot = el('div', 'bslot'); slot.append(matchBox(m)); list.append(slot); });
+          col.append(list);
+          row.append(col);
+        });
+        sec.append(row);
+        extra.append(sec);
+      }
+      if ((b.losers || []).length) strip('Losers bracket', b.losers, b.loser_names || []);
+      strip('Grand final', (b.grand || []).map(function (m) { return [m]; }), ['Grand final', 'Deciding match']);
     }
     // Start scrolled so the final is in the middle of the screen.
     var wrap = $('btreewrap');

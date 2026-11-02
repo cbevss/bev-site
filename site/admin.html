@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=a37904eb4a">
+<link rel="stylesheet" href="/styles.css?v=d6585484ad">
 </head>
 <body class="admin">
 <a class="skip" href="#main">Skip to content</a>
@@ -58,7 +58,7 @@
 
 <div class="bar">
 <div class="me"><span class="av sm" id="meav" aria-hidden="true"></span><p>Signed in as <strong id="who">a site admin</strong></p></div>
-<nav class="jump" aria-label="Sections"><a class="pill" href="#maint">Maintenance</a> <a class="pill" href="#alert">Discord alert</a> <a class="pill" href="#bann">Banner</a> <a class="pill" href="#visits">Visits</a> <a class="pill" href="#check">Connection</a> <a class="pill" href="#admins">Admins</a></nav>
+<nav class="jump" aria-label="Sections"><a class="pill" href="#maint">Maintenance</a> <a class="pill" href="#alert">Discord alert</a> <a class="pill" href="#bann">Banner</a> <a class="pill" href="#visits">Visits</a> <a class="pill" href="#health">Health</a> <a class="pill" href="#check">Connection</a> <a class="pill" href="#admins">Admins</a></nav>
 </div>
 
 <p class="toast" id="toast" role="alert" hidden></p>
@@ -208,6 +208,18 @@
 </div>
 </section>
 
+<section class="asec" id="health" aria-labelledby="health-h">
+<div class="ahead"><h2 class="disp" id="health-h">Bot health</h2><span class="stat" id="hstate">Not checked</span></div>
+<p class="adesc">How each part of BEV is doing: errors in the last day, the background jobs (when each last ran and whether it worked) and the latest errors, so problems can be fixed before anyone reports them.</p>
+<div class="row gap"><button class="act save" id="hrun" type="button">Check BEV's health</button><span class="note" id="hnote"></span></div>
+<div id="hbody" hidden>
+<dl class="finfo hfacts" id="hfacts"></dl>
+<details class="fset hsect" id="hareas-d"><summary>Errors by part of BEV (last 24 hours)</summary><ul class="hlist" id="hareas"></ul></details>
+<details class="fset hsect" id="hjobs-d"><summary>Background jobs</summary><ul class="hlist" id="hjobs"></ul></details>
+<details class="fset hsect" id="hrecent-d"><summary>Latest errors</summary><ul class="hlist" id="hrecent"></ul></details>
+</div>
+</section>
+
 <section class="asec" id="check" aria-labelledby="check-h">
 <div class="ahead"><h2 class="disp" id="check-h">Connection check</h2></div>
 <p class="adesc">Tests every link between this website and BEV: the sign-in settings, the bot token, the bot's address, the shared key and the site database. If something on the site isn't working, start here.</p>
@@ -237,9 +249,9 @@
 <nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
 </footer>
 
-<script src="/updates.js?v=ecead8f224" defer></script>
+<script src="/updates.js?v=e2c7972742" defer></script>
 <script src="/nav.js?v=a85f8420b7" defer></script>
 <script src="/supportchat.js?v=56ad3f5691" defer></script>
-<script src="/admin.js?v=5c5f56db84" defer></script>
+<script src="/admin.js?v=f72509dbfc" defer></script>
 </body>
 </html>
