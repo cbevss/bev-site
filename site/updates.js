@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.61',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Role details on the Role Permissions tool',
+        text: 'Each role now has Discord\'s role settings on the dashboard: name, colour, a gradient second colour, show separately, allow @mention, and a one-emoji icon. Roles can be moved up or down the list (never above BEV\'s own highest role), given to or taken from members, and deleted. Every change goes to the mod log.' },
+    ],
+  },
+  {
     id: '4.60',
     date: '2 November 2026',
     changes: [

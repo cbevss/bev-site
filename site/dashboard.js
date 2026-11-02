@@ -1284,13 +1284,36 @@
     note.setAttribute('role', 'status');
     var groups = el('div', 'rpgroups');
     var bar = el('div', 'rpbar');
+    var details = el('div', 'rpextras');
+    var order = el('div', 'rpextras');
+    var people = el('div', 'rpextras');
+    var pickedMember = null;
+    function post(action, values, done) {
+      return request('/api/action', {
+        method: 'POST',
+        headers: { accept: 'application/json', 'content-type': 'application/json' },
+        body: JSON.stringify({ guild_id: state.guild, owner: 'roleperms', action: action, values: values })
+      }).then(function (r) {
+        if (r.status === 200 && r.data && r.data.data && r.data.data.roles) {
+          data = r.data.data;
+          var id = picked ? picked.id : '';
+          fillRoles(); sel.value = id; draw();
+          note.textContent = r.data.note || 'Saved.';
+          say(note.textContent);
+          if (done) done();
+        } else {
+          note.textContent = '❌ ' + ((r.data && r.data.message) || errorText(r));
+          drawBar();
+        }
+      });
+    }
     var save = el('button', 'act save', 'Save permissions');
     var reset = el('button', 'act', 'Undo changes');
     save.type = reset.type = 'button';
     save.id = 'rp-save';
     bar.append(save, reset);
     meta.append(label, sel, info);
-    body.append(groups, bar, note);
+    body.append(details, order, people, groups, bar, note);
     function roleById(id) { return data.roles.filter(function (r) { return r.id === id; })[0] || null; }
     function fillRoles() {
       var keep = sel.value;
@@ -1315,10 +1338,120 @@
       reset.disabled = !n;
       save.textContent = n ? 'Save ' + n + ' change' + (n === 1 ? '' : 's') : 'Save permissions';
     }
+    function drawExtras() {
+      details.replaceChildren(); order.replaceChildren(); people.replaceChildren();
+      pickedMember = null;
+      if (!picked) return;
+      var locked = !!picked.locked;
+      if (picked.is_default) {
+        details.append(el('p', 'fnote', "@everyone's name and settings can't be changed here."));
+        return;
+      }
+      var st = { none: !picked.color, grad: !!picked.secondary, hoist: !!picked.hoist, mention: !!picked.mentionable };
+      var box = el('section', 'rpgroup');
+      box.append(el('h4', 'rphead', 'Role details'));
+      var nameL = el('label', 'flabel sm', 'Name'); var nameI = el('input', 'field');
+      nameI.type = 'text'; nameI.maxLength = 100; nameI.value = picked.name; nameI.id = 'rd-name'; nameI.disabled = locked; nameL.htmlFor = nameI.id;
+      var colL = el('label', 'flabel sm', 'Colour'); var colI = el('input', 'field');
+      colI.type = 'color'; colI.value = picked.color || '#99aab5'; colI.id = 'rd-colour'; colI.disabled = locked; colL.htmlFor = colI.id;
+      var noCol = switchButton('No colour', function () { return st.none; }, function (v) { st.none = v; }, true);
+      noCol.disabled = locked;
+      var secL = el('label', 'flabel sm', 'Second colour (gradient)'); var secI = el('input', 'field');
+      secI.type = 'color'; secI.value = picked.secondary || picked.color || '#ffde90'; secI.id = 'rd-second'; secI.disabled = locked || !picked.gradient; secL.htmlFor = secI.id;
+      var gradSw = switchButton('Gradient', function () { return st.grad; }, function (v) { st.grad = v; secI.disabled = locked || !v || !picked.gradient; }, true);
+      gradSw.disabled = locked || !picked.gradient;
+      var hoistSw = switchButton('Show separately', function () { return st.hoist; }, function (v) { st.hoist = v; }, true);
+      hoistSw.disabled = locked;
+      var mentionSw = switchButton('Allow @mention', function () { return st.mention; }, function (v) { st.mention = v; }, true);
+      mentionSw.disabled = locked;
+      var iconL = el('label', 'flabel sm', 'Icon (one emoji, optional)'); var iconI = el('input', 'field');
+      iconI.type = 'text'; iconI.maxLength = 8; iconI.value = picked.icon || ''; iconI.id = 'rd-icon'; iconI.disabled = locked; iconL.htmlFor = iconI.id;
+      var rowColour = el('div', 'rprow'); rowColour.append(colL, colI, noCol);
+      var rowGrad = el('div', 'rprow'); rowGrad.append(gradSw, secL, secI);
+      var saveBtn = el('button', 'act save', 'Save role details');
+      saveBtn.type = 'button'; saveBtn.disabled = locked;
+      var delBtn = el('button', 'act stop', 'Delete role');
+      delBtn.type = 'button'; delBtn.disabled = locked;
+      saveBtn.addEventListener('click', function () {
+        var values = {
+          role: picked.id,
+          name: nameI.value.trim(),
+          colour: st.none ? 'none' : (picked.color && colI.value === picked.color ? '' : colI.value),
+          secondary: !picked.gradient ? '' : (!st.grad ? 'none' : (picked.secondary && secI.value === picked.secondary ? '' : secI.value)),
+          hoist: st.hoist ? 'on' : 'off',
+          mentionable: st.mention ? 'on' : 'off',
+          icon: iconI.value.trim()
+        };
+        post('details', values);
+      });
+      delBtn.addEventListener('click', function () {
+        if (!root.confirm('Delete @' + picked.name + '? This can\'t be undone, and everyone who has it loses it.')) return;
+        post('delete', { role: picked.id });
+      });
+      box.append(nameL, nameI, rowColour, rowGrad, hoistSw, mentionSw, iconL, iconI, el('p', 'fnote', picked.gradient ? '' : 'Gradient colours need a newer version of BEV.'), saveBtn, delBtn);
+      details.append(box);
+      // order
+      var ranked = data.roles.filter(function (r) { return !r.is_default; });
+      var rank = ranked.indexOf(picked) + 1;
+      var obox = el('section', 'rpgroup');
+      obox.append(el('h4', 'rphead', 'Order'));
+      obox.append(el('p', 'fnote', 'Position ' + rank + ' of ' + ranked.length + '. 1 is the highest role, and it is listed at the top.'));
+      var up = el('button', 'act', 'Move up'); up.type = 'button'; up.disabled = locked || rank <= 1;
+      var down = el('button', 'act', 'Move down'); down.type = 'button'; down.disabled = locked || rank >= ranked.length;
+      up.addEventListener('click', function () { post('move', { role: picked.id, direction: 'up' }); });
+      down.addEventListener('click', function () { post('move', { role: picked.id, direction: 'down' }); });
+      obox.append(el('div', 'rpbar', ''));
+      obox.lastChild.append(up, down);
+      order.append(obox);
+      // members
+      var mbox = el('section', 'rpgroup');
+      mbox.append(el('h4', 'rphead', 'Members with this role'));
+      var mid = 'rp-find';
+      var mLabel = el('label', 'flabel sm', 'Find a member to give or take this role'); var mInput = el('input', 'field');
+      mInput.type = 'search'; mInput.id = mid; mInput.placeholder = 'Type part of their name, or their ID'; mInput.autocomplete = 'off'; mLabel.htmlFor = mid;
+      var mFound = el('ul', 'mfound'); mFound.hidden = true;
+      var mPick = el('p', 'fnote', 'Nobody picked yet.');
+      var give = el('button', 'act save', 'Give role'); give.type = 'button'; give.disabled = true;
+      var take = el('button', 'act', 'Take role'); take.type = 'button'; take.disabled = true;
+      function refreshMembers() { give.disabled = take.disabled = locked || !pickedMember; }
+      var mtimer = null, masked = 0;
+      mInput.addEventListener('input', function () {
+        root.clearTimeout(mtimer);
+        var text = mInput.value.trim();
+        if (text.length < 2 && !/^\d+$/.test(text)) { mFound.hidden = true; mFound.replaceChildren(); return; }
+        mtimer = root.setTimeout(function () {
+          var n = ++masked;
+          request('/api/members?guild_id=' + encodeURIComponent(state.guild) + '&q=' + encodeURIComponent(text)).then(function (r) {
+            if (n !== masked) return;
+            mFound.replaceChildren();
+            var list = r.status === 200 && r.data && Array.isArray(r.data.members) ? r.data.members : [];
+            if (!list.length) mFound.append(el('li', 'empty', 'Nobody in the server matches that.'));
+            list.forEach(function (m) {
+              var li = el('li'); var b = el('button', 'mpick'); b.type = 'button';
+              b.append(avatarNode(m.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(m.avatar) ? m.avatar : null, m.display, 'av xs'), el('b', null, m.display), el('span', 'mname', '@' + m.name));
+              b.addEventListener('click', function () {
+                pickedMember = { id: m.id };
+                mPick.textContent = 'Picked: ' + m.display;
+                mFound.hidden = true; mInput.value = m.display; refreshMembers();
+              });
+              li.append(b); mFound.append(li);
+            });
+            mFound.hidden = false;
+          });
+        }, 250);
+      });
+      give.addEventListener('click', function () { if (pickedMember) post('give', { role: picked.id, member: pickedMember.id }); });
+      take.addEventListener('click', function () { if (pickedMember) post('take', { role: picked.id, member: pickedMember.id }); });
+      mbox.append(mLabel, mInput, mFound, mPick);
+      var mrow = el('div', 'rpbar', ''); mrow.append(give, take);
+      mbox.append(mrow);
+      people.append(mbox);
+    }
     function draw() {
       groups.replaceChildren();
       note.textContent = '';
       picked = roleById(sel.value);
+      drawExtras();
       if (!picked) { info.textContent = 'Pick a role to see its permissions.'; drawBar(); return; }
       wanted = {};
       picked.on.forEach(function (k) { wanted[k] = true; });
