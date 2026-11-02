@@ -898,11 +898,11 @@
     // The buttons and what they show sit where the Settings line is on the card beside it.
     var meta = el('div', 'fmeta');
     // Scan and health results open below the buttons; the emoji list is always there, so it isn't "opened".
-    var body = el('div', 'tres' + (t.key === 'scan' || t.key === 'health' ? ' grows' : ''));
+    var body = el('div', 'tres' + (t.key === 'scan' || t.key === 'health' || t.key === 'changes' ? ' grows' : ''));
     if (t.key === 'members') memberTool(t, meta, body);
     else if (t.key === 'emoji') emojiTool(t, meta, body);
     else {
-      var draw = t.key === 'scan' ? scanResults : t.key === 'health' ? healthResults : null;
+      var draw = t.key === 'scan' ? scanResults : t.key === 'health' ? healthResults : t.key === 'changes' ? changeResults : null;
       meta.append(actionRow(t.key, t.buttons || [], { onResult: function (answer) { if (draw && answer.data) body.replaceChildren(draw(answer.data)); } }));
     }
     var lower = el('div', 'tbody');
@@ -929,6 +929,23 @@
     });
     wrap.append(list);
     return wrap;
+  }
+
+  // Change history (4.51): who changed what, and when; undone changes are marked.
+  function changeResults(items) {
+    var list = el('ol', 'bhist chist');
+    (Array.isArray(items) ? items : []).forEach(function (c) {
+      var li = el('li', 'bhitem' + (c.undone_by ? ' undone' : ''));
+      var who = el('div', 'bhwho');
+      who.append(el('b', null, c.what));
+      who.append(el('span', 'chchange', c.old + ' → ' + c.new));
+      var when = new Date(c.at * 1000).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      who.append(el('span', 'bhmeta', '#' + c.id + ' • ' + when + ' • ' + c.actor + (c.undone_by ? ' • undone by ' + c.undone_by : '')));
+      li.append(who);
+      list.append(li);
+    });
+    if (!list.children.length) list.append(el('li', 'bhempty', 'No changes yet.'));
+    return list;
   }
 
   function healthResults(d) {

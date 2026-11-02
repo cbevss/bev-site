@@ -10,11 +10,15 @@
 ## Features (all free)
 
 ### Security
-- Anti-Nuke Protection (also called: anti-nuke, server protection, mass ban protection, rogue admin protection, audit log watcher): Watches the audit log for anyone who bans, kicks, prunes members or deletes roles or channels too fast, stops them straight away, and can rebuild what they deleted. Page: https://bevbotdiscord.com/features/anti-nuke
+- Anti-Nuke Protection (also called: anti-nuke, server protection, mass ban protection, rogue admin protection, audit log watcher): Watches the audit log for anyone who bans, kicks, prunes members or deletes roles or channels too fast, stops them straight away, and can rebuild what they deleted. It also watches new webhooks and bots, and stops webhook spam. Page: https://bevbotdiscord.com/features/anti-nuke
   - Setting: Actions allowed per minute. The next destructive action after this gets them stopped Choices: 1 per minute, 2 per minute, 3 per minute, 5 per minute, 10 per minute.
   - Setting: Punishment. What happens to someone who goes over the limit Choices: Remove all their roles, Kick them, Ban them.
   - Setting: Rebuild deleted channels and roles. Recreates what they deleted in that minute
   - Setting: DM the owner when it triggers. Sends the server owner an alert
+  - Setting: Webhooks made by people who aren't trusted. Trusted: the server owner and anyone on the Whitelist Choices: Do nothing, Tell the server log, Delete them straight away.
+  - Setting: Stop webhook spam. A webhook that pings @everyone or posts more than 5 messages in 10 seconds is deleted. BEV's own webhooks are never touched
+  - Setting: Bots added by people who aren't trusted. Dangerous: Administrator, Manage Server, Roles, Channels or Webhooks, Ban, Kick, Mention Everyone and Timeout Choices: Do nothing, Tell the server log, Take away their dangerous permissions.
+  - Setting: Trusted bots. These bots are never checked
 - Anti-Raid Shield (also called: anti-raid, raid protection, join flood, raid mode, lockdown on raid): Counts how fast people join. When too many join within a minute, BEV locks the server down and deals with everyone who joins until it ends. Page: https://bevbotdiscord.com/features/anti-raid
   - Setting: Joins in a minute that start a lockdown. How many joins within 60 seconds count as a raid Choices: 5 joins, 8 joins, 10 joins, 15 joins, 20 joins, 30 joins.
   - Setting: During a lockdown. What happens to people who join during a lockdown Choices: Pause verification, Kick new joiners, Time out new joiners for 1 hour.
@@ -155,6 +159,11 @@
   - Setting: Category for the channel BEV makes. If BEV makes this feature's channel (when none is picked), it goes in this category. Leave it empty for the top of the server.
   - Setting: Staff roles to ping.
   - Setting: Greeting sent to members.
+- Ban Appeals: Banned members can ask to be unbanned on BEV's website. Staff get each appeal in a channel with Unban and Keep banned buttons, and BEV tells the person the answer. Page: https://bevbotdiscord.com/features/ban-appeals
+  - Setting: Appeals channel. Where staff get appeals. Only staff should see it
+  - Setting: Message on the appeal page. Banned people see this above the appeal form
+  - Setting: After an answer, they can appeal again after. Choices: 7 days, 14 days, 30 days, 90 days, Never.
+  - Setting: DM people the appeal link when BEV bans them.
 
 ### Welcome & roles
 - Welcome, Goodbye & Boosts (also called: welcome message, welcome card, welcome image, goodbye message, leave message, boost message, join message): Greets new members with a message and a picture card, can DM them your rules, says goodbye when people leave and thanks boosters. Use {user}, {name}, {server} and {count}. Page: https://bevbotdiscord.com/features/welcome
@@ -409,6 +418,7 @@
 - Security scan: Checks your roles, bots and server settings for risky permissions, and says how to fix each thing it finds. Page: https://bevbotdiscord.com/features/scan
 - Emojis: Add an emoji from a picture link or from another server's emoji, and remove ones you don't need any more. Page: https://bevbotdiscord.com/features/emoji
 - Health check: BEV's ping, the permissions it has, where its role sits and every switched-on feature that needs attention. Page: https://bevbotdiscord.com/features/health
+- Change history: Who changed which setting or switched a feature on or off, and when. Undo puts one change back the way it was. Page: https://bevbotdiscord.com/features/changes
 - Server Builder (with AI): Add ready-made categories and channels with the right permissions in one click, or describe your server (like a Rocket League community) and BEV's AI designs every category, channel and permission for it. You see the plan first; nothing changes until you build it. Page: https://bevbotdiscord.com/features/builder
 
 ## Slash commands

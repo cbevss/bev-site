@@ -1710,3 +1710,12 @@ table.lvl td.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monos
 .admset{margin-top:10px;width:100%}
 .admbtns{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0 4px}
 .admbtns .act{flex:none;margin:0}
+
+/* Ban appeal page */
+.apserver{display:flex;align-items:center;gap:12px}
+.apserver img{width:40px;height:40px;border-radius:12px;flex:none}
+.apserver b{color:#fff;font-size:17px;min-width:0;overflow-wrap:anywhere}
+/* Change history (4.51) */
+.chist .chchange{display:block;color:#fff;font-size:14.5px;margin:2px 0;overflow-wrap:anywhere}
+.chist .bhitem.undone{opacity:.65}
+.chist .bhitem.undone .chchange{text-decoration:line-through}

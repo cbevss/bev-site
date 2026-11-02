@@ -53,7 +53,7 @@ const DURATIONS = [0, 15, 30, 60, 120, 240, 480, 720, 1440]; // maintenance leng
 const DEFAULT_MESSAGE = "We're carrying out scheduled maintenance to improve bevbotdiscord.com, so the website is temporarily unavailable. "
   + "The BEV bot isn't affected and keeps running in Discord as normal. Thank you for your patience. We'll be back shortly.";
 // The pages visits are counted for, with the names the admin page shows.
-const PAGES = { '/suggest': 'Suggest an idea', '/discover': 'Find a server', '/': 'Home', '/features': 'Features', '/support': 'Support', '/status': 'Bot status', '/leaderboard': 'Leaderboard',
+const PAGES = { '/appeal': 'Ban appeal', '/suggest': 'Suggest an idea', '/discover': 'Find a server', '/': 'Home', '/features': 'Features', '/support': 'Support', '/status': 'Bot status', '/leaderboard': 'Leaderboard',
   '/servers': 'My servers', '/dashboard': 'Dashboard', '/terms': 'Terms of Service', '/privacy': 'Privacy Policy' };
 // Link previews, crawlers, uptime monitors and scripts don't count as visits.
 const NOT_A_PERSON = /bot|crawl|spider|slurp|preview|monitor|uptime|curl|wget|python|httpclient|headless|lighthouse|facebookexternalhit|embedly|whatsapp/i;
@@ -270,6 +270,9 @@ async function loadView(session, c, fresh) {
 
 /* ---------- auth routes ---------- */
 
+// Pages sign-in may come back to: a tournament bracket, or a ban appeal page.
+const BACK_RE = /^(?:\/bracket\/\d{15,25}\/\d{1,10}|\/appeal\?guild=\d{5,25})$/;
+
 function login(c, url, secure) {
   if (!c.clientSecret || !c.sessionSecret) return redirect('/servers.html?error=' + (c.sessionSecretShort ? 'secret_short' : 'setup'));
   const state = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('');
@@ -277,7 +280,7 @@ function login(c, url, secure) {
     '&response_type=code&scope=identify%20guilds&state=' + state +
     '&redirect_uri=' + encodeURIComponent(url.origin + '/auth/callback');
   const next = url.searchParams.get('next') || '';
-  const back = /^\/bracket\/\d{15,25}\/\d{1,10}$/.test(next) ? next : '';
+  const back = BACK_RE.test(next) ? next : '';
   return redirect(target, [setCookie(cookieNames(secure).state, state + (back ? '|' + back : ''), STATE_TTL, secure)]);
 }
 
@@ -291,7 +294,7 @@ async function callback(request, c, url, secure) {
   const state = url.searchParams.get('state') || '';
   const stored = readCookies(request)[N.state] || '';
   const expected = stored.split('|')[0];
-  const back = /^\/bracket\/\d{15,25}\/\d{1,10}$/.test(stored.split('|')[1] || '') ? stored.split('|')[1] : '';
+  const back = BACK_RE.test(stored.split('|')[1] || '') ? stored.split('|')[1] : '';
   if (!state || !expected || !safeEqual(state, expected)) return fail('state');
   const code = url.searchParams.get('code');
   if (!code) return fail('state');
@@ -474,7 +477,7 @@ async function publicApi(request, c, url) {
 const PRIVATE = { '/api/suggest': ['POST'], '/api/me': ['GET'], '/api/servers': ['GET'], '/api/config': ['GET', 'POST'], '/api/level-roles': ['GET', 'POST'], '/api/messages': ['POST'],
                   '/api/action': ['POST'], '/api/members': ['GET'], '/api/preview': ['POST'], '/api/bracket': ['GET'],
                   '/api/support/mine': ['GET'], '/api/support/new': ['POST'], '/api/support/ticket': ['GET'], '/api/support/topic': ['POST'],
-                  '/api/support/send': ['POST'], '/api/support/close': ['POST'] };
+                  '/api/support/send': ['POST'], '/api/support/close': ['POST'], '/api/appeal': ['GET', 'POST'] };
 
 async function api(request, c, url, secure, s) {
   const path = url.pathname;
@@ -491,6 +494,7 @@ async function api(request, c, url, secure, s) {
   // "admin" only decides whether the top bar shows the Admin tab; /admin and its API check again.
   if (path === '/api/me') return json({ user: session.user, admin: s.admin });
   if (path === '/api/suggest') return sendSuggestion(request, c, s);
+  if (path === '/api/appeal') return banAppeal(request, c, url, s);
   if (path.startsWith('/api/support/')) return supportChat(request, c, url, s, path);
   // A tournament bracket: anyone signed in can ask, and the bot only answers members of that server.
   if (path === '/api/bracket') {
@@ -921,7 +925,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=0a58abd86c">
+<link rel="stylesheet" href="/styles.css?v=80c1bf234d">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1585,6 +1589,45 @@ async function sendSuggestion(request, c, s) {
   if (res.error) return json({ error: res.error, message: "BEV didn't answer. Try again in a minute." }, 503);
   if (res.status === 400) return json({ error: 'invalid', message: str(res.data && res.data.error, 300) }, 400);
   if (res.status === 404) return json({ error: 'bot_outdated', message: "This needs the newest version of BEV. Try again later." }, 501);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error', message: 'Something went wrong. Try again in a minute.' }, 502);
+  return json({ ok: true, id: Number(res.data.id) || 0 });
+}
+
+/* ---------- ban appeals: someone banned from a server asks its staff to unban them ---------- */
+
+// Who is appealing always comes from their sign-in; the page only says which server.
+async function banAppeal(request, c, url, s) {
+  const u = s.session.user;
+  if (request.method === 'GET') {
+    const guildId = url.searchParams.get('guild_id') || '';
+    if (!ID_RE.test(guildId)) return json({ error: 'bad_request', message: 'That link is missing the server.' }, 400);
+    const res = await bot(c, '/api/appeals/status?guild_id=' + guildId + '&user_id=' + String(u.id));
+    if (res.error) return json({ error: res.error, message: "BEV didn't answer. Try again in a minute." }, 503);
+    if (res.status === 404 && res.data && res.data.error) return json({ error: 'not_found', message: "BEV isn't in that server, so it can't take an appeal for it." }, 404);
+    if (res.status === 404) return json({ error: 'bot_outdated', message: 'This needs the newest version of BEV. Try again later.' }, 501);
+    if (res.status !== 200 || !res.data) return json({ error: 'bot_error', message: 'Something went wrong. Try again in a minute.' }, 502);
+    const d = res.data;
+    const a = d.appeal && typeof d.appeal === 'object' ? d.appeal : null;
+    const g = d.guild || {};
+    return json({
+      guild: { id: String(g.id || guildId), name: str(g.name, 100), icon: typeof g.icon === 'string' && /^https:\/\/cdn\.discordapp\.com\//.test(g.icon) ? g.icon.slice(0, 300) : null },
+      enabled: d.enabled === true, banned: d.banned === true, can_appeal: d.can_appeal === true, intro: str(d.intro, 600),
+      wait_until: Number.isFinite(d.wait_until) ? d.wait_until : null, min: Number(d.min) || 20, max: Number(d.max) || 2000,
+      appeal: a ? { id: Number(a.id) || 0, status: ['pending', 'approved', 'denied'].includes(a.status) ? a.status : 'pending',
+                    created: Number(a.created) || 0, note: str(a.note, 500) || null } : null,
+    });
+  }
+  const body = await readJson(request, 6000);
+  const guildId = body && String(body.guild_id || '');
+  const text = body && typeof body.text === 'string' ? body.text.trim() : '';
+  if (!ID_RE.test(guildId)) return json({ error: 'bad_request', message: 'That link is missing the server.' }, 400);
+  if (text.length < 20 || text.length > 2000) return json({ error: 'invalid', message: 'Write between 20 and 2,000 characters.' }, 400);
+  const avatar = u.avatar && /^[\w]+$/.test(u.avatar) ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : null;
+  const res = await bot(c, '/api/appeals/submit', { method: 'POST', body: JSON.stringify({ guild_id: guildId, user_id: String(u.id), username: u.username || u.name, display: u.name, avatar, text }) });
+  if (res.error) return json({ error: res.error, message: "BEV didn't answer. Try again in a minute." }, 503);
+  if (res.status === 400) return json({ error: 'invalid', message: str(res.data && res.data.error, 300) || "That appeal couldn't be sent." }, 400);
+  if (res.status === 404 && res.data && res.data.error) return json({ error: 'not_found', message: "BEV isn't in that server, so it can't take an appeal for it." }, 404);
+  if (res.status === 404) return json({ error: 'bot_outdated', message: 'This needs the newest version of BEV. Try again later.' }, 501);
   if (res.status !== 200 || !res.data) return json({ error: 'bot_error', message: 'Something went wrong. Try again in a minute.' }, 502);
   return json({ ok: true, id: Number(res.data.id) || 0 });
 }

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<title>BEV | Appeal a ban</title>
+<meta property="og:site_name" content="BEV">
+<meta property="og:title" content="Appeal a ban">
+<meta property="og:description" content="Banned from a Discord server that uses BEV? Ask its staff to unban you.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bevbotdiscord.com/appeal">
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Banned from a Discord server that uses BEV? Ask its staff to unban you.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=80c1bf234d">
+</head>
+<body class="appeal">
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/discover">Discover</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Ban appeal</div>
+<h1 class="disp rise d1" id="aph">Appeal a ban</h1>
+<p class="lead rise d2" id="aplead">Banned from a server that uses <span class="bevword">BEV</span>? Ask its staff to unban you. They read every appeal, and BEV DMs you their answer.</p>
+</div>
+</div>
+
+<main id="main" class="wrap sec">
+<section class="panel" id="apin" hidden>
+<h2 class="disp">Sign in to appeal</h2>
+<p>Signing in with Discord shows the staff who's appealing, and lets BEV DM you their answer. Nobody sees your password.</p>
+<a class="act save" id="apsignin" href="/auth/login">Sign in with Discord</a>
+</section>
+<section class="panel" id="apmsg" hidden>
+<h2 class="disp" id="apmsgh">Appeal</h2>
+<p id="apmsgp"></p>
+</section>
+<section class="panel sgform" id="apform" hidden>
+<div class="apserver"><img id="apicon" alt="" referrerpolicy="no-referrer" hidden><b id="apname"></b></div>
+<p class="fnote" id="apintro"></p>
+<label class="flabel" for="aptext">Why should you be unbanned?</label>
+<textarea class="field ta" id="aptext" rows="7" maxlength="2000" placeholder="What happened, and what you'll do differently."></textarea>
+<div class="sgrow"><span class="count" id="apcount">0 / 2000</span><button class="act save" id="apsend" type="button" disabled>📨 Send appeal</button></div>
+<p class="fnote" id="apnote" role="status" hidden></p>
+</section>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/updates.js?v=be0beff504" defer></script>
+<script src="/nav.js?v=a85f8420b7" defer></script>
+<script src="/supportchat.js?v=56ad3f5691" defer></script>
+<script src="/appeal.js?v=a307554d43" defer></script>
+</body>
+</html>

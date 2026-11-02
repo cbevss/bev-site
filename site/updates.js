@@ -5,6 +5,24 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.51',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Safer backups',
+        text: 'BEV now saves a protected snapshot before the Server Builder changes your server and before a backup is restored, and those are kept even when older backups are cleared out.' },
+      { title: 'Restore only what you need',
+        text: 'Restoring a backup can now bring back just the missing roles, just the missing channels, or put permissions back as they were, and you can name exactly which ones.' },
+      { title: 'Webhook Guardian',
+        text: 'Anti-Nuke can now report or delete webhooks made by people who aren\'t trusted, and stops webhooks that spam or ping @everyone.' },
+      { title: 'Ban appeals',
+        text: 'Switch on Ban Appeals and banned members can ask to be unbanned on BEV\'s website. Staff get each appeal with Unban and Keep banned buttons, and BEV DMs the person the answer.' },
+      { title: 'Change history',
+        text: 'A new Change history tool on the dashboard shows who changed which setting or switched a feature on or off, and when. Undo puts any one change back.' },
+      { title: 'New bot check',
+        text: 'When someone who isn\'t trusted adds a bot, Anti-Nuke can take its dangerous permissions away until you give them back from the dashboard.' },
+    ],
+  },
+  {
     id: '4.49',
     date: '1 November 2026',
     changes: [
