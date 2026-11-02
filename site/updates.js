@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.56',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Member Verification: the Verified role gets every channel',
+        text: 'Whatever role you pick as the role after verifying is now given every channel and category, and @everyone can\'t see them until they verify. Admin, mod, staff, log and ticket channels, and any channel that was already private, are left alone. New channels are set up the same way, and you can add channels BEV should never change. The honeypot (trap) channel always stays visible to everyone.' },
+      { title: 'Honeypot Trap',
+        text: 'New punishment: Jail them. You can also pick roles and people who can talk in the trap channel without being punished.' },
+      { title: 'Anti-Nuke: trusted roles and people',
+        text: 'Pick roles and people Anti-Nuke never stops, however fast they ban, kick or delete.' },
+    ],
+  },
+  {
     id: '4.55',
     date: '2 November 2026',
     changes: [

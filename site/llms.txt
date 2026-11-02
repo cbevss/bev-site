@@ -19,6 +19,8 @@
   - Setting: Stop webhook spam. A webhook that pings @everyone or posts more than 5 messages in 10 seconds is deleted. BEV's own webhooks are never touched
   - Setting: Bots added by people who aren't trusted. Dangerous: Administrator, Manage Server, Roles, Channels or Webhooks, Ban, Kick, Mention Everyone and Timeout Choices: Do nothing, Tell the server log, Take away their dangerous permissions.
   - Setting: Trusted bots. These bots are never checked
+  - Setting: Trusted roles. Anti-Nuke never stops people with these roles. Only pick roles you fully trust
+  - Setting: Trusted people. Anti-Nuke never stops these people
 - Anti-Raid Shield (also called: anti-raid, raid protection, join flood, raid mode, lockdown on raid): Counts how fast people join. When too many join within a minute, BEV locks the server down and deals with everyone who joins until it ends. Page: https://bevbotdiscord.com/features/anti-raid
   - Setting: Joins in a minute that start a lockdown. How many joins within 60 seconds count as a raid Choices: 5 joins, 8 joins, 10 joins, 15 joins, 20 joins, 30 joins.
   - Setting: During a lockdown. What happens to people who join during a lockdown Choices: Pause verification, Kick new joiners, Time out new joiners for 1 hour.
@@ -62,12 +64,16 @@
 - Honeypot Trap (also called: honeypot channel, bot trap, spam bot catcher): A trap channel near the top of the server. Real members read the warning and stay away, but spam bots type everywhere, so they're caught instantly. Page: https://bevbotdiscord.com/features/honeypot
   - Setting: Trap channel. Anyone who types here is punished
   - Setting: Category for the channel BEV makes. If BEV makes this feature's channel (when none is picked), it goes in this category. Leave it empty for the top of the server.
-  - Setting: Punishment. Choices: Ban them, Kick them, Time them out for 1 day.
+  - Setting: Punishment. Choices: Ban them, Kick them, Time them out for 1 day, Jail them.
+  - Setting: Roles who can talk here safely. People with these roles aren't punished for typing in the trap channel
+  - Setting: People who can talk here safely. These people aren't punished for typing in the trap channel
 - Member Verification (also called: verify, captcha, verification gate, member screening, verified role): New members get the Unverified role and must pass a check to get Verified: a button, a maths question or a picture code. Hide your channels from @everyone and show them to Verified. Page: https://bevbotdiscord.com/features/verification
   - Setting: Check type. Choices: Press a button, Answer a maths question, Type the code from a picture.
   - Setting: Verify channel.
   - Setting: Category for the channel BEV makes. If BEV makes this feature's channel (when none is picked), it goes in this category. Leave it empty for the top of the server.
   - Setting: Role after verifying.
+  - Setting: Give the Verified role every channel. Hides your channels from @everyone and shows them to Verified. Staff channels (admin, mod, logs, tickets…) are never changed
+  - Setting: Never change these. Channels or categories BEV leaves exactly as they are
   - Setting: Role while waiting.
   - Setting: Picture code: length. How many characters the picture code has. Only used when the check type is a picture code. Choices: 4 characters, 5 characters, 6 characters, 7 characters, 8 characters.
   - Setting: Picture code: colours. Black and white is easier for people with colour blindness. Choices: Colourful letters, Black and white (easiest to read).
