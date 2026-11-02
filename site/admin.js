@@ -768,6 +768,7 @@
       avatar(pic, a.avatar, a.name);
       var nm = make('div', 'nm');
       nm.appendChild(make('b', null, a.name || 'Name not found'));
+      if (a.username) nm.appendChild(make('span', 'handle', '@' + a.username));
       nm.appendChild(make('span', null, a.id));
       head.appendChild(nm);
       var me = state.me && state.me.id === a.id;

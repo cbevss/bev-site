@@ -1287,13 +1287,13 @@ async function adminProfiles(c) {
   const key = c.adminIds.join(',') + '|' + (c.botToken ? 1 : 0);
   if (profileCache.list && profileCache.key === key && Date.now() - profileCache.at < 600000) return profileCache.list;
   const list = await Promise.all(c.adminIds.map(async (id) => {
-    if (!c.botToken) return { id, name: null, avatar: null };
+    if (!c.botToken) return { id, name: null, username: null, avatar: null };
     try {
       const u = await discord('/users/' + id, 'Bot ' + c.botToken);
       const hash = typeof u.avatar === 'string' && /^(a_)?[0-9a-f]{32}$/.test(u.avatar) ? u.avatar : null;
-      return { id, name: str(u.global_name || u.username, 64) || null, avatar: hash ? `https://cdn.discordapp.com/avatars/${id}/${hash}.png?size=64` : null };
+      return { id, name: str(u.global_name || u.username, 64) || null, username: str(u.username, 64) || null, avatar: hash ? `https://cdn.discordapp.com/avatars/${id}/${hash}.png?size=64` : null };
     } catch {
-      return { id, name: null, avatar: null };
+      return { id, name: null, username: null, avatar: null };
     }
   }));
   profileCache = { at: Date.now(), key, list };

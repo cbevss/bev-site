@@ -10,6 +10,8 @@ window.BEV_UPDATES = [
     changes: [
       { title: 'Dashboard settings (Admin page)',
         text: 'Every feature now has its own row with a Settings dropdown: On, Off everywhere, or Off everywhere except the servers you pick. The whole list sits under a Features dropdown, so you can fold it away and scroll straight past it.' },
+      { title: 'Admin list',
+        text: 'Each site admin on the Admin page now shows their @username as well as their display name.' },
       { title: 'Smoother scrolling',
         text: 'Fixed a flicker where a block sitting right at the top edge of the screen could fade in and out over and over.' },
     ],
