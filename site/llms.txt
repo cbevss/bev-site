@@ -21,6 +21,8 @@
   - Setting: Trusted bots. These bots are never checked
   - Setting: Trusted roles. Anti-Nuke never stops people with these roles. Only pick roles you fully trust
   - Setting: Trusted people. Anti-Nuke never stops these people
+  - Setting: Alert when a role gets dangerous permissions. Says which powerful permissions were added (like Administrator or Ban Members), to which role and by whom
+  - Setting: Alert when important server settings are weakened. Verification level lowered, content filter turned down, vanity invite changed, or 2FA for moderators turned off
 - Anti-Raid Shield (also called: anti-raid, raid protection, join flood, raid mode, lockdown on raid): Counts how fast people join. When too many join within a minute, BEV locks the server down and deals with everyone who joins until it ends. Page: https://bevbotdiscord.com/features/anti-raid
   - Setting: Joins in a minute that start a lockdown. How many joins within 60 seconds count as a raid Choices: 5 joins, 8 joins, 10 joins, 15 joins, 20 joins, 30 joins.
   - Setting: During a lockdown. What happens to people who join during a lockdown Choices: Pause verification, Kick new joiners, Time out new joiners for 1 hour.
@@ -31,6 +33,7 @@
   - Setting: Allowed websites. Websites members may still link to
   - Setting: Channels where links are fine. Links are never removed here
   - Setting: Roles that may post links. Members with these roles can post links
+  - Setting: Test mode: only log what BEV would do. Nothing is deleted and nobody is punished. Each match goes to your log channel, so you can tune the settings first
 - Anti-Spam (also called: anti-spam, spam filter, mention spam, flood protection, caps filter): Catches message floods, copy-pasted spam, mass pings, walls of capitals, emoji spam and glitchy text. Also reports ghost pings. Page: https://bevbotdiscord.com/features/anti-spam
   - Setting: Messages allowed in the window. Choices: 4 messages, 5 messages, 6 messages, 8 messages, 10 messages.
   - Setting: Time window. Choices: 3 seconds, 5 seconds, 8 seconds, 10 seconds.
@@ -43,6 +46,7 @@
   - Setting: Timeout length. Choices: 1 minute, 5 minutes, 10 minutes, 1 hour.
   - Setting: Report ghost pings. Reposts who pinged someone and quickly deleted it
   - Setting: Channels to ignore.
+  - Setting: Test mode: only log what BEV would do. Nothing is deleted and nobody is punished. Each match goes to your log channel, so you can tune the settings first
 - Scam Link Blocker (also called: phishing protection, scam links, fake Nitro links, malicious link filter): Blocks known scam and phishing sites (fake free Nitro, fake Steam pages) using a list that updates every day, while normal links keep working. Page: https://bevbotdiscord.com/features/scam-blocker
   - Setting: Punishment. Choices: Delete only, Delete and time out for 1 day, Delete and kick, Delete and ban.
   - Setting: Extra scam websites. Your own list of sites to block
@@ -57,6 +61,7 @@
   - Setting: Your blocked words.
   - Setting: Punishment. Choices: Only delete the message, Delete + 5 minute timeout, Delete + 1 hour timeout, Delete + 24 hour timeout, Delete + 7 day timeout.
   - Setting: Channels to ignore.
+  - Setting: Test mode: only log what BEV would do. Nothing is deleted and nobody is punished. Each match goes to your log channel, so you can tune the settings first
 - Account Age Gate (also called: account age, new account filter, alt protection, minimum account age): Checks how old a Discord account is when it joins. Brand-new accounts are a common sign of raid bots and alts, so BEV deals with them and explains why. Page: https://bevbotdiscord.com/features/age-gate
   - Setting: Minimum account age. Choices: 1 day, 3 days, 7 days, 14 days, 30 days.
   - Setting: Younger accounts. Choices: Kick them, Ban them, Time them out until old enough.
@@ -100,6 +105,8 @@
   - Setting: Fix names starting with symbols.
   - Setting: Fix names with blocked words.
   - Setting: Fix unreadable names.
+  - Setting: Stop people copying staff names. Someone whose name looks the same as a staff member's (even with lookalike letters) gets renamed
+  - Setting: Protected names. Names only staff may use, like your server or brand name
   - Setting: Change their name to. Their Discord username, or a name you choose Choices: Set display name to username, Custom display name.
   - Setting: Custom display name.
 - Server Lockdown (also called: lock channels, server lockdown, emergency lock, slowmode everything): While it's on, only staff can type in any channel, for raids or emergencies. Switching it off puts everything back exactly as it was. Staff can also use /lockdown in Discord. Page: https://bevbotdiscord.com/features/lockdown
@@ -170,6 +177,7 @@
   - Setting: Message on the appeal page. Banned people see this above the appeal form
   - Setting: After an answer, they can appeal again after. Choices: 7 days, 14 days, 30 days, 90 days, Never.
   - Setting: DM people the appeal link when BEV bans them.
+  - Setting: The person who banned them can't answer the appeal. Someone else from the staff has to look at it. The server owner can always answer
 
 ### Welcome & roles
 - Welcome, Goodbye & Boosts (also called: welcome message, welcome card, welcome image, goodbye message, leave message, boost message, join message): Greets new members with a message and a picture card, can DM them your rules, says goodbye when people leave and thanks boosters. Use {user}, {name}, {server} and {count}. Page: https://bevbotdiscord.com/features/welcome
@@ -192,7 +200,7 @@
   - Setting: Give roles back on rejoin. Stops people escaping a punishment role by rejoining
   - Setting: Roles never given back.
 - Role Menus (also called: reaction roles, self roles, button roles, dropdown roles, role picker, role selection): Build menus of buttons or dropdowns that let members pick their own roles: ranks, colours, pronouns, regions, ping roles and more. Make some roles one at a time, so picking a new one swaps out the old one, and leave the rest free to add alongside. Page: https://bevbotdiscord.com/features/role-menus
-  - Setting: Menus. Each has: Menu title, Description, Style, Reaction emojis, Layout (for buttons), Roles in the menu, One-at-a-time roles, Channel to post in.
+  - Setting: Menus. Each has: Menu title, Description, Style, Reaction emojis, Layout (for buttons), Roles in the menu, One-at-a-time roles, Only for people with, Most people per role, Channel to post in.
 - Invite Tracker (also called: invite tracking, who invited, invite leaderboard, invite logs): Shows who invited each new member, keeps an invites leaderboard and can give roles for inviting people. Page: https://bevbotdiscord.com/features/invite-tracker
   - Setting: Join log channel. Posts who invited each new member
   - Setting: Show how many people the inviter has invited. The join log says how many people the inviter has brought in so far, like: cbevs has invited 20 people
@@ -208,6 +216,7 @@
   - Setting: Saved replies. Pick one in the ticket inbox to fill in the reply. {user} is the person's name, {server} the server's Each has: Name, Reply.
   - Setting: Escalate unanswered tickets after. BEV raises the priority and posts a reminder in the ticket when nobody from the staff has answered Choices: Never, 1 hour, 4 hours, 12 hours, 1 day, 2 days.
   - Setting: Ping this role when escalating. Optional
+  - Setting: Close quiet tickets after. When nobody has written in a ticket for this long, BEV warns in it. If still nobody writes, it closes a while later Choices: Never, 1 day, 2 days, 3 days, 1 week.
 - Giveaways (also called: giveaway, raffle, contest, prize draw): Run giveaways: members press a button to enter and BEV picks the winners when the timer ends. Reroll winners or end early any time. Page: https://bevbotdiscord.com/features/giveaways
   - Setting: Roles to ping for giveaways.
   - Setting: Default giveaway channel.
@@ -408,6 +417,8 @@
   - Setting: Longest song (minutes).
   - Setting: Vote to skip. People who can't skip on their own vote instead. The song is skipped when half the listeners have voted
   - Setting: Song-request channel. Anything typed here is searched and added to the queue, like /music play. Leave empty for none
+  - Setting: Most songs one person can queue. 0 means no limit. Stops one person filling the whole queue
+  - Setting: Skip songs that are already queued.
 - Auto-Publish (also called: auto publish, announcement channel crosspost, auto crosspost): Publishes new posts in your announcement channels straight away, so every server that follows them gets them without staff pressing Publish. Page: https://bevbotdiscord.com/features/auto-publish
   - Setting: Announcement channels. Leave empty to publish in every announcement channel. Only announcement channels can be published
   - Setting: Publish posts from bots too.
@@ -467,6 +478,7 @@
 - /divorce: End your marriage.
 - /event: Create an event with Going, Maybe and Can't buttons and a reminder before it starts.
 - /giveaway: Start, end and reroll giveaways that members enter with a button.
+- /hideme: Hide yourself from this server's leaderboards, or show yourself again.
 - /invites: See how many people you've invited and the server's invite leaderboard.
 - /marry: Propose to another member. They have to accept.
 - /my-birthday: Save or remove your birthday so the server can celebrate it with you.
@@ -475,6 +487,7 @@
 - /rep: Give another member a reputation point.
 - /report: Report a member to the staff privately, with a reason.
 - /roleplay: Post as roleplay characters: save a character with a tag, then start messages with that tag.
+- /solved: Mark this forum post as solved and close it.
 - /star: Star a message for the starboard (reply to it with !star, or use its Apps menu).
 - /suggest: Suggest a change to BEV (the bot or the website), or an idea for this server.
 - /tag: Post one of the server's saved answers, like the rules or an FAQ.

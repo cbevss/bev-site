@@ -5,6 +5,38 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.58',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Anti-Nuke: dangerous permission alerts',
+        text: 'BEV tells you when a role gets Administrator or another powerful permission, or someone is given a role that has one: what changed and who did it. Emoji and sticker deletion now count towards Anti-Nuke too.' },
+      { title: 'Anti-Nuke: server setting alerts',
+        text: 'You get an alert when someone lowers the verification level, turns the content filter down, changes the vanity invite or turns off 2FA for moderators.' },
+      { title: 'Word Filter: lookalike letters',
+        text: 'Blocked words hidden with lookalike letters (like Cyrillic or fullwidth ones), numbers for letters or invisible characters are caught now.' },
+      { title: 'Test mode',
+        text: 'The Word Filter, Link Blocker and Anti-Spam have a test mode: BEV only logs what it would have done, so you can tune them first.' },
+      { title: 'Nickname Clean-up: staff copycats',
+        text: 'Names copying a staff member\'s name (even with lookalike letters), or a name you protect, are changed.' },
+      { title: 'Role menus: needed role and limits',
+        text: 'A menu can be only for people with a certain role, and each role can have a most-people limit.' },
+      { title: 'Starboard follows edits',
+        text: 'Editing a starred message updates its starboard copy, and deleting it removes the copy.' },
+      { title: 'Tickets: close quiet tickets',
+        text: 'BEV can warn in tickets nobody has written in for a while, and close them if still nobody answers.' },
+      { title: 'Music: fair queues',
+        text: 'Set the most songs one person can queue, and songs already in the queue are skipped.' },
+      { title: 'Voice rooms: handover',
+        text: 'When a room\'s owner leaves, the room passes to someone still in it.' },
+      { title: 'AI assistant: secrets blanked out',
+        text: 'Tokens, keys, passwords, emails and phone numbers are removed from questions before they go to the AI.' },
+      { title: 'Ban appeals: a second pair of eyes',
+        text: 'You can make sure the person who banned someone isn\'t the one who answers their appeal.' },
+      { title: '/hideme and /solved',
+        text: '/hideme takes you off the server\'s leaderboards (and back on). /solved marks a forum post as solved and closes it.' },
+    ],
+  },
+  {
     id: '4.57',
     date: '2 November 2026',
     changes: [
