@@ -1288,21 +1288,34 @@
     var order = el('div', 'rpextras');
     var people = el('div', 'rpextras');
     var pickedMember = null;
-    function post(action, values, done) {
+    var busy = false, here = null;
+    function post(action, values, done, status) {
+      if (busy) return;
+      busy = true; here = status || null;
+      root.document.querySelectorAll('#t-roleperms .rpextras button').forEach(function (b) { b.classList.add('busy'); });
+      if (here) { here.textContent = 'Working on it…'; here.className = 'fnote rpstatus'; }
       return request('/api/action', {
         method: 'POST',
         headers: { accept: 'application/json', 'content-type': 'application/json' },
         body: JSON.stringify({ guild_id: state.guild, owner: 'roleperms', action: action, values: values })
       }).then(function (r) {
+        busy = false;
+        root.document.querySelectorAll('#t-roleperms .rpextras button').forEach(function (b) { b.classList.remove('busy'); });
+        var target = here; here = null;
         if (r.status === 200 && r.data && r.data.data && r.data.data.roles) {
           data = r.data.data;
           var id = picked ? picked.id : '';
+          var where = target ? target.dataset.spot : '';
           fillRoles(); sel.value = id; draw();
-          note.textContent = r.data.note || 'Saved.';
-          say(note.textContent);
+          var text = r.data.note || 'Saved.';
+          var spot = where ? body.querySelector('[data-spot="' + where + '"]') : null;
+          (spot || note).textContent = text;
+          if (spot) spot.className = 'fnote rpstatus ok';
+          say(text);
           if (done) done();
         } else {
-          note.textContent = '❌ ' + ((r.data && r.data.message) || errorText(r));
+          var bad = '❌ ' + ((r.data && r.data.message) || errorText(r));
+          if (target) { target.textContent = bad; target.className = 'fnote rpstatus no'; } else note.textContent = bad;
           drawBar();
         }
       });
@@ -1337,6 +1350,9 @@
       save.disabled = !n;
       reset.disabled = !n;
       save.textContent = n ? 'Save ' + n + ' change' + (n === 1 ? '' : 's') : 'Save permissions';
+    }
+    function spot(name) {
+      var p = el('p', 'fnote rpstatus'); p.dataset.spot = name; p.setAttribute('role', 'status'); return p;
     }
     function drawExtras() {
       details.replaceChildren(); order.replaceChildren(); people.replaceChildren();
@@ -1382,13 +1398,14 @@
           mentionable: st.mention ? 'on' : 'off',
           icon: iconI.value.trim()
         };
-        post('details', values);
+        post('details', values, null, dStatus);
       });
       delBtn.addEventListener('click', function () {
         if (!root.confirm('Delete @' + picked.name + '? This can\'t be undone, and everyone who has it loses it.')) return;
-        post('delete', { role: picked.id });
+        post('delete', { role: picked.id }, null, note);
       });
-      box.append(nameL, nameI, rowColour, rowGrad, hoistSw, mentionSw, iconL, iconI, el('p', 'fnote', picked.gradient ? '' : 'Gradient colours need a newer version of BEV.'), saveBtn, delBtn);
+      var dStatus = spot('details');
+      box.append(nameL, nameI, rowColour, rowGrad, hoistSw, mentionSw, iconL, iconI, el('p', 'fnote', picked.gradient ? '' : 'Gradient colours need a newer version of BEV.'), saveBtn, delBtn, dStatus);
       details.append(box);
       // order
       var ranked = data.roles.filter(function (r) { return !r.is_default; });
@@ -1396,12 +1413,24 @@
       var obox = el('section', 'rpgroup');
       obox.append(el('h4', 'rphead', 'Order'));
       obox.append(el('p', 'fnote', 'Position ' + rank + ' of ' + ranked.length + '. 1 is the highest role, and it is listed at the top.'));
-      var up = el('button', 'act', 'Move up'); up.type = 'button'; up.disabled = locked || rank <= 1;
-      var down = el('button', 'act', 'Move down'); down.type = 'button'; down.disabled = locked || rank >= ranked.length;
-      up.addEventListener('click', function () { post('move', { role: picked.id, direction: 'up' }); });
-      down.addEventListener('click', function () { post('move', { role: picked.id, direction: 'down' }); });
+      var above = ranked[rank - 2], below = ranked[rank];
+      var up = el('button', 'act', 'Move up'); up.type = 'button';
+      var down = el('button', 'act', 'Move down'); down.type = 'button';
+      var upWhy = locked ? 'BEV can\'t change this role.' : !above ? 'It\'s already the highest role.' :
+        above.locked ? '@' + above.name + ' is above it, and BEV can\'t move roles past that one.' : '';
+      var downWhy = locked ? 'BEV can\'t change this role.' : !below ? 'It\'s already the lowest role.' :
+        below.locked ? '@' + below.name + ' is below it and belongs to a bot or sits above BEV, so they can\'t swap.' : '';
+      up.disabled = !!upWhy; down.disabled = !!downWhy;
+      if (upWhy) up.title = upWhy;
+      if (downWhy) down.title = downWhy;
+      var oStatus = spot('order');
+      up.addEventListener('click', function () { post('move', { role: picked.id, direction: 'up' }, null, oStatus); });
+      down.addEventListener('click', function () { post('move', { role: picked.id, direction: 'down' }, null, oStatus); });
       obox.append(el('div', 'rpbar', ''));
       obox.lastChild.append(up, down);
+      var why = [upWhy && upWhy !== downWhy ? 'Move up: ' + upWhy : '', downWhy && downWhy !== upWhy ? 'Move down: ' + downWhy : '', upWhy && upWhy === downWhy ? upWhy : ''].filter(Boolean);
+      if (why.length) obox.append(el('p', 'fhelp', why.join(' ')));
+      obox.append(oStatus);
       order.append(obox);
       // members
       var mbox = el('section', 'rpgroup');
@@ -1413,7 +1442,10 @@
       var mPick = el('p', 'fnote', 'Nobody picked yet.');
       var give = el('button', 'act save', 'Give role'); give.type = 'button'; give.disabled = true;
       var take = el('button', 'act', 'Take role'); take.type = 'button'; take.disabled = true;
-      function refreshMembers() { give.disabled = take.disabled = locked || !pickedMember; }
+      function refreshMembers() {
+        give.disabled = take.disabled = locked || !pickedMember;
+        give.title = take.title = locked ? 'BEV can\'t change this role.' : !pickedMember ? 'Find and pick a member first.' : '';
+      }
       var mtimer = null, masked = 0;
       mInput.addEventListener('input', function () {
         root.clearTimeout(mtimer);
@@ -1440,11 +1472,13 @@
           });
         }, 250);
       });
-      give.addEventListener('click', function () { if (pickedMember) post('give', { role: picked.id, member: pickedMember.id }); });
-      take.addEventListener('click', function () { if (pickedMember) post('take', { role: picked.id, member: pickedMember.id }); });
+      var mStatus = spot('members');
+      give.addEventListener('click', function () { if (pickedMember) post('give', { role: picked.id, member: pickedMember.id }, null, mStatus); });
+      take.addEventListener('click', function () { if (pickedMember) post('take', { role: picked.id, member: pickedMember.id }, null, mStatus); });
       mbox.append(mLabel, mInput, mFound, mPick);
       var mrow = el('div', 'rpbar', ''); mrow.append(give, take);
-      mbox.append(mrow);
+      refreshMembers();
+      mbox.append(mrow, mStatus);
       people.append(mbox);
     }
     function draw() {

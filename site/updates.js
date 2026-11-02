@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.62',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Role order and members fixes',
+        text: 'Move up and Move down on the Role Permissions tool now always swap the role with the one next to it, even when Discord has two roles on the same position. The result of each button shows right under it, and a button that can\'t be used says why instead of showing a loading cursor.' },
+    ],
+  },
+  {
     id: '4.61',
     date: '2 November 2026',
     changes: [

@@ -1777,3 +1777,8 @@ h4.brkpart{margin:18px 0 8px;color:#B9D0FF;font-size:15px}
 .rpextras .rpgroup .rpbar{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
 .rpextras .rpgroup .rpbar .act{flex:1 1 140px;width:auto}
 input.field[type=color]{width:64px;height:44px;padding:4px;cursor:pointer}
+
+/* 4.62: in the role extras a greyed button isn't busy, so it shows "not allowed"; while BEV works they show the loading cursor */
+.rpextras .act:disabled,.rpextras .act.save:disabled{cursor:not-allowed}
+.rpextras button.busy{cursor:progress;opacity:.7;pointer-events:none}
+.rpstatus:empty{display:none}
