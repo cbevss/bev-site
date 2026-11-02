@@ -265,7 +265,7 @@
   /* ---------- drawing the settings ---------- */
 
   // Cards that fill a whole row go after the others in their section, so the two-column grid has no gaps.
-  var WIDE = { custom_messages: true, dashboard_access: true, 'tool:members': true, brackets: true, security_timeline: true, insights: true, tickets: true };
+  var WIDE = { 'tool:roleperms': true, custom_messages: true, dashboard_access: true, 'tool:members': true, brackets: true, security_timeline: true, insights: true, tickets: true };
   function isWide(f) { return !!WIDE[f.tool ? 'tool:' + f.key : f.key]; }
 
   function inOrder(feats) {
@@ -901,6 +901,7 @@
     var body = el('div', 'tres' + (t.key === 'scan' || t.key === 'health' || t.key === 'changes' ? ' grows' : ''));
     if (t.key === 'members') memberTool(t, meta, body);
     else if (t.key === 'emoji') emojiTool(t, meta, body);
+    else if (t.key === 'roleperms') rolePermsTool(t, meta, body);
     else {
       var draw = t.key === 'scan' ? scanResults : t.key === 'health' ? healthResults : t.key === 'changes' ? changeResults : t.key === 'transfer' ? transferResult : null;
       meta.append(actionRow(t.key, t.buttons || [], { onResult: function (answer) { if (draw && answer.data) body.replaceChildren(draw(answer.data)); } }));
@@ -1266,6 +1267,115 @@
         grid.append(li);
       });
     }
+    draw();
+  }
+
+
+  // Role Permissions (4.60): pick a role, see each permission ticked or not, change them and save.
+  function rolePermsTool(t, meta, body) {
+    var data = t.data || { roles: [], groups: [] };
+    var picked = null, wanted = {};
+    var label = el('label', 'flabel', 'Role');
+    var sel = el('select', 'field rpsel');
+    sel.id = 'rp-role';
+    label.htmlFor = sel.id;
+    var info = el('p', 'fnote');
+    var note = el('p', 'fnote');
+    note.setAttribute('role', 'status');
+    var groups = el('div', 'rpgroups');
+    var bar = el('div', 'rpbar');
+    var save = el('button', 'act save', 'Save permissions');
+    var reset = el('button', 'act', 'Undo changes');
+    save.type = reset.type = 'button';
+    save.id = 'rp-save';
+    bar.append(save, reset);
+    meta.append(label, sel, info);
+    body.append(groups, bar, note);
+    function roleById(id) { return data.roles.filter(function (r) { return r.id === id; })[0] || null; }
+    function fillRoles() {
+      var keep = sel.value;
+      sel.replaceChildren();
+      var first = el('option', null, 'Pick a role…'); first.value = ''; sel.append(first);
+      data.roles.forEach(function (r) {
+        var o = el('option', null, r.name + (r.locked ? ' 🔒' : '') + ' (' + r.members + ')');
+        o.value = r.id; sel.append(o);
+      });
+      sel.value = keep && roleById(keep) ? keep : '';
+    }
+    function changed() {
+      if (!picked) return 0;
+      var n = 0;
+      data.groups.forEach(function (g) { g.perms.forEach(function (p) { if (!!wanted[p.key] !== (picked.on.indexOf(p.key) >= 0)) n++; }); });
+      return n;
+    }
+    function drawBar() {
+      var n = changed();
+      bar.hidden = !picked || !!picked.locked;
+      save.disabled = !n;
+      reset.disabled = !n;
+      save.textContent = n ? 'Save ' + n + ' change' + (n === 1 ? '' : 's') : 'Save permissions';
+    }
+    function draw() {
+      groups.replaceChildren();
+      note.textContent = '';
+      picked = roleById(sel.value);
+      if (!picked) { info.textContent = 'Pick a role to see its permissions.'; drawBar(); return; }
+      wanted = {};
+      picked.on.forEach(function (k) { wanted[k] = true; });
+      info.textContent = picked.locked ? '🔒 ' + picked.locked : picked.on.length + ' permission' + (picked.on.length === 1 ? '' : 's') + ' ticked • ' +
+        picked.members + ' member' + (picked.members === 1 ? '' : 's') + ' have this role.';
+      data.groups.forEach(function (g) {
+        var box = el('section', 'rpgroup');
+        box.append(el('h4', 'rphead', g.name));
+        var list = el('ul', 'rplist');
+        g.perms.forEach(function (p) {
+          var li = el('li', 'rprow' + (p.danger ? ' danger' : ''));
+          var name = el('span', 'rpname', p.label);
+          if (p.danger) name.append(el('span', 'rpwarn', ' ⚠️'));
+          var tick = el('span', 'rpstate');
+          var sw = switchButton(p.label, function () { return !!wanted[p.key]; }, function (v) { wanted[p.key] = v; mark(); drawBar(); }, true);
+          sw.disabled = !!picked.locked;
+          function mark() {
+            var on = !!wanted[p.key];
+            tick.textContent = on ? '✓ Checked' : '✗ Unchecked';
+            tick.className = 'rpstate ' + (on ? 'on' : 'off');
+            li.classList.toggle('changed', on !== (picked.on.indexOf(p.key) >= 0));
+          }
+          mark();
+          li.append(name, tick, sw);
+          list.append(li);
+        });
+        box.append(list);
+        groups.append(box);
+      });
+      drawBar();
+    }
+    sel.addEventListener('change', draw);
+    reset.addEventListener('click', draw);
+    save.addEventListener('click', function () {
+      if (!picked) return;
+      var keys = Object.keys(wanted).filter(function (k) { return wanted[k]; });
+      if (wanted.administrator && picked.on.indexOf('administrator') < 0 &&
+          !root.confirm('Give ' + picked.name + ' Administrator? Everyone with it can do anything in the server, including banning people and deleting channels.')) return;
+      save.disabled = true;
+      request('/api/action', {
+        method: 'POST',
+        headers: { accept: 'application/json', 'content-type': 'application/json' },
+        body: JSON.stringify({ guild_id: state.guild, owner: 'roleperms', action: 'save', values: { role: picked.id, perms: keys.join(',') } })
+      }).then(function (r) {
+        if (r.status === 200 && r.data && r.data.data && r.data.data.roles) {
+          data = r.data.data;
+          var id = picked.id;
+          fillRoles(); sel.value = id; draw();
+          note.textContent = r.data.note || 'Saved.';
+          say(note.textContent);
+        } else {
+          note.textContent = '❌ ' + ((r.data && r.data.message) || errorText(r));
+          drawBar();
+        }
+      });
+    });
+    fillRoles();
     draw();
   }
 

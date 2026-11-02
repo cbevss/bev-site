@@ -521,6 +521,7 @@ async function api(request, c, url, secure, s) {
   // Only a server this user administers (or was given Dashboard Access in) and BEV is in. The bot also checks it is in the server.
   const allowed = (id) => typeof id === 'string' && ID_RE.test(id) && view.servers.some((s) => s.id === id && s.dashboard);
   // Who is looking, for the bot: someone who isn't an admin there only gets the parts they were given.
+  allowed.siteAdmin = !!s.admin;     // BEV's site admins: some bot actions (like Role Permissions) skip the server's own rules for them
   allowed.viewer = (id) => {
     const server = view.servers.find((s) => s.id === id);
     return { viewer_id: String(session.user.id), viewer_full: !!server && server.access !== 'limited' };
@@ -705,7 +706,7 @@ async function webAction(request, c, session, allowed) {
   if (!allowed(guildId)) return json({ error: 'forbidden' }, 403);
   const res = await bot(c, '/api/action', {
     method: 'POST',
-    body: JSON.stringify({ guild_id: guildId, owner, action, values, actor: `${session.user.name} (${session.user.id}) on the website`, actor_id: session.user.id, ...allowed.viewer(guildId) }),
+    body: JSON.stringify({ guild_id: guildId, owner, action, values, actor: `${session.user.name} (${session.user.id}) on the website`, actor_id: session.user.id, site_admin: !!allowed.siteAdmin, ...allowed.viewer(guildId) }),
   });
   if (res.error) return json({ error: res.error }, 503);
   if (res.status === 401) return json({ error: 'bot_rejected_key' }, 502);
@@ -925,7 +926,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=33366b69ab">
+<link rel="stylesheet" href="/styles.css?v=48750128af">
 </head>
 <body class="notice">
 <div class="hero">

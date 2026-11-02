@@ -5,6 +5,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.60',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Role Permissions on the dashboard',
+        text: 'A new Role Permissions tool: pick any role from the dropdown to see every permission it has, checked or unchecked, grouped like Discord\'s own role settings. Server admins can switch them on or off and save. Risky permissions are marked, and every change goes to the mod log.' },
+    ],
+  },
+  {
     id: '4.59',
     date: '2 November 2026',
     changes: [

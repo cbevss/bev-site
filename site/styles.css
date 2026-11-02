@@ -1752,3 +1752,20 @@ h4.brkpart{margin:18px 0 8px;color:#B9D0FF;font-size:15px}
 .dlist li button span{opacity:.7;font-size:13px;white-space:nowrap}
 .dtable td,.dtable th{max-width:260px;overflow-wrap:anywhere;font-size:13px;text-align:left}
 #dfile{max-width:100%}
+
+/* 4.60: Role Permissions */
+.rpsel{max-width:420px}
+.rpgroups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.rpgroup{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:rgba(4,8,20,.35);min-width:0}
+.rphead{margin:0 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.rplist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rprow{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px}
+.rprow.changed{background:rgba(37,99,235,.16)}
+.rpname{flex:1;min-width:0;font-weight:600;font-size:14.5px;overflow-wrap:anywhere}
+.rpwarn{font-size:12px}
+.rpstate{font-size:12.5px;font-weight:700;white-space:nowrap}
+.rpstate.on{color:#8CF0C2}
+.rpstate.off{color:var(--mut)}
+.rpbar{display:flex;flex-wrap:wrap;gap:10px}
+.rpbar .act{width:auto}
+@media(max-width:520px){.rpgroups{grid-template-columns:minmax(0,1fr)}.rprow{flex-wrap:wrap;gap:4px 10px}.rpname{flex-basis:100%}.rpstate{flex:1}}
