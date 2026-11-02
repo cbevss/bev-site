@@ -281,6 +281,7 @@
   - Setting: Default event channel.
   - Setting: Roles to ping.
   - Setting: Remind people before it starts. Choices: No reminder, 15 minutes before, 30 minutes before, 1 hour before.
+  - Setting: Stop sign-ups before it starts. After this, nobody new can press Going. Leaving still works Choices: Never (sign up any time), When it starts, 15 minutes before, 30 minutes before, 1 hour before, 3 hours before, 1 day before.
 - Staff Applications (also called: staff applications, application form, apply, recruitment): Members apply through a form of your questions. Staff review each one with Accept and Deny buttons. Page: https://bevbotdiscord.com/features/applications
   - Setting: Application name.
   - Setting: Questions (one per line, up to 10).
@@ -297,7 +298,7 @@
 - Channel Modes (also called: sticky messages, media only channel, image only, auto thread, slowmode per channel): Give channels special behaviour: start a thread on every post, allow only pictures and videos, or keep a sticky message at the bottom. Page: https://bevbotdiscord.com/features/channel-modes
   - Setting: Channel rules. Each has: Channel, Mode, Sticky text or thread name.
 - News Feeds & Free Games (also called: YouTube notifications, Reddit feed, RSS feed, Bluesky, Mastodon, free games, Epic free games, Steam free games, social notifications): Posts new YouTube uploads, Reddit posts, website and blog (RSS) updates, and free game deals on Steam, Epic and more. Page: https://bevbotdiscord.com/features/feeds
-  - Setting: Feeds. Each has: Type, Channel, subreddit, account or link, Post in.
+  - Setting: Feeds. Each has: Type, Channel, subreddit, account or link, Only posts with these words, Skip posts with these words, Post in.
 - Live Stream Alerts (also called: Twitch notifications, YouTube live alerts, TikTok live, Kick alerts, go live notifications, stream notifications, multi-platform creators): Checks your streamers every 3 minutes and posts one alert when they go live on Twitch, YouTube, Kick or TikTok, with their profile picture and a live preview that keeps refreshing while they're live. Give someone's accounts the same creator name and they get one alert when they're live on several platforms at once, and each account can have its own message and roles to ping. Page: https://bevbotdiscord.com/features/stream-alerts
   - Setting: Streamers. Each has: Platform, Username, Alert channel, Creator name (optional), Message above the alert (optional), Roles to ping for this account (optional).
   - Setting: Who to ping. Choices: Roles (pick them in Roles to ping), @here (only people who are online), @everyone, Nobody.
@@ -314,6 +315,9 @@
   - Setting: Message. Placeholders: {user}, {name}, {server}, {years}
   - Setting: Coins to give (0 for none).
   - Setting: Roles for each year. Like 1 year → @Veteran. Members keep the roles for every year they've reached Each has: Years, Role.
+- Highlights: Members choose words, and BEV DMs them when someone says one in a channel they can see, with the message and a link. Nobody is told while they're already chatting in that channel. Members use /highlight to set their words. Page: https://bevbotdiscord.com/features/highlights
+  - Setting: Words per member.
+  - Setting: Channels to skip.
 
 ### Levels
 - Leveling & XP (also called: levels, XP, rank card, leaderboard, level roles, level up rewards, MEE6 levels): Members earn XP for chatting and talking in voice. Add level-up rewards, XP boosts for roles, double XP events and a weekly top chatter role. Page: https://bevbotdiscord.com/features/leveling
@@ -335,6 +339,7 @@
   - Setting: XP boosts for roles. Each has: Role, Extra XP.
   - Setting: Weekly top chatter role.
   - Setting: Show leaderboard on the website.
+  - Setting: No XP for repeated messages. The same message again (or nearly the same), or one or two characters, earns no XP
 - Achievements & Badges (also called: achievements, badges, milestones): Over 70 badges for chatting, levels, coins, work, games, exploring, rep, quests, music, the shop, voice and loyalty. Switch any of them off, add your own badges that give a role, and see everyone's progress with /achievements. Page: https://bevbotdiscord.com/features/achievements
   - Setting: Announce new badges.
   - Setting: Announce them in. Optional. Empty: where they earned it
@@ -479,6 +484,7 @@
 - /event: Create an event with Going, Maybe and Can't buttons and a reminder before it starts.
 - /giveaway: Start, end and reroll giveaways that members enter with a button.
 - /hideme: Hide yourself from this server's leaderboards, or show yourself again.
+- /highlight: Get a DM when someone says your words.
 - /invites: See how many people you've invited and the server's invite leaderboard.
 - /marry: Propose to another member. They have to accept.
 - /my-birthday: Save or remove your birthday so the server can celebrate it with you.

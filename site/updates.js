@@ -5,6 +5,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.59',
+    date: '2 November 2026',
+    changes: [
+      { title: 'Highlights',
+        text: 'A new feature: use /highlight to pick words, and BEV DMs you when someone says one in a channel you can see. It stays quiet while you\'re chatting there, and /highlight pause stops them for a while.' },
+      { title: 'Events: sign-up cut-off',
+        text: 'Choose when sign-ups close, like an hour before the event starts. Leaving still works after that.' },
+      { title: 'Feeds: word filters',
+        text: 'Each feed can post only items with certain words, or skip items with others.' },
+      { title: 'Leveling: no XP for repeats',
+        text: 'Sending the same message again, or just one or two characters, earns no XP, so spamming doesn\'t level anyone up.' },
+    ],
+  },
+  {
     id: '4.58',
     date: '2 November 2026',
     changes: [
