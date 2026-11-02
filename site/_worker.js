@@ -45,7 +45,7 @@ const DEFAULT_ADMIN_IDS = ['1218359974757924934', '382429959886602265', '1492355
 // Built-in regular admins: they can use /admin but can't add or remove admins. (Main admins can still remove them there.)
 const DEFAULT_REGULAR_ADMIN_IDS = ['1443919792435363900'];
 // The only accounts that can add, remove or change site admins on /admin. Fixed here on purpose: nobody can add
-// themselves to it from the page. They can't be removed or changed from the page either.
+// themselves to it from the page. They can remove or change each other (never themselves).
 const ADMIN_MANAGER_IDS = ['1218359974757924934', '382429959886602265', '1492355672988450857'];
 const STATS_ZONE = 'Europe/London';  // visit counts are grouped by UK days
 const SETTINGS_TTL = 10 * 1000;     // each Cloudflare copy of this file re-reads maintenance and banner settings this often
@@ -797,7 +797,6 @@ async function changeAdmins(request, env, c, s) {
   if (!ID_RE.test(id || '') || !['add', 'remove', 'set'].includes(action)) return json({ error: 'bad_request' }, 400);
   const me = String(s.session.user.id);
   if (!ADMIN_MANAGER_IDS.includes(me)) return json({ error: 'not_manager' }, 403);
-  if (action !== 'add' && ADMIN_MANAGER_IDS.includes(id)) return json({ error: 'cant_change_manager' }, 400);
   if (!database(env)) return json({ error: 'no_database' }, 503);
   const base = config(env).adminIds;
   const baseRegular = DEFAULT_REGULAR_ADMIN_IDS;
@@ -922,7 +921,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=28b9a77631">
+<link rel="stylesheet" href="/styles.css?v=0a58abd86c">
 </head>
 <body class="notice">
 <div class="hero">

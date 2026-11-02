@@ -751,37 +751,47 @@
 
   /* ---------- admins ---------- */
 
+  var adminOpen = {};
   function renderAdmins() {
     var manage = !!state.canManageAdmins;
     $('anote').textContent = manage
-      ? 'You can add, remove and change site admins here. You can\'t change yourself or the other people who manage admins.'
+      ? 'Open a person’s Settings to make them a main or regular admin, or remove them. You can’t change yourself.'
       : 'Only the people who manage admins can add, remove or change site admins.';
     $('aadd').hidden = !manage;
     var list = $('alist');
     list.textContent = '';
     (state.admins || []).forEach(function (a) {
-      var li = make('li');
+      var li = make('li', 'adm');
+      var head = make('div', 'admhead');
       var pic = make('span', 'av sm');
-      li.appendChild(pic);
+      head.appendChild(pic);
       avatar(pic, a.avatar, a.name);
       var nm = make('div', 'nm');
       nm.appendChild(make('b', null, a.name || 'Name not found'));
       nm.appendChild(make('span', null, a.id));
-      li.appendChild(nm);
-      if (state.me && state.me.id === a.id) li.appendChild(make('span', 'badge you', 'You'));
-      else if (manage && !a.manager) {
+      head.appendChild(nm);
+      var me = state.me && state.me.id === a.id;
+      if (me) head.appendChild(make('span', 'badge you', 'You'));
+      head.appendChild(make('span', a.main ? 'badge main' : 'badge', a.main ? 'Main' : 'Regular'));
+      li.appendChild(head);
+      if (manage && !me) {
+        var det = make('details', 'fset admset');
+        det.open = !!adminOpen[a.id];
+        det.addEventListener('toggle', function () { if (det.open) adminOpen[a.id] = 1; else delete adminOpen[a.id]; });
+        det.appendChild(make('summary', null, 'Settings'));
+        var row = make('div', 'admbtns');
         var sw = make('button', 'mini act arm-sw', a.main ? 'Make regular' : 'Make main');
         sw.type = 'button';
-        sw.setAttribute('aria-label', (a.main ? 'Make ' : 'Make ') + (a.name || a.id) + (a.main ? ' a regular admin' : ' a main admin'));
+        sw.setAttribute('aria-label', 'Make ' + (a.name || a.id) + (a.main ? ' a regular admin' : ' a main admin'));
         sw.addEventListener('click', function () { if (arm(sw, 'Click again to confirm')) changeAdmin('set', a.id, sw, a.main ? 'regular' : 'main'); });
-        li.appendChild(sw);
         var rm = make('button', 'mini act arm-rm', 'Remove');
         rm.type = 'button';
         rm.setAttribute('aria-label', 'Remove ' + (a.name || a.id) + ' as a site admin');
         rm.addEventListener('click', function () { if (arm(rm, 'Click again to remove')) changeAdmin('remove', a.id, rm); });
-        li.appendChild(rm);
+        row.append(sw, rm);
+        det.appendChild(row);
+        li.appendChild(det);
       }
-      li.appendChild(make('span', a.main ? 'badge main' : 'badge', a.main ? 'Main' : 'Regular'));
       list.appendChild(li);
     });
   }
@@ -939,7 +949,7 @@
         head.append(text, pill);
         var det = make('details', 'fset ofset');
         det.open = !!owner.open[f.key];
-        det.addEventListener('toggle', function () { if (det.open) owner.open[f.key] = 1; else delete owner.open[f.key]; syncAll(); });
+        det.addEventListener('toggle', function () { if (det.open) owner.open[f.key] = 1; else delete owner.open[f.key]; });
         det.append(make('summary', null, 'Settings'));
         var inner = make('div', 'ofinner');
         var lab = make('label', 'flabel sm', 'Where ' + f.name + ' is on');
@@ -965,24 +975,12 @@
       box.append(group);
     });
     $('fcount').textContent = shown + ' of ' + owner.features.length + ' features';
-    syncAll();
+    if (q && !$('fdet').open) $('fdet').open = true;
   }
-  // The Show all / Hide all settings button follows the rows: it says "Hide" while every shown row is open.
-  function syncAll() {
-    var dets = $('flist').querySelectorAll('details.ofset');
-    var all = dets.length > 0 && Array.prototype.every.call(dets, function (d) { return d.open; });
-    $('fall').textContent = all ? 'Hide all settings' : 'Show all settings';
-    $('fall').setAttribute('aria-pressed', all ? 'true' : 'false');
-    $('fall').disabled = !dets.length;
-  }
-  function toggleAll() {
-    var dets = $('flist').querySelectorAll('details.ofset');
-    var open = $('fall').getAttribute('aria-pressed') !== 'true';
-    Array.prototype.forEach.call(dets, function (d) { d.open = open; });   // same chevron turn as a dashboard feature's Settings
-    Array.prototype.forEach.call(dets, function (d) { if (open) owner.open[d.parentNode.getAttribute('data-key')] = 1; else delete owner.open[d.parentNode.getAttribute('data-key')]; });
-    syncAll();
-    say(open ? 'All settings shown.' : 'All settings hidden.');
-  }
+  // The whole list sits under a Features dropdown (closed = you scroll straight past it). It remembers how you left it,
+  // and opens by itself while you're searching.
+  function featsOpenSaved() { try { return root.localStorage.getItem('bev-admin-features') === '1'; } catch (e) { return false; } }
+  function featsOpenSave(on) { try { root.localStorage.setItem('bev-admin-features', on ? '1' : '0'); } catch (e) { /* private window */ } }
   function queueKeep(f) {                 // ticking servers saves a moment after the last tick
     root.clearTimeout(owner.timers[f.key]);
     owner.timers[f.key] = root.setTimeout(function () { saveOwner(f, 'except', f.keep, true); }, 600);
@@ -1021,7 +1019,8 @@
     }, function () { $('fstate').textContent = 'Not available'; });
   }
   $('ffind').addEventListener('input', drawOwner);
-  $('fall').addEventListener('click', toggleAll);
+  $('fdet').open = featsOpenSaved();
+  $('fdet').addEventListener('toggle', function () { if (!($('ffind').value || '').trim()) featsOpenSave($('fdet').open); });
   loadOwner();
 
   // Suggestions: how many are waiting. The list itself has its own page.

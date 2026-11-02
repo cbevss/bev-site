@@ -1703,3 +1703,10 @@ table.lvl td.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monos
 .ofsm{margin-left:auto;color:var(--mut);font-size:12.5px;flex:none}
 .ofnone{padding:8px;color:var(--mut)}
 @media(max-width:420px){.ofhead{flex-wrap:wrap}.ofsm{display:none}}
+.alist li.adm{flex-direction:column;align-items:stretch;gap:0}
+.alist li .admhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0}
+.alist li .admhead .nm{flex:1 1 120px}
+.alist li .admhead .badge{flex:none}
+.admset{margin-top:10px;width:100%}
+.admbtns{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0 4px}
+.admbtns .act{flex:none;margin:0}

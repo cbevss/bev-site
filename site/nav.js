@@ -324,8 +324,13 @@
       });
       entries.forEach(function (e) {
         var el = e.target;
-        if (e.isIntersecting) {
-          el.style.transitionDelay = jumping ? '' : Math.min(shown++ * 60, 360) + 'ms';
+        // Hysteresis: a block comes in once 8% of it is on screen, but only goes back out when none of it is. Otherwise a
+        // block sitting right at the edge flips between the two states for ever (each state moves it a little, which
+        // flips the check again), flickering and never holding still.
+        var inView = e.isIntersecting && (e.intersectionRatio >= 0.08 || el.classList.contains('rv-in'));
+        if (e.isIntersecting && !inView) return;
+        if (inView) {
+          if (!el.classList.contains('rv-in')) el.style.transitionDelay = jumping ? '' : Math.min(shown++ * 60, 360) + 'ms';
           el.classList.add('rv-in');
         } else {
           el.style.transitionDelay = '';
@@ -334,7 +339,7 @@
           el.classList.remove('rv-in');
         }
       });
-    }, { rootMargin: '-4% 0px -8% 0px', threshold: 0.08 });
+    }, { rootMargin: '-4% 0px -8% 0px', threshold: [0, 0.08] });
     var SKIP = 'header.nav, header, .hero, .skip, .modal, noscript, #news, dialog, .totop, .navholder, script, style, template, br';
     // Every page: walk down the page and animate blocks that fit on screen (big wrappers are split into their parts).
     function blocks(root, out) {

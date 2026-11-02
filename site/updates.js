@@ -9,7 +9,9 @@ window.BEV_UPDATES = [
     date: '1 November 2026',
     changes: [
       { title: 'Dashboard settings (Admin page)',
-        text: 'Every feature now has its own row with a Settings dropdown: On, Off everywhere, or Off everywhere except the servers you pick. A Show all settings button at the top opens or closes every row at once.' },
+        text: 'Every feature now has its own row with a Settings dropdown: On, Off everywhere, or Off everywhere except the servers you pick. The whole list sits under a Features dropdown, so you can fold it away and scroll straight past it.' },
+      { title: 'Smoother scrolling',
+        text: 'Fixed a flicker where a block sitting right at the top edge of the screen could fade in and out over and over.' },
     ],
   },
   {
@@ -21,7 +23,7 @@ window.BEV_UPDATES = [
       { title: 'Import playlists',
         text: 'The playlist menu on /music now has "Import a playlist from a link". Paste a public Spotify playlist or album, a YouTube playlist or a SoundCloud playlist and BEV saves its songs as one of your playlists.' },
       { title: 'Site admins',
-        text: 'Main site admins can now add and remove site admins from the Admin page, using their Discord user ID, as a main or regular admin, and change an admin from one to the other. Only a few chosen accounts can do this.' },
+        text: 'Main site admins can now add and remove site admins from the Admin page, using their Discord user ID, as a main or regular admin, and change an admin from one to the other. Only a few chosen accounts can do this, and they can change each other too. Each admin\'s buttons sit under a Settings dropdown.' },
       { title: 'Levels and XP',
         text: 'Setting someone to a level in Member tools now says how much XP that level is, member tools show their total XP, and there\'s a button to see the XP each level takes.' },
     ],
