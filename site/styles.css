@@ -1838,3 +1838,32 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .pdel{margin-left:auto;flex:0 0 auto;min-width:34px;height:34px;padding:0 10px;border:1px solid rgba(237,66,69,.55);border-radius:10px;background:rgba(237,66,69,.14);color:#FF7A7C;font:inherit;font-weight:800;cursor:pointer}
 .pdel:hover,.pdel:focus-visible,.pdel.armed{background:#ED4245;color:#fff}
 .paysteps .mini{display:inline-flex;width:auto;min-width:0;margin:4px 0;padding:4px 14px}
+
+/* Role details: one setting per row, name and help on the left, controls on the right; stacked on phones */
+.rdstack{display:grid;gap:6px;margin:4px 0 10px}
+.rdline{display:flex;align-items:center;justify-content:space-between;gap:12px 16px;padding:12px 0;border-top:1px solid var(--line)}
+.rdname{min-width:0;flex:1 1 220px}
+.rdname .flabel{margin:0}
+.rdhelp{margin:2px 0 0;color:var(--mut);font-size:13.5px;line-height:1.4}
+.rdctl{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.rdsub{color:var(--mut);font-size:14px}
+.rdctl input[type=color]{width:64px;height:40px;padding:4px}
+.rdctl input[type=color]:disabled{opacity:.35}
+.rdbtns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.rdbtns .act{flex:1 1 160px;margin:0}
+@media(max-width:520px){.rdline{flex-wrap:wrap}.rdname{flex-basis:100%}.rdctl{flex-wrap:wrap}}
+
+/* Role order: drag and drop list (top = highest role) */
+.rolist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px;max-height:520px;overflow:auto;overscroll-behavior:contain}
+.roitem{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(4,6,12,.6);cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;transition:background .2s,border-color .2s}
+.roitem:hover,.roitem:focus-visible{border-color:var(--ac2);outline:none}
+.roitem.mine{border-color:var(--ac);background:rgba(37,99,235,.16)}
+.roitem.rofixed{cursor:default;opacity:.6;touch-action:auto}
+.roitem.dragging{position:fixed;z-index:60;cursor:grabbing;box-shadow:0 14px 40px rgba(0,0,0,.55);background:#0b1430;border-color:var(--ac2)}
+.rogap{list-style:none;border:2px dashed var(--ac2);border-radius:12px;background:rgba(127,166,255,.08);transition:height .15s}
+.rograb{color:var(--mut);width:1.2em;text-align:center;flex:0 0 auto}
+.rodot{width:12px;height:12px;border-radius:50%;background:#99aab5;flex:0 0 auto}
+.roname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-weight:600}
+.rocount{color:var(--mut);font-size:13px;flex:0 0 auto}
+.rograb{touch-action:none;padding:6px 4px;margin:-6px 0 -6px -4px}
+@media(pointer:coarse){.rograb{padding:10px 12px;margin:-10px 0 -10px -12px;font-size:18px}}

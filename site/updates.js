@@ -7,6 +7,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.65',
+    date: '3 November 2026',
+    changes: [
+      { title: 'Role Permissions: tidier role details',
+        text: 'Each role setting now has its own row with its name and a short explanation, so it reads properly on phones. Show separately is now called Display Separate: it shows members with the role in their own group in the member list, apart from online members.' },
+      { title: 'Role Permissions: drag to reorder',
+        text: 'The Order box lists every role, highest first. Drag one to where it should go and a gap opens to show where it will land. On a keyboard, pick a role and use the up and down arrows. A role can never go above BEV\'s own highest role.' },
+    ],
+  },
+  {
     id: '4.63',
     date: '3 November 2026',
     changes: [

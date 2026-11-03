@@ -1290,7 +1290,7 @@
     var people = el('div', 'rpextras');
     var pickedMember = null;
     var busy = false, here = null;
-    function post(action, values, done, status) {
+    function post(action, values, done, status, onFail) {
       if (busy) return;
       busy = true; here = status || null;
       root.document.querySelectorAll('#t-roleperms .rpextras button').forEach(function (b) { b.classList.add('busy'); });
@@ -1316,6 +1316,7 @@
           if (done) done();
         } else {
           var bad = '❌ ' + ((r.data && r.data.message) || errorText(r));
+          if (onFail) { onFail(bad); drawBar(); return; }
           if (target) { target.textContent = bad; target.className = 'fnote rpstatus no'; } else note.textContent = bad;
           drawBar();
         }
@@ -1355,6 +1356,134 @@
     function spot(name) {
       var p = el('p', 'fnote rpstatus'); p.dataset.spot = name; p.setAttribute('role', 'status'); return p;
     }
+    function roleOrder() {
+      var obox = el('section', 'rpgroup');
+      obox.append(el('h4', 'rphead', 'Order'));
+      obox.append(el('p', 'fnote', 'Drag a role up or down to where it should go: the top is the highest. Or pick one and use the ↑ and ↓ keys. 🔒 roles can\'t be moved by BEV.'));
+      var list = el('ul', 'rolist');
+      list.setAttribute('aria-label', 'Role order, highest first');
+      var ranked = data.roles.filter(function (r) { return !r.is_default; });
+      var bevTop = data.bev_top;
+      var oStatus = spot('order');
+      ranked.forEach(function (r) {
+        var li = el('li', 'roitem' + (r.locked ? ' rofixed' : '') + (picked && r.id === picked.id ? ' mine' : ''));
+        li.dataset.id = r.id;
+        var dot = el('span', 'rodot');
+        if (r.color) dot.style.background = r.color;
+        li.append(el('span', 'rograb', r.locked ? '🔒' : '⠿'), dot, el('span', 'roname', r.name), el('span', 'rocount', String(r.members)));
+        if (!r.locked) {
+          li.tabIndex = 0;
+          li.setAttribute('aria-label', r.name + '. Drag, or press up or down to move it.');
+          dragOrder(li, list, bevTop, oStatus);
+          li.addEventListener('keydown', function (e) {
+            if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+            e.preventDefault();
+            var items = Array.prototype.slice.call(list.querySelectorAll('.roitem'));
+            var i = items.indexOf(li);
+            var below = e.key === 'ArrowUp' ? items[i - 1] : items[i + 2];
+            if (e.key === 'ArrowUp' && !below) return;
+            if (e.key === 'ArrowUp' && (below.dataset.id === bevTop || items.indexOf(list.querySelector('[data-id="' + bevTop + '"]')) >= i - 1)) {
+              oStatus.textContent = '❌ BEV can only put roles below its own highest role.'; return;
+            }
+            if (e.key === 'ArrowDown' && i === items.length - 1) return;
+            place(r.id, below ? below.dataset.id : '', oStatus);
+          });
+        }
+        li.addEventListener('click', function () {
+          if (li.dataset.dragged) { delete li.dataset.dragged; return; }
+          sel.value = r.id; draw();
+        });
+        list.append(li);
+      });
+      obox.append(list, oStatus);
+      return obox;
+    }
+    function orderMessage(text) {
+      var s2 = order.querySelector('[data-spot="order"]');
+      if (s2) { s2.textContent = text; s2.className = 'fnote rpstatus no'; }
+    }
+    function place(id, below, status) {
+      post('place', { role: id, below: below }, function () {
+        var again = order.querySelector('.roitem[data-id="' + id + '"]');
+        if (again) again.focus();
+      }, status, function (bad) {
+        draw();                     // put the list back the way BEV really has it
+        orderMessage(bad);
+      });
+    }
+    // Pointer drag (mouse, touch and pen): the role follows the pointer and a gap opens where it would land.
+    function dragOrder(li, list, bevTop, status) {
+      var startY = 0, offset = 0, dragging = false, gap = null, id = li.dataset.id;
+      function allowed(beforeNode) {
+        // the gap has to stay under BEV's highest role
+        var top = list.querySelector('.roitem[data-id="' + bevTop + '"]');
+        if (!top) return true;
+        var nodes = Array.prototype.slice.call(list.children);
+        return nodes.indexOf(beforeNode || null) === -1 ? true : nodes.indexOf(beforeNode) > nodes.indexOf(top);
+      }
+      function moveGap(y) {
+        var items = Array.prototype.slice.call(list.querySelectorAll('.roitem')).filter(function (n) { return n !== li; });
+        var before = null;
+        for (var i = 0; i < items.length; i++) {
+          var b = items[i].getBoundingClientRect();
+          if (y < b.top + b.height / 2) { before = items[i]; break; }
+        }
+        if (!allowed(before)) {
+          var top = list.querySelector('.roitem[data-id="' + bevTop + '"]');
+          before = top ? top.nextElementSibling : before;
+          while (before && (before === li || before === gap)) before = before.nextElementSibling;
+        }
+        if (gap.nextElementSibling !== before) list.insertBefore(gap, before);
+      }
+      li.addEventListener('pointerdown', function (e) {
+        if (e.button !== 0 || busy) return;
+        // on touch screens, drag by the ⠿ handle so the page can still be scrolled over the list
+        if (e.pointerType === 'touch' && !e.target.closest('.rograb')) return;
+        startY = e.clientY; dragging = false;
+        li.setPointerCapture(e.pointerId);
+      });
+      li.addEventListener('pointermove', function (e) {
+        if (!li.hasPointerCapture(e.pointerId)) return;
+        if (!dragging) {
+          if (Math.abs(e.clientY - startY) < 6) return;
+          dragging = true;
+          var r = li.getBoundingClientRect();
+          offset = startY - r.top;
+          gap = el('li', 'rogap');
+          gap.style.height = r.height + 'px';
+          list.insertBefore(gap, li);
+          li.classList.add('dragging');
+          li.style.width = r.width + 'px';
+          li.style.left = r.left + 'px';
+        }
+        e.preventDefault();
+        li.style.top = (e.clientY - offset) + 'px';
+        moveGap(e.clientY);
+      });
+      function end(e, cancel) {
+        if (li.hasPointerCapture && e && li.hasPointerCapture(e.pointerId)) li.releasePointerCapture(e.pointerId);
+        if (!dragging) return;
+        dragging = false;
+        li.dataset.dragged = '1';
+        var next = gap.nextElementSibling;
+        while (next && next === li) next = next.nextElementSibling;
+        list.insertBefore(li, gap);
+        gap.remove();
+        li.classList.remove('dragging');
+        li.style.width = li.style.left = li.style.top = '';
+        if (cancel) return;
+        var top = list.querySelector('.roitem[data-id="' + bevTop + '"]');
+        var nodes = Array.prototype.slice.call(list.children);
+        if (top && nodes.indexOf(li) <= nodes.indexOf(top)) {
+          draw();
+          orderMessage('❌ BEV can only put roles below its own highest role. Drop it lower down.');
+          return;
+        }
+        place(id, next && next.classList.contains('roitem') ? next.dataset.id : '', status);
+      }
+      li.addEventListener('pointerup', function (e) { end(e, false); });
+      li.addEventListener('pointercancel', function (e) { end(e, true); });
+    }
     function drawExtras() {
       details.replaceChildren(); order.replaceChildren(); people.replaceChildren();
       pickedMember = null;
@@ -1371,20 +1500,39 @@
       nameI.type = 'text'; nameI.maxLength = 100; nameI.value = picked.name; nameI.id = 'rd-name'; nameI.disabled = locked; nameL.htmlFor = nameI.id;
       var colL = el('label', 'flabel sm', 'Colour'); var colI = el('input', 'field');
       colI.type = 'color'; colI.value = picked.color || '#99aab5'; colI.id = 'rd-colour'; colI.disabled = locked; colL.htmlFor = colI.id;
-      var noCol = switchButton('No colour', function () { return st.none; }, function (v) { st.none = v; }, true);
+      var noCol = switchButton('No colour', function () { return st.none; }, function (v) { st.none = v; colI.disabled = locked || v; }, true);
       noCol.disabled = locked;
       var secL = el('label', 'flabel sm', 'Second colour (gradient)'); var secI = el('input', 'field');
       secI.type = 'color'; secI.value = picked.secondary || picked.color || '#ffde90'; secI.id = 'rd-second'; secI.disabled = locked || !picked.gradient; secL.htmlFor = secI.id;
       var gradSw = switchButton('Gradient', function () { return st.grad; }, function (v) { st.grad = v; secI.disabled = locked || !v || !picked.gradient; }, true);
       gradSw.disabled = locked || !picked.gradient;
-      var hoistSw = switchButton('Show separately', function () { return st.hoist; }, function (v) { st.hoist = v; }, true);
+      var hoistSw = switchButton('Display Separate', function () { return st.hoist; }, function (v) { st.hoist = v; }, true);
       hoistSw.disabled = locked;
       var mentionSw = switchButton('Allow @mention', function () { return st.mention; }, function (v) { st.mention = v; }, true);
       mentionSw.disabled = locked;
       var iconL = el('label', 'flabel sm', 'Icon (one emoji, optional)'); var iconI = el('input', 'field');
       iconI.type = 'text'; iconI.maxLength = 8; iconI.value = picked.icon || ''; iconI.id = 'rd-icon'; iconI.disabled = locked; iconL.htmlFor = iconI.id;
-      var rowColour = el('div', 'rprow'); rowColour.append(colL, colI, noCol);
-      var rowGrad = el('div', 'rprow'); rowGrad.append(gradSw, secL, secI);
+      // One setting per row: its name on the left, its controls on the right (wraps neatly on phones).
+      function line(labelNode, help) {
+        var row = el('div', 'rdline');
+        var name = el('div', 'rdname');
+        name.append(labelNode);
+        if (help) name.append(el('p', 'rdhelp', help));
+        var ctl = el('div', 'rdctl');
+        for (var i = 2; i < arguments.length; i++) ctl.append(arguments[i]);
+        row.append(name, ctl);
+        return row;
+      }
+      function nameText(text) { return el('span', 'flabel sm', text); }
+      colL.textContent = 'Colour';
+      secL.textContent = 'Gradient';
+      var rowColour = line(colL, 'Switch on No colour to use none.', colI, el('span', 'rdsub', 'No colour'), noCol);
+      var rowGrad = line(secL, picked.gradient ? 'A second colour that fades into the first.' : 'Needs a newer version of BEV.', secI, gradSw);
+      var rowHoist = line(nameText('Display Separate'), 'Show members with this role in their own group in the member list, apart from online members.', hoistSw);
+      var rowMention = line(nameText('Allow @mention'), 'Let anyone @mention this role.', mentionSw);
+      var rowName = el('div', 'rdstack'); rowName.append(nameL, nameI);
+      var rowIcon = el('div', 'rdstack'); rowIcon.append(iconL, iconI);
+
       var saveBtn = el('button', 'act save', 'Save role details');
       saveBtn.type = 'button'; saveBtn.disabled = locked;
       var delBtn = el('button', 'act stop', 'Delete role');
@@ -1406,33 +1554,12 @@
         post('delete', { role: picked.id }, null, note);
       });
       var dStatus = spot('details');
-      box.append(nameL, nameI, rowColour, rowGrad, hoistSw, mentionSw, iconL, iconI, el('p', 'fnote', picked.gradient ? '' : 'Gradient colours need a newer version of BEV.'), saveBtn, delBtn, dStatus);
+      if (st.none) colI.disabled = true;
+      var btns = el('div', 'rdbtns'); btns.append(saveBtn, delBtn);
+      box.append(rowName, rowColour, rowGrad, rowHoist, rowMention, rowIcon, btns, dStatus);
       details.append(box);
-      // order
-      var ranked = data.roles.filter(function (r) { return !r.is_default; });
-      var rank = ranked.indexOf(picked) + 1;
-      var obox = el('section', 'rpgroup');
-      obox.append(el('h4', 'rphead', 'Order'));
-      obox.append(el('p', 'fnote', 'Position ' + rank + ' of ' + ranked.length + '. 1 is the highest role, and it is listed at the top.'));
-      var above = ranked[rank - 2], below = ranked[rank];
-      var up = el('button', 'act', 'Move up'); up.type = 'button';
-      var down = el('button', 'act', 'Move down'); down.type = 'button';
-      var upWhy = locked ? 'BEV can\'t change this role.' : !above ? 'It\'s already the highest role.' :
-        above.locked ? '@' + above.name + ' is above it, and BEV can\'t move roles past that one.' : '';
-      var downWhy = locked ? 'BEV can\'t change this role.' : !below ? 'It\'s already the lowest role.' :
-        below.locked ? '@' + below.name + ' is below it and belongs to a bot or sits above BEV, so they can\'t swap.' : '';
-      up.disabled = !!upWhy; down.disabled = !!downWhy;
-      if (upWhy) up.title = upWhy;
-      if (downWhy) down.title = downWhy;
-      var oStatus = spot('order');
-      up.addEventListener('click', function () { post('move', { role: picked.id, direction: 'up' }, null, oStatus); });
-      down.addEventListener('click', function () { post('move', { role: picked.id, direction: 'down' }, null, oStatus); });
-      obox.append(el('div', 'rpbar', ''));
-      obox.lastChild.append(up, down);
-      var why = [upWhy && upWhy !== downWhy ? 'Move up: ' + upWhy : '', downWhy && downWhy !== upWhy ? 'Move down: ' + downWhy : '', upWhy && upWhy === downWhy ? upWhy : ''].filter(Boolean);
-      if (why.length) obox.append(el('p', 'fhelp', why.join(' ')));
-      obox.append(oStatus);
-      order.append(obox);
+      // order: every role in a list, top = highest. Drag one (or use the arrow keys) to put it somewhere else.
+      order.append(roleOrder());
       // members
       var mbox = el('section', 'rpgroup');
       mbox.append(el('h4', 'rphead', 'Members with this role'));
