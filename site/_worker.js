@@ -926,7 +926,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=75f8133e14">
+<link rel="stylesheet" href="/styles.css?v=17cfecb812">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1137,6 +1137,7 @@ const ADMIN_ROUTES = {
   '/api/admin/features': 'GET', '/api/admin/features/set': 'POST', '/api/admin/suggestions': 'GET', '/api/admin/suggestions/answer': 'POST',
   '/api/admin/support': 'GET', '/api/admin/support/act': 'POST', '/api/admin/admins': 'POST', '/api/admin/health': 'GET',
   '/api/admin/data': 'GET', '/api/admin/data/table': 'GET', '/api/admin/data/download': 'GET', '/api/admin/data/upload': 'POST',
+  '/api/admin/backup': 'GET', '/api/admin/backup/set': 'POST',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1461,6 +1462,7 @@ async function adminApi(request, env, c, url, secure, s) {
   if (path === '/api/admin/admins') return changeAdmins(request, env, c, s);
   if (path === '/api/admin/health') return botHealth(c);
   if (path.startsWith('/api/admin/data')) return botData(request, c, s, url, path);
+  if (path.startsWith('/api/admin/backup')) return backupTiming(request, c, s, path);
 
   const body = await readJson(request, 20000);
   if (!body) return json({ error: 'bad_request' }, 400);
@@ -1525,6 +1527,32 @@ async function botData(request, c, s, url, path) {
   if (res.status === 404) return json({ error: path === '/api/admin/data/table' ? 'unknown_table' : 'bot_outdated' }, path === '/api/admin/data/table' ? 404 : 501);
   if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
   return json(res.data);
+}
+
+/* ---------- 4.63: how often BEV posts a database backup to Discord (main admins only), 30 minutes to 30 days ---------- */
+
+function cleanBackup(d) {
+  const num = (v) => (Number.isFinite(v) ? v : null);
+  const l = d.last && typeof d.last === 'object' ? d.last : null;
+  return { set_up: d.set_up === true, every_minutes: num(d.every_minutes), min_minutes: num(d.min_minutes) || 30, max_minutes: num(d.max_minutes) || 43200,
+    keep_days: num(d.keep_days), last: l ? { at: num(l.at), ok: l.ok === true, bytes: num(l.bytes), parts: num(l.parts), note: str(l.note, 200) } : null };
+}
+
+async function backupTiming(request, c, s, path) {
+  if (!(c.mainAdminIds || c.adminIds).includes(String(s.session.user.id))) return json({ error: 'need_main_admin' }, 403);
+  let res;
+  if (path === '/api/admin/backup/set') {
+    const body = await readJson(request, 2000);
+    const minutes = body ? Number(body.every_minutes) : NaN;
+    if (!Number.isInteger(minutes) || minutes < 30 || minutes > 43200) return json({ error: 'bad_interval' }, 400);
+    res = await bot(c, '/api/backup', { method: 'POST', body: JSON.stringify({ every_minutes: minutes }) });
+  } else res = await bot(c, '/api/backup');
+  if (res.error) return json({ error: res.error }, 503);
+  if (res.status === 404) return json({ error: 'bot_outdated' }, 501);
+  if (res.status === 400) return json({ error: 'bad_interval' }, 400);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
+  if (res.data.every_minutes === undefined) return json({ error: 'bot_outdated' }, 501);
+  return json(cleanBackup(res.data));
 }
 
 /* ---------- bot health: each part of BEV, its background jobs and recent errors (site admins only) ---------- */

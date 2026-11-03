@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=75f8133e14">
+<link rel="stylesheet" href="/styles.css?v=17cfecb812">
 </head>
 <body class="admin">
 <a class="skip" href="#main">Skip to content</a>
@@ -226,6 +226,12 @@
 <p class="note" id="dnomain" hidden>Only main admins can see or move BEV's data.</p>
 <div id="dmain">
 <div class="row gap"><button class="act save" id="ddown" type="button">⬇️ Download database</button><button class="act" id="dload" type="button">Show what's stored</button><span class="note" id="dnote"></span></div>
+<div class="fset gap" id="bk-box"><p class="flabel">Backups to Discord</p>
+<p class="adesc">BEV posts a checked, compressed copy of its database to the private channel in BACKUP_CHANNEL_ID. Choose how often: every 30 minutes at the most, every 30 days at the least.</p>
+<div class="row gap"><label for="bk-n">Every</label><input class="field bkn" id="bk-n" type="number" min="1" max="720" step="1">
+<select class="field" id="bk-u" aria-label="Unit"><option value="1">minutes</option><option value="60">hours</option><option value="1440">days</option></select>
+<button class="act save" id="bk-save" type="button">Save</button><button class="act" id="bk-load" type="button">Show</button></div>
+<p class="note" id="bk-note" role="status"></p></div>
 <details class="fset gap" id="dup-d"><summary>Upload a database (replaces everything)</summary>
 <p class="adesc">Use this on the new computer, with a file from <b>Download database</b>. BEV checks the file is a real BEV database, keeps the current data as a backup file, swaps in the upload and restarts (about a minute). Only the 3 admin managers can do this.</p>
 <div class="row gap"><input class="field" id="dfile" type="file" accept=".db,.sqlite,.sqlite3,application/octet-stream" aria-label="Database file"><button class="act" id="dsend" type="button" disabled>Upload and replace</button></div>
@@ -279,9 +285,9 @@
 <nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
 </footer>
 
-<script src="/updates.js?v=d3a733150e" defer></script>
+<script src="/updates.js?v=69cd83321a" defer></script>
 <script src="/nav.js?v=a85f8420b7" defer></script>
 <script src="/supportchat.js?v=56ad3f5691" defer></script>
-<script src="/admin.js?v=dfa2422feb" defer></script>
+<script src="/admin.js?v=2f1748f715" defer></script>
 </body>
 </html>

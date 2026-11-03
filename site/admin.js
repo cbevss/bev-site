@@ -1047,6 +1047,42 @@
       }, function () { $('dupnote').textContent = '❌ The upload didn’t finish. Check your connection and try again.'; })
       .then(function () { b.disabled = !$('dfile').files.length; });
   }
+  // 4.63: how often BEV posts a database backup to Discord
+  function bkSplit(min) {
+    if (min % 1440 === 0) return [min / 1440, 1440];
+    if (min % 60 === 0) return [min / 60, 60];
+    return [min, 1];
+  }
+  function bkWords(min) {
+    var p = bkSplit(min), unit = { 1: 'minute', 60: 'hour', 1440: 'day' }[p[1]];
+    return p[0] + ' ' + unit + (p[0] === 1 ? '' : 's');
+  }
+  function bkShow(d) {
+    var p = bkSplit(d.every_minutes || 1440);
+    $('bk-n').value = p[0]; $('bk-u').value = String(p[1]);
+    var last = d.last ? (d.last.ok ? '✅ Last backup ' : '❌ Last backup failed ') + ago(d.last.at) + (d.last.ok ? '' : ': ' + d.last.note) : 'No backup yet.';
+    $('bk-note').textContent = (d.set_up ? 'Every ' + bkWords(d.every_minutes) + '. Backups are kept ' + d.keep_days + ' days. ' + last
+      : '⚠️ BACKUP_CHANNEL_ID isn’t set on the bot, so nothing is posted yet. The timing is saved for when it is.');
+  }
+  function bkError(res) {
+    var e = res.data && res.data.error;
+    return e === 'bad_interval' ? 'Pick between 30 minutes and 30 days.' : dataError(res);
+  }
+  function bkLoad() {
+    $('bk-note').textContent = 'Loading…';
+    call('/api/admin/backup').then(function (res) { if (res.ok) bkShow(res.data); else $('bk-note').textContent = '❌ ' + bkError(res); },
+      function () { $('bk-note').textContent = '❌ BEV didn’t answer. Try again.'; });
+  }
+  function bkSave() {
+    var n = Number($('bk-n').value), min = Math.round(n * Number($('bk-u').value));
+    if (!Number.isFinite(n) || n <= 0 || min < 30 || min > 43200) { $('bk-note').textContent = '❌ Pick between 30 minutes and 30 days.'; return; }
+    var b = $('bk-save'); b.disabled = true;
+    call('/api/admin/backup/set', { every_minutes: min }).then(function (res) {
+      if (res.ok) { bkShow(res.data); toast('✅ Backups every ' + bkWords(min)); say('Backup timing saved'); } else $('bk-note').textContent = '❌ ' + bkError(res);
+    }, function () { $('bk-note').textContent = '❌ BEV didn’t answer. Try again.'; }).then(function () { b.disabled = false; });
+  }
+  $('bk-save').addEventListener('click', bkSave);
+  $('bk-load').addEventListener('click', bkLoad);
   $('dload').addEventListener('click', loadData);
   $('ddown').addEventListener('click', downloadData);
   $('dsend').addEventListener('click', uploadData);

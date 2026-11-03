@@ -5,6 +5,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.63',
+    date: '3 November 2026',
+    changes: [
+      { title: 'Database backups as often as you like',
+        text: 'Main admins can now choose how often BEV posts a backup of its database to the private backup channel, from the Admin page: anywhere from every 30 minutes to every 30 days.' },
+      { title: 'Reminders: snooze',
+        text: 'A reminder now comes with Snooze buttons: 10 minutes, 1 hour or tomorrow. Only the person it\'s for can press them.' },
+      { title: 'AFK: what you missed',
+        text: 'When you come back from AFK, BEV sends you a list of who mentioned you while you were away, with a link to each message.' },
+    ],
+  },
+  {
     id: '4.62',
     date: '2 November 2026',
     changes: [

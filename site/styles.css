@@ -1782,3 +1782,6 @@ input.field[type=color]{width:64px;height:44px;padding:4px;cursor:pointer}
 .rpextras .act:disabled,.rpextras .act.save:disabled{cursor:not-allowed}
 .rpextras button.busy{cursor:progress;opacity:.7;pointer-events:none}
 .rpstatus:empty{display:none}
+
+/* 4.63: backup timing on the Admin page */
+.bkn{width:6em}
