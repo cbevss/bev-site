@@ -195,9 +195,12 @@
 
   function unseenUpdates(list, seen) {
     if (!seen) return list.slice(0, 1);                  // never pressed Got it: just the latest update
+    // Compared by place in the full list, so an update this reader doesn't get (admin-only) still counts as a marker.
+    var all = (root.BEV_UPDATES || []).map(function (u) { return u.id; });
+    var stop = all.indexOf(seen);
     var out = [];
-    for (var i = 0; i < list.length && i < 10; i++) {
-      if (list[i].id === seen) break;
+    for (var i = 0; i < list.length && out.length < 10; i++) {
+      if (list[i].id === seen || (stop >= 0 && all.indexOf(list[i].id) >= stop)) break;
       out.push(list[i]);
     }
     return out;
@@ -248,16 +251,29 @@
     return box;
   }
 
-  function whatsNew(user) {
-    var list = root.BEV_UPDATES;
-    if (newsShown || !user || !user.id || !Array.isArray(list) || !list.length) return;
-    var latest = list[0].id;
-    if (seenHere(user) === latest) return;
+  // Changes marked admin: true are only for site admins: everyone else never sees them, and an update with
+  // nothing else in it doesn't make the popup appear for them at all.
+  function forReader(list, isAdmin) {
+    if (!Array.isArray(list)) return [];
+    return list.map(function (u) {
+      var changes = (u.changes || []).filter(function (c) { return isAdmin || !c.admin; });
+      return (u.admin && !isAdmin) || !changes.length ? null : { id: u.id, date: u.date, changes: changes };
+    }).filter(Boolean);
+  }
+
+  function whatsNew(user, isAdmin) {
+    var guess = forReader(root.BEV_UPDATES, !!isAdmin);
+    if (newsShown || !user || !user.id || !guess.length) return;
+    if (seenHere(user) === guess[0].id) return;
     newsShown = true;
     root.fetch('/api/updates', { credentials: 'same-origin', cache: 'no-store', headers: { accept: 'application/json' } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d) { newsShown = false; return; }
+        // The site says whether they're a site admin, so admin-only changes go only to admins.
+        var list = forReader(root.BEV_UPDATES, d.admin === true);
+        if (!list.length) return;
+        var latest = list[0].id;
         var seen = d.seen || seenHere(user);
         if (seen === latest) { rememberSeen(user, latest); return; }
         var updates = unseenUpdates(list, seen);
@@ -281,7 +297,7 @@
       setFlag();
       show(true);
       var user = e && e.detail && e.detail.user;
-      if (user && user.name) { rememberMe(user); showMe(user); whatsNew(user); }
+      if (user && user.name) { rememberMe(user); showMe(user); whatsNew(user, adminHint()); }
     });
     doc.addEventListener('bev:signedout', function () { clearFlag(); show(false); });
 
@@ -299,8 +315,8 @@
       })
       .then(function (d) {
         if (!d) return;
-        if (d.user && d.user.name) { setFlag(); rememberMe(d.user); showMe(d.user); whatsNew(d.user); }
         if (typeof d.admin === 'boolean') adminTab(d.admin);
+        if (d.user && d.user.name) { setFlag(); rememberMe(d.user); showMe(d.user); whatsNew(d.user, d.admin === true); }
       })
       .catch(function () { /* offline or backend not reachable: leave the top bar as it is */ });
   }

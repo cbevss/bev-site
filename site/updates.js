@@ -2,13 +2,15 @@
  * Newest update first. Every update gets an id (the bot's version), a date, and one entry per change:
  * `title` is the command or part of BEV that changed or was added, `text` says what changed in plain words.
  * Someone who presses "Got it" doesn't see the popup again until an update with a new id is added here.
+ * Changes to the Admin page or anything only site admins use get `admin: true` (on the change, or on the whole update):
+ * only site admins see those in the popup.
  */
 window.BEV_UPDATES = [
   {
     id: '4.63',
     date: '3 November 2026',
     changes: [
-      { title: 'Database backups as often as you like',
+      { title: 'Database backups as often as you like', admin: true,
         text: 'Main admins can now choose how often BEV posts a backup of its database to the private backup channel, from the Admin page: anywhere from every 30 minutes to every 30 days.' },
       { title: 'Reminders: snooze',
         text: 'A reminder now comes with Snooze buttons: 10 minutes, 1 hour or tomorrow. Only the person it\'s for can press them.' },

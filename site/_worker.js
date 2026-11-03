@@ -1605,13 +1605,13 @@ async function updatesApi(request, env, url, s) {
   const userId = String(s.session.user.id);
   const db = database(env);
   if (request.method === 'GET') {
-    if (!db) return json({ seen: null, saved: false });
+    if (!db) return json({ seen: null, saved: false, admin: s.admin });
     try {
       await ready(db);
       const row = await db.prepare('SELECT version FROM update_seen WHERE user_id = ?1').bind(userId).first();
-      return json({ seen: row ? row.version : null, saved: true });
+      return json({ seen: row ? row.version : null, saved: true, admin: s.admin });
     } catch {
-      return json({ seen: null, saved: false });
+      return json({ seen: null, saved: false, admin: s.admin });
     }
   }
   let body;
