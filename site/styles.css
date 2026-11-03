@@ -1785,3 +1785,47 @@ input.field[type=color]{width:64px;height:44px;padding:4px;cursor:pointer}
 
 /* 4.63: backup timing on the Admin page */
 .bkn{width:6em}
+
+/* ---------- 4.64: Premium page, the Premium tab and locked items on the dashboard ---------- */
+.tab.ptab{color:#FFD58A}
+.pswitch{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;margin:0 0 18px;background:rgba(2,4,10,.5)}
+.pbill{border:0;background:transparent;color:var(--mut);font:inherit;font-weight:700;padding:8px 16px;border-radius:999px;cursor:pointer}
+.pbill[aria-pressed="true"]{background:var(--ac);color:#fff}
+.psave{font-size:.8em;margin-left:4px;padding:2px 7px;border-radius:999px;background:rgba(59,165,93,.2);color:#B9F5C9}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:18px;align-items:start}
+.pcard h2{margin-bottom:4px}
+.pcard.ptop{border-color:rgba(255,213,138,.45);box-shadow:0 0 0 1px rgba(255,213,138,.15) inset}
+.pcur{display:inline-block;margin:0 0 8px;padding:3px 10px;border-radius:999px;font-size:.85em;font-weight:700;background:rgba(127,166,255,.18);color:#CFE0FF}
+.pprice{margin:6px 0 10px;color:var(--mut)}
+.pprice b{font-size:2em;color:#fff;font-family:inherit}
+.plist{list-style:none;margin:10px 0 16px;padding:0;display:grid;gap:6px;max-height:520px;overflow:auto}
+.plist li{display:flex;gap:8px;align-items:flex-start;overflow-wrap:anywhere}
+.plist li.pall{padding-bottom:6px;border-bottom:1px solid var(--line)}
+.pico{flex:0 0 1.4em;text-align:center}
+.pbuy{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pbuy .fnote{flex-basis:100%;margin:0}
+/* a feature or setting that needs Premium in this server: greyed, and a click opens /premium */
+.plocked h3,.plocked .flabel{color:var(--mut);opacity:.55}
+.plocked{cursor:pointer}
+.plocked input,.plocked select,.plocked textarea,.plocked button,.plocked .switch{opacity:.45;pointer-events:none}
+.plock{display:inline-block;margin-left:8px;font-size:.78em;font-weight:700;color:#FFD58A;text-decoration:none;white-space:nowrap}
+.plock:hover,.plock:focus-visible{text-decoration:underline}
+
+/* 4.64: the Admin page's Premium section and admin permissions */
+.asec.aview .act.save,.asec.aview .act.stop,.asec.aview input,.asec.aview select,.asec.aview textarea{pointer-events:none;opacity:.5}
+.pay2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.payc{border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.payc h3{margin:0 0 6px}
+.steps{margin:0;padding-left:1.3em;display:grid;gap:8px}
+.steps li{overflow-wrap:anywhere}
+.steps li.done::marker{content:"✅ "}
+.copyme{display:inline-block;max-width:100%;overflow-wrap:anywhere;padding:1px 6px;border-radius:6px;background:rgba(2,4,10,.6)}
+.ptiers{display:grid;gap:6px;margin-top:10px}
+.ptcat{margin:12px 0 2px;font-size:1rem}
+.ptfeat{border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.ptfeat summary{cursor:pointer;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ptset{display:flex;gap:6px;align-items:flex-start;padding:4px 0 4px 22px;overflow-wrap:anywhere}
+.permgrid{display:grid;gap:6px;margin-top:10px}
+.permrow{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.permrow select{max-width:12em}
+.stat.goodon{background:rgba(59,165,93,.22);color:#B9F5C9}

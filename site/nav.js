@@ -574,7 +574,36 @@
     if (root.ResizeObserver) new root.ResizeObserver(function () { measure(); onScroll(); }).observe(nav);
   }
 
+  /* ---------- 4.64: the Premium tab, only once BEV's owner has switched Premium on ---------- */
+  function premiumTab() {
+    var tabs = doc.querySelector('.tabs');
+    if (!tabs) return;
+    function put(on) {
+      var tab = tabs.querySelector('[data-premium]');
+      if (on && !tab) {
+        tab = doc.createElement('a');
+        tab.className = 'tab ptab';
+        tab.href = '/premium';
+        tab.textContent = '💎 Premium';
+        tab.setAttribute('data-premium', '');
+        if (/^\/premium\/?$/.test(root.location.pathname)) tab.setAttribute('aria-current', 'page');
+        tabs.insertBefore(tab, tabs.firstChild ? tabs.firstChild.nextSibling : null);
+      } else if (!on && tab) tab.remove();
+    }
+    var cached = null;
+    try { cached = JSON.parse(root.sessionStorage.getItem('bev_premium') || 'null'); } catch (e) { cached = null; }
+    if (cached && Date.now() - cached.at < 300000) { put(cached.on); return; }
+    root.fetch('/api/premium', { credentials: 'same-origin', headers: { accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : { enabled: false }; })
+      .then(function (d) {
+        var on = !!(d && d.enabled);
+        try { root.sessionStorage.setItem('bev_premium', JSON.stringify({ on: on, at: Date.now() })); } catch (e) { /* private mode */ }
+        put(on);
+      }, function () { /* offline: no tab */ });
+  }
+
   navExtras();
+  premiumTab();
   scrollReveal();
   hoverGlow();
   smoothDialogs();

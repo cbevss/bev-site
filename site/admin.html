@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=17cfecb812">
+<link rel="stylesheet" href="/styles.css?v=c90dd3ab6d">
 </head>
 <body class="admin">
 <a class="skip" href="#main">Skip to content</a>
@@ -256,6 +256,50 @@
 </div>
 </section>
 
+<section class="asec" id="premium" aria-labelledby="prem-h">
+<div class="ahead"><h2 class="disp" id="prem-h">Premium</h2><span class="stat" id="pstate">Checking</span><button class="mini irefresh" id="prefresh" type="button">Refresh</button></div>
+<p class="adesc">While Premium is off, everyone can use every feature that isn't switched off above. Switch it on and the features and settings ticked below need Premium: people without it see them greyed out, with a link to the Premium page. Premium is £5 a month or £54 a year, and it covers every server the buyer owns.</p>
+<div class="row gap"><button class="act save" id="pon" type="button">Switch Premium on</button><button class="act stop" id="poff" type="button" hidden>Switch Premium off</button><a class="act" href="/premium" target="_blank" rel="noopener">Open the Premium page</a><span class="note" id="ponnote" role="status"></span></div>
+
+<details class="fset gap" id="ppay-d" open><summary>Getting paid (Stripe and PayPal)</summary>
+<p class="adesc">People pay through Stripe (cards, Apple Pay, Google Pay) or PayPal. Both send the money to your own UK bank account, so you set your bank up inside Stripe or PayPal, never here. You need at least one. Each step's tick turns green once Cloudflare has it.</p>
+<div class="pay2">
+<div class="payc"><h3>Stripe</h3>
+<ol class="steps">
+<li id="ps1">Make a free account at <a class="inl" href="https://dashboard.stripe.com/register" target="_blank" rel="noopener noreferrer">stripe.com</a> and add your UK bank under <b>Settings → Payouts</b>.</li>
+<li id="ps2">Go to <b>Developers → API keys</b>, copy the <b>Secret key</b>, and add it in Cloudflare (Pages project → Settings → Variables and Secrets) as a <b>Secret</b> named <code>STRIPE_SECRET_KEY</code>.</li>
+<li id="ps3">Go to <b>Developers → Webhooks → Add endpoint</b>. Paste this address: <code class="copyme" id="pshook"></code> <button class="mini act" id="pscopy" type="button">Copy</button>, pick the events <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code> and <code>invoice.paid</code>, save, then copy its <b>Signing secret</b> into Cloudflare as <code>STRIPE_WEBHOOK_SECRET</code>.</li>
+<li id="ps4">Go to <b>Settings → Billing → Customer portal</b> and press <b>Save</b> once, so people can cancel by themselves.</li>
+</ol></div>
+<div class="payc"><h3>PayPal</h3>
+<ol class="steps">
+<li id="pp1">Use a <b>PayPal Business</b> account and link your UK bank in PayPal.</li>
+<li id="pp2">At <a class="inl" href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener noreferrer">developer.paypal.com</a>, switch to <b>Live</b>, make an app, and add its <b>Client ID</b> and <b>Secret</b> in Cloudflare as <code>PAYPAL_CLIENT_ID</code> and <code>PAYPAL_CLIENT_SECRET</code>. Add <code>PAYPAL_MODE</code> = <code>live</code> (leave it out, or use <code>sandbox</code>, while testing).</li>
+<li id="pp3">In the same app, add a webhook with this address: <code class="copyme" id="pphook"></code> <button class="mini act" id="ppcopy" type="button">Copy</button> and the events <b>Billing subscription (all)</b> and <b>Payment sale completed</b>. Copy its <b>Webhook ID</b> into Cloudflare as <code>PAYPAL_WEBHOOK_ID</code>.</li>
+<li id="pp4">Redeploy the site, then press <b>Make the PayPal plans</b>: <button class="mini act" id="ppplans" type="button">Make the PayPal plans</button></li>
+</ol></div>
+</div>
+<div class="row gap"><button class="act save" id="pcheck" type="button">Check payments</button><span class="note" id="pchecknote" role="status"></span></div>
+<ul class="clist" id="pchecks" hidden></ul>
+</details>
+
+<details class="fset gap" id="ptier-d"><summary>What needs Premium</summary>
+<p class="adesc">Ticked features need Premium as a whole. Inside a feature, ticked settings need Premium while the rest of the feature stays free: a server without Premium uses the setting's default. The security features keep their core protection free.</p>
+<div class="row gap"><input class="field" id="ptq" type="search" placeholder="Find a feature or setting" aria-label="Find a feature or setting" autocomplete="off"><button class="act save" id="ptsave" type="button" disabled>Save</button><button class="act" id="ptreset" type="button">Go back to BEV's suggested split</button><span class="note" id="ptnote" role="status"></span></div>
+<div id="ptiers" class="ptiers"></div>
+</details>
+
+<details class="fset gap" id="pgift-d"><summary>Give Premium to someone</summary>
+<p class="adesc">For testing, prizes or refunds. It covers every server they own. Use 0 days to take it away.</p>
+<div class="row gap"><input class="field" id="pgid" type="text" inputmode="numeric" maxlength="25" placeholder="Their Discord user ID" autocomplete="off" aria-label="Their Discord user ID">
+<input class="field bkn" id="pgdays" type="number" min="0" max="3660" value="30" aria-label="Days"><span>days</span><button class="act save" id="pgive" type="button">Save</button><span class="note" id="pgnote" role="status"></span></div>
+</details>
+
+<details class="fset gap" id="ppeople-d"><summary>People with Premium <span id="pcount"></span></summary>
+<ul class="alist" id="ppeople"></ul>
+</details>
+</section>
+
 <section class="asec" id="check" aria-labelledby="check-h">
 <div class="ahead"><h2 class="disp" id="check-h">Connection check</h2></div>
 <p class="adesc">Tests every link between this website and BEV: the sign-in settings, the bot token, the bot's address, the shared key and the site database. If something on the site isn't working, start here.</p>
@@ -286,8 +330,8 @@
 </footer>
 
 <script src="/updates.js?v=69cd83321a" defer></script>
-<script src="/nav.js?v=a85f8420b7" defer></script>
+<script src="/nav.js?v=5a118c0852" defer></script>
 <script src="/supportchat.js?v=56ad3f5691" defer></script>
-<script src="/admin.js?v=2f1748f715" defer></script>
+<script src="/admin.js?v=aa04a47f77" defer></script>
 </body>
 </html>

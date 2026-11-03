@@ -171,7 +171,224 @@
     renderVisits();
     renderAdmins();
     renderData();
+    applyPerms();
   }
+
+  /* ---------- 4.64: what this admin may see and do (the admin managers choose, under Site admins) ---------- */
+
+  var LEVEL_WORDS = { off: 'Hidden', view: 'View only', full: 'Can change' };
+  function applyPerms() {
+    var mine = state.myPerms || {};
+    (state.sections || []).forEach(function (sec) {
+      var box = $(sec.key);
+      if (!box) return;
+      var level = mine[sec.key] || 'full';
+      box.hidden = level === 'off';
+      box.classList.toggle('aview', level === 'view');
+      var head = box.querySelector('.ahead');
+      var pill = head && head.querySelector('.viewonly');
+      if (level === 'view' && head && !pill) head.appendChild(make('span', 'stat viewonly', 'View only'));
+      if (level !== 'view' && pill) pill.remove();
+    });
+    if (mine.premium && mine.premium !== 'off' && !premium) loadPremium();
+  }
+
+  function permEditor(a) {
+    var wrap = make('div', 'permgrid');
+    wrap.appendChild(make('p', 'flabel', 'What they can see and do here'));
+    var mine = (state.allPerms || {})[a.id] || {};
+    (state.sections || []).forEach(function (sec) {
+      var row = make('label', 'permrow');
+      row.appendChild(make('span', null, sec.name));
+      var sel = make('select', 'field');
+      ['off', 'view', 'full'].forEach(function (lv) {
+        var o = make('option', null, LEVEL_WORDS[lv]);
+        o.value = lv;
+        o.selected = (mine[sec.key] || 'full') === lv;
+        sel.appendChild(o);
+      });
+      sel.setAttribute('aria-label', sec.name + ' for ' + (a.name || a.id));
+      sel.addEventListener('change', function () {
+        var change = {};
+        change[sec.key] = sel.value;
+        sel.disabled = true;
+        call('/api/admin/perms', { id: a.id, perms: change }).then(function (res) {
+          sel.disabled = false;
+          if (!res.ok) { toast(ADMIN_ERRORS[res.data.error] || 'That didn\'t save. Try again.'); return; }
+          state.allPerms = res.data.allPerms;
+          toast((a.name || a.id) + ': ' + sec.name + ' is now ' + LEVEL_WORDS[sel.value].toLowerCase() + '.');
+        }, function () { sel.disabled = false; toast('That didn\'t save. Check your connection and try again.'); });
+      });
+      row.appendChild(sel);
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
+  /* ---------- 4.64: Premium ---------- */
+
+  var premium = null, tierDraft = {}, premiumBusy = false;
+  var PREMIUM_ERRORS = {
+    no_permission: 'You can\'t change this. An admin manager can give you access under Site admins.',
+    paypal_not_set_up: 'Add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in Cloudflare first, then redeploy.',
+    paypal_login_failed: 'PayPal refused the client ID and secret. Check them, and PAYPAL_MODE.',
+    paypal_error: 'PayPal didn\'t make the plans. Try again in a minute.',
+    bot_outdated: 'The bot needs updating before this works.', bad_request: 'Check the user ID and the number of days.'
+  };
+  function pErr(res) { return PREMIUM_ERRORS[res.data && res.data.error] || 'BEV didn\'t answer. Try again in a minute.'; }
+
+  function loadPremium() {
+    if (premiumBusy) return;
+    premiumBusy = true;
+    $('pstate').textContent = 'Checking';
+    call('/api/admin/premium').then(function (res) {
+      premiumBusy = false;
+      if (!res.ok) { $('pstate').textContent = 'Not loaded'; $('ponnote').textContent = pErr(res); return; }
+      premium = res.data; tierDraft = {};
+      renderPremium();
+    }, function () { premiumBusy = false; $('pstate').textContent = 'Not loaded'; });
+  }
+
+  function tick(id, ok) { var n = $(id); if (n) n.classList.toggle('done', !!ok); }
+
+  function renderPremium() {
+    var p = premium;
+    $('pstate').textContent = p.enabled ? 'On' : 'Off';
+    $('pstate').className = 'stat' + (p.enabled ? ' goodon' : '');
+    $('pon').hidden = p.enabled; $('poff').hidden = !p.enabled;
+    $('ponnote').textContent = p.enabled ? 'Premium is on. ' + p.premiumCount + ' features and settings need it.'
+      : 'Premium is off, so everything is free. ' + p.premiumCount + ' features and settings would need it.';
+    var pr = p.providers || { stripe: {}, paypal: {} };
+    $('pshook').textContent = pr.stripe.webhookUrl || '';
+    $('pphook').textContent = pr.paypal.webhookUrl || '';
+    tick('ps2', pr.stripe.key); tick('ps3', pr.stripe.webhook);
+    tick('pp2', pr.paypal.id && pr.paypal.secret); tick('pp3', pr.paypal.webhook);
+    tick('pp4', p.paypalPlans && p.paypalPlans.month && p.paypalPlans.mode === pr.paypal.mode);
+    renderTiers();
+    var list = $('ppeople');
+    list.textContent = '';
+    var active = (p.people || []).filter(function (x) { return x.active; });
+    $('pcount').textContent = '(' + active.length + ' now)';
+    (p.people || []).forEach(function (x) {
+      var li = make('li', 'adm');
+      var when = x.until ? new Date(x.until * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      li.appendChild(make('b', null, x.user_id));
+      li.appendChild(make('span', null, ' ' + (x.active ? '✅ until ' : 'ended ') + when + ' • ' + (x.plan || '') + (x.source ? ' via ' + x.source : '') + (x.note ? ' • ' + x.note : '')));
+      list.appendChild(li);
+    });
+    if (!(p.people || []).length) list.appendChild(make('li', 'empty', 'Nobody yet.'));
+  }
+
+  function renderTiers() {
+    var box = $('ptiers');
+    box.textContent = '';
+    var q = ($('ptq').value || '').trim().toLowerCase();
+    var cats = {};
+    (premium.categories || []).forEach(function (c) { cats[c.key] = c; });
+    var groups = {};
+    premium.features.forEach(function (f) { (groups[f.category] = groups[f.category] || []).push(f); });
+    Object.keys(groups).forEach(function (ck) {
+      var shown = groups[ck].filter(function (f) {
+        return !q || f.name.toLowerCase().indexOf(q) >= 0 || f.settings.some(function (x) { return x.label.toLowerCase().indexOf(q) >= 0; });
+      });
+      if (!shown.length) return;
+      var c = cats[ck] || { icon: '', name: ck };
+      box.appendChild(make('h3', 'ptcat', c.icon + ' ' + c.name));
+      shown.forEach(function (f) {
+        var det = make('details', 'ptfeat');
+        var sum = make('summary');
+        var fk = 'features:' + f.key;
+        var cb = make('input');
+        cb.type = 'checkbox';
+        cb.checked = tierDraft[fk] !== undefined ? tierDraft[fk] : f.premium;
+        cb.setAttribute('aria-label', f.name + ' needs Premium');
+        cb.addEventListener('click', function (e) { e.stopPropagation(); });
+        cb.addEventListener('change', function () { tierDraft[fk] = cb.checked; if (cb.checked === f.premium) delete tierDraft[fk]; tierCount(); });
+        sum.append(cb, make('span', null, ' ' + f.icon + ' ' + f.name));
+        var paidSettings = f.settings.filter(function (x) { return x.premium; }).length;
+        if (paidSettings && !f.premium) sum.appendChild(make('span', 'badge', paidSettings + ' setting' + (paidSettings === 1 ? '' : 's')));
+        det.appendChild(sum);
+        if (q && f.settings.some(function (x) { return x.label.toLowerCase().indexOf(q) >= 0; })) det.open = true;
+        f.settings.forEach(function (x) {
+          var row = make('label', 'ptset');
+          var sk = 'settings:' + x.key;
+          var scb = make('input');
+          scb.type = 'checkbox';
+          scb.checked = tierDraft[sk] !== undefined ? tierDraft[sk] : x.premium;
+          scb.addEventListener('change', function () { tierDraft[sk] = scb.checked; if (scb.checked === x.premium) delete tierDraft[sk]; tierCount(); });
+          row.append(scb, make('span', null, ' ' + x.label));
+          det.appendChild(row);
+        });
+        if (!f.settings.length) det.appendChild(make('p', 'adesc', 'No settings.'));
+        box.appendChild(det);
+      });
+    });
+    tierCount();
+  }
+  function tierCount() {
+    var n = Object.keys(tierDraft).length;
+    $('ptsave').disabled = !n;
+    $('ptsave').textContent = n ? 'Save ' + n + ' change' + (n === 1 ? '' : 's') : 'Save';
+  }
+  function premiumPost(path, body, note, done) {
+    $(note).textContent = 'Saving…';
+    return call(path, body).then(function (res) {
+      if (!res.ok) { $(note).textContent = '❌ ' + pErr(res); return; }
+      premium = res.data; tierDraft = {};
+      renderPremium();
+      $(note).textContent = done;
+      say(done);
+    }, function () { $(note).textContent = '❌ That didn\'t save. Check your connection.'; });
+  }
+  $('prefresh').addEventListener('click', loadPremium);
+  $('pon').addEventListener('click', function () {
+    if (!arm($('pon'), 'Click again: switch Premium on for everyone')) return;
+    premiumPost('/api/admin/premium/set', { enabled: true }, 'ponnote', '✅ Premium is on.');
+  });
+  $('poff').addEventListener('click', function () {
+    if (!arm($('poff'), 'Click again: make everything free')) return;
+    premiumPost('/api/admin/premium/set', { enabled: false }, 'ponnote', '✅ Premium is off. Everything is free again.');
+  });
+  $('ptq').addEventListener('input', function () { if (premium) renderTiers(); });
+  $('ptsave').addEventListener('click', function () {
+    var tiers = { features: {}, settings: {} };
+    Object.keys(tierDraft).forEach(function (k) { var parts = k.split(':'); tiers[parts[0]][parts[1]] = tierDraft[k]; });
+    premiumPost('/api/admin/premium/set', { tiers: tiers }, 'ptnote', '✅ Saved what needs Premium.');
+  });
+  $('ptreset').addEventListener('click', function () {
+    if (!arm($('ptreset'), 'Click again to undo your changes')) return;
+    premiumPost('/api/admin/premium/set', { reset_tiers: true }, 'ptnote', '✅ Back to BEV\'s suggested split.');
+  });
+  $('pgive').addEventListener('click', function () {
+    var id = $('pgid').value.trim(), days = parseInt($('pgdays').value, 10);
+    if (!/^\d{5,25}$/.test(id)) { $('pgnote').textContent = 'Paste their Discord user ID (only numbers).'; return; }
+    if (!(days >= 0 && days <= 3660)) { $('pgnote').textContent = 'Pick 0 to 3660 days.'; return; }
+    premiumPost('/api/admin/premium/gift', { user_id: id, days: days }, 'pgnote', days ? '✅ Given for ' + days + ' days.' : '✅ Taken away.');
+  });
+  $('ppplans').addEventListener('click', function () {
+    premiumPost('/api/admin/premium/paypal-plans', {}, 'pchecknote', '✅ PayPal plans made: £5 a month and £54 a year.');
+  });
+  $('pcheck').addEventListener('click', function () {
+    $('pchecknote').textContent = 'Checking…';
+    call('/api/admin/premium/check', {}).then(function (res) {
+      if (!res.ok) { $('pchecknote').textContent = '❌ ' + pErr(res); return; }
+      $('pchecknote').textContent = '';
+      var ul = $('pchecks');
+      ul.textContent = '';
+      res.data.checks.forEach(function (c) {
+        var li = make('li', c.ok ? 'ok' : 'bad');
+        li.append(make('b', null, (c.ok ? '✅ ' : '❌ ') + c.label), make('span', null, ' ' + c.detail));
+        ul.appendChild(li);
+      });
+      ul.hidden = false;
+    }, function () { $('pchecknote').textContent = '❌ Check your connection.'; });
+  });
+  function copyText(id, btn) {
+    var text = $(id).textContent;
+    if (root.navigator.clipboard) root.navigator.clipboard.writeText(text).then(function () { btn.textContent = 'Copied'; root.setTimeout(function () { btn.textContent = 'Copy'; }, 2000); });
+  }
+  $('pscopy').addEventListener('click', function () { copyText('pshook', $('pscopy')); });
+  $('ppcopy').addEventListener('click', function () { copyText('pphook', $('ppcopy')); });
 
   /* ---------- maintenance mode ---------- */
 
@@ -792,6 +1009,7 @@
         rm.addEventListener('click', function () { if (arm(rm, 'Click again to remove')) changeAdmin('remove', a.id, rm); });
         row.append(sw, rm);
         det.appendChild(row);
+        if (!a.manager) det.appendChild(permEditor(a));
         li.appendChild(det);
       }
       list.appendChild(li);
@@ -801,7 +1019,7 @@
   var ADMIN_ERRORS = {
     already_admin: 'They\'re already a site admin.', cant_remove_self: 'You can\'t remove yourself.', cant_change_self: 'You can\'t change your own kind of admin.',
     need_main_admin: 'There has to be at least one main admin.', not_admin: 'They aren\'t a site admin.',
-    not_manager: 'Only the people who manage admins can change this.', cant_change_manager: 'The people who manage admins can\'t be changed here.', too_many_admins: 'That\'s the most admins you can add.',
+    not_manager: 'Only the people who manage admins can change this.', manager_has_all: 'People who manage admins can always use everything.', cant_change_manager: 'The people who manage admins can\'t be changed here.', too_many_admins: 'That\'s the most admins you can add.',
     no_database: 'The site\'s database isn\'t connected, so this can\'t be saved.', bad_request: 'That isn\'t a Discord user ID.'
   };
   function changeAdmin(action, id, button, role) {

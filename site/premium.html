@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<title>BEV | Premium</title>
+<meta property="og:site_name" content="BEV">
+<meta property="og:title" content="Premium">
+<meta property="og:description" content="BEV's plans: everything on the free plan, and what Premium adds for the servers you own.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bevbotdiscord.com/premium">
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="BEV's plans: everything on the free plan, and what Premium adds for the servers you own.">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=c90dd3ab6d">
+</head>
+<body class="premium">
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab" href="/features.html">Features</a>
+<a class="tab" href="/discover">Discover</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<div class="tag mono rise">Plans</div>
+<h1 class="disp rise d1">Pick your plan</h1>
+<p class="lead rise d2">Premium covers every server you own. Cancel whenever you like: it keeps working until the end of what you've paid for.</p>
+</div>
+</div>
+
+<main class="wrap sec" id="pmain">
+<p class="fnote" id="pload" role="status">Loading the plans…</p>
+<section class="panel" id="poff" hidden>
+<h2 class="disp">Nothing to buy yet</h2>
+<p>Everything in BEV is free to use right now. <a class="inl" href="/features.html">See every feature</a>.</p>
+</section>
+<p class="fnote ok" id="ppaid" role="status" hidden>✅ Thanks! Your payment went through. Premium switches on within a minute: this page updates by itself.</p>
+<p class="fnote" id="pcancel" role="status" hidden>Payment cancelled. Nothing was charged.</p>
+<div id="pplans" hidden>
+<div class="pswitch" role="group" aria-label="Billing">
+<button type="button" class="pbill" id="pmonth" aria-pressed="true">Monthly</button>
+<button type="button" class="pbill" id="pyear" aria-pressed="false">Yearly <span class="psave">10% off</span></button>
+</div>
+<div class="pgrid">
+<section class="panel pcard" id="pfree" aria-labelledby="pfree-h">
+<h2 class="disp" id="pfree-h">Free</h2>
+<p class="pcur" id="pfreecur" hidden>Current plan</p>
+<p class="pprice"><b>£0</b></p>
+<ul class="plist" id="pfreelist"></ul>
+</section>
+<section class="panel pcard ptop" id="pprem" aria-labelledby="pprem-h">
+<h2 class="disp" id="pprem-h">Premium</h2>
+<p class="pcur" id="ppremcur" hidden>Current plan</p>
+<p class="pprice"><b id="pamount">£5</b> <span id="pper">a month</span></p>
+<p class="fnote" id="pyearnote" hidden></p>
+<ul class="plist" id="ppremlist"></ul>
+<div class="pbuy" id="pbuy"></div>
+<p class="fnote" id="pnote" role="status"></p>
+</section>
+</div>
+</div>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/updates.js?v=69cd83321a" defer></script>
+<script src="/nav.js?v=5a118c0852" defer></script>
+<script src="/supportchat.js?v=56ad3f5691" defer></script>
+<script src="/premium.js?v=89d7d54bc0" defer></script>
+</body>
+</html>

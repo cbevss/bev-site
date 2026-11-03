@@ -479,8 +479,9 @@ const PRIVATE = { '/api/suggest': ['POST'], '/api/me': ['GET'], '/api/servers': 
                   '/api/support/mine': ['GET'], '/api/support/new': ['POST'], '/api/support/ticket': ['GET'], '/api/support/topic': ['POST'],
                   '/api/support/send': ['POST'], '/api/support/close': ['POST'], '/api/appeal': ['GET', 'POST'] };
 
-async function api(request, c, url, secure, s) {
+async function api(request, c, url, secure, s, env) {
   const path = url.pathname;
+  if (path === '/api/premium' || path === '/api/premium/checkout' || path === '/api/premium/manage') return premiumApi(request, env, c, url, s, path);
   if (path === '/api/status' || path === '/api/leaderboard' || path === '/api/directory') return publicApi(request, c, url);
   if (!Object.prototype.hasOwnProperty.call(PRIVATE, path)) return json({ error: 'not_found' }, 404);
   if (!PRIVATE[path].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
@@ -768,6 +769,8 @@ const BLANK = {
   banner: { on: false, text: '', link: '', linkText: '', style: 'info', id: '', at: 0, by: '' },
   // Site admins added or removed on /admin, on top of the main list (SITE_ADMIN_IDS or the built-in one).
   admins: { added: [], mainAdded: [], demoted: [], removed: [], at: 0, by: '' },
+  // 4.64: what each regular admin can see and do on /admin: { perms: { "<id>": { section: "off" | "view" | "full" } } }
+  adminPerms: { perms: {}, at: 0, by: '' },
 };
 
 const ADMINS_MAX = 25;
@@ -926,7 +929,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=17cfecb812">
+<link rel="stylesheet" href="/styles.css?v=c90dd3ab6d">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1138,6 +1141,8 @@ const ADMIN_ROUTES = {
   '/api/admin/support': 'GET', '/api/admin/support/act': 'POST', '/api/admin/admins': 'POST', '/api/admin/health': 'GET',
   '/api/admin/data': 'GET', '/api/admin/data/table': 'GET', '/api/admin/data/download': 'GET', '/api/admin/data/upload': 'POST',
   '/api/admin/backup': 'GET', '/api/admin/backup/set': 'POST',
+  '/api/admin/premium': 'GET', '/api/admin/premium/set': 'POST', '/api/admin/premium/gift': 'POST', '/api/admin/premium/paypal-plans': 'POST',
+  '/api/admin/premium/check': 'POST', '/api/admin/perms': 'POST',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1318,6 +1323,10 @@ async function adminState(env, c, s, site) {
     adminsFromSetting: c.adminFromSetting,
     canManageAdmins: ADMIN_MANAGER_IDS.includes(String(s.session.user.id)),
     isMainAdmin: (c.mainAdminIds || c.adminIds).includes(String(s.session.user.id)),
+    sections: ADMIN_SECTIONS.map(([key, name]) => ({ key, name })),
+    myPerms: adminPermsFor(c, s, s.session.user.id),
+    allPerms: ADMIN_MANAGER_IDS.includes(String(s.session.user.id))
+      ? Object.fromEntries(c.adminIds.map((id) => [id, adminPermsFor(c, s, id)])) : {},
     visits: await visitStats(env),
     now: Date.now(),
   };
@@ -1450,8 +1459,15 @@ async function adminApi(request, env, c, url, secure, s) {
   if (request.method === 'POST' && request.headers.get('origin') !== url.origin) return json({ error: 'bad_origin' }, 403);
   if (!s.session) return json({ error: 'signed_out' }, 401, [hintCookie(false, secure)]);
   if (!s.admin) return json({ error: 'forbidden' }, 403);
+  const section = adminSectionOf(path);
+  if (section) {
+    const level = adminPermsFor(c, s, s.session.user.id)[section];
+    if (level === 'off' || (level === 'view' && request.method !== 'GET' && path !== '/api/admin/check')) return json({ error: 'no_permission', section }, 403);
+  }
 
   if (path === '/api/admin/state') return json(await adminState(env, c, s, s.site));
+  if (path === '/api/admin/perms') return changeAdminPerms(request, env, c, s);
+  if (path.startsWith('/api/admin/premium')) return adminPremium(request, env, c, s, url, path);
   if (path === '/api/admin/check') return json({ checks: await connectionCheck(env, c) });
   if (path.startsWith('/api/admin/alert')) return alertApi(request, c, s, path);
   if (path === '/api/admin/inbox') return json(await inboxState(env, c));
@@ -1827,6 +1843,426 @@ async function adminSupport(request, c, s, path) {
                                      waiting: Number(res.data.waiting) || 0 });
 }
 
+/* ---------- 4.64: Premium. Built and ready, but off until BEV's owner switches it on from /admin ---------- */
+// BEV (the bot) keeps who has Premium and which features need it. This file only talks to the payment providers:
+//   • Stripe: card, Apple Pay and Google Pay. Needs STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Cloudflare.
+//   • PayPal: needs PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET and PAYPAL_WEBHOOK_ID (and PAYPAL_MODE=sandbox while testing).
+// Both pay out to the owner's own bank account from their Stripe or PayPal account: nothing here touches bank details.
+// A payment provider's webhook says a subscription changed; this file looks the subscription up again with the provider
+// (so a faked webhook can't give anyone Premium) and tells the bot how long that person's Premium runs.
+
+const PREMIUM_PATHS = new Set(['/premium']);
+let premiumMemo = { at: 0, value: null };
+
+function payConfig(env) {
+  const get = (k) => {
+    const v = String(env[k] ?? '').trim();
+    return v && !/^YOUR_/i.test(v) ? v : '';
+  };
+  const mode = get('PAYPAL_MODE').toLowerCase() === 'live' ? 'live' : 'sandbox';
+  return {
+    stripeKey: get('STRIPE_SECRET_KEY'), stripeHook: get('STRIPE_WEBHOOK_SECRET'),
+    paypalId: get('PAYPAL_CLIENT_ID'), paypalSecret: get('PAYPAL_CLIENT_SECRET'), paypalHook: get('PAYPAL_WEBHOOK_ID'), paypalMode: mode,
+    paypalBase: mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com',
+  };
+}
+
+function cleanPlanList(list) {
+  return (Array.isArray(list) ? list : []).slice(0, 400).map((x) => ({ key: str(x.key, 60), name: str(x.name, 160), icon: str(x.icon, 16), kind: str(x.kind, 10) }));
+}
+
+async function premiumPublic(c, fresh = false) {
+  if (!fresh && premiumMemo.value && Date.now() - premiumMemo.at < 60000) return premiumMemo.value;
+  const res = await bot(c, '/api/premium/public');
+  if (res.status !== 200 || !res.data) return premiumMemo.value || { enabled: false, month: 500, year: 5400, free: [], premium: [], unreachable: true };
+  const d = res.data;
+  const value = { enabled: d.enabled === true, currency: 'GBP', month: Number(d.month) || 500, year: Number(d.year) || 5400,
+    free: cleanPlanList(d.free), premium: cleanPlanList(d.premium) };
+  premiumMemo = { at: Date.now(), value };
+  return value;
+}
+
+async function premiumPerson(c, userId) {
+  const res = await bot(c, `/api/premium/user?user_id=${userId}`);
+  if (res.status !== 200 || !res.data) return null;
+  const d = res.data;
+  return { has: d.has === true, until: Number(d.until) || null, plan: str(d.plan, 10) || null, source: str(d.source, 10) || null,
+    status: str(d.status, 40) || null, customer: str(d.customer, 120) || null,
+    servers: (Array.isArray(d.servers) ? d.servers : []).slice(0, 200).map((g) => ({ id: str(g.id, 25), name: str(g.name, 100) })) };
+}
+
+async function grantPremium(c, body) {
+  const res = await bot(c, '/api/premium/grant', { method: 'POST', body: JSON.stringify(body) });
+  return res.status === 200;
+}
+
+/* ----- Stripe ----- */
+
+function form(obj, prefix = '', out = new URLSearchParams()) {
+  for (const [k, v] of Object.entries(obj)) {
+    const key = prefix ? `${prefix}[${k}]` : k;
+    if (v && typeof v === 'object') form(v, key, out);
+    else if (v !== undefined && v !== null) out.append(key, String(v));
+  }
+  return out;
+}
+
+async function stripe(p, method, path, body) {
+  const r = await fetch('https://api.stripe.com' + path, {
+    method,
+    headers: { authorization: `Bearer ${p.stripeKey}`, 'content-type': 'application/x-www-form-urlencoded', 'stripe-version': '2024-06-20' },
+    body: body ? form(body) : undefined, signal: AbortSignal.timeout(20000),
+  });
+  let data = null;
+  try { data = await r.json(); } catch { data = null; }
+  return { status: r.status, data };
+}
+
+const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+async function stripeSignatureOk(secret, header, payload) {
+  const parts = Object.create(null);
+  const sigs = [];
+  for (const piece of String(header || '').split(',')) {
+    const [k, v] = piece.split('=');
+    if (k === 'v1') sigs.push(v); else if (k) parts[k] = v;
+  }
+  const t = Number(parts.t);
+  if (!t || !sigs.length || Math.abs(Date.now() / 1000 - t) > 300) return false;
+  const key = await crypto.subtle.importKey('raw', te.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const want = hex(await crypto.subtle.sign('HMAC', key, te.encode(`${t}.${payload}`)));
+  return sigs.some((s) => s.length === want.length && [...s].reduce((acc, ch, i) => acc | (ch.charCodeAt(0) ^ want.charCodeAt(i)), 0) === 0);
+}
+
+// Looks the subscription up with Stripe and tells the bot. Statuses that still mean "paid up" keep Premium.
+async function syncStripeSubscription(c, p, subId) {
+  if (!/^sub_[A-Za-z0-9]{6,80}$/.test(subId || '')) return false;
+  const { status, data } = await stripe(p, 'GET', `/v1/subscriptions/${subId}`);
+  if (status !== 200 || !data) return false;
+  const userId = String((data.metadata && data.metadata.user_id) || '');
+  if (!ID_RE.test(userId)) return false;
+  const item = data.items && data.items.data && data.items.data[0];
+  const end = Number(data.current_period_end || (item && item.current_period_end) || 0);
+  const interval = item && item.price && item.price.recurring ? item.price.recurring.interval : null;
+  const live = ['active', 'trialing', 'past_due'].includes(data.status);
+  const until = live ? end : Number(data.ended_at || data.canceled_at || Date.now() / 1000);
+  return grantPremium(c, { user_id: userId, until, plan: interval === 'year' ? 'year' : 'month', source: 'stripe', ref: subId,
+    customer: typeof data.customer === 'string' ? data.customer : '', status: data.status });
+}
+
+async function stripeWebhook(request, env, c) {
+  const p = payConfig(env);
+  if (!p.stripeKey || !p.stripeHook) return json({ error: 'not_configured' }, 503);
+  const payload = await request.text();
+  if (payload.length > 200000) return json({ error: 'too_big' }, 413);
+  if (!(await stripeSignatureOk(p.stripeHook, request.headers.get('stripe-signature'), payload))) return json({ error: 'bad_signature' }, 400);
+  let event;
+  try { event = JSON.parse(payload); } catch { return json({ error: 'bad_request' }, 400); }
+  const o = (event && event.data && event.data.object) || {};
+  let subId = '';
+  if (event.type === 'checkout.session.completed') subId = o.subscription;
+  else if (String(event.type).startsWith('customer.subscription.')) subId = o.id;
+  else if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
+    subId = o.subscription || (o.parent && o.parent.subscription_details && o.parent.subscription_details.subscription) || '';
+  }
+  if (typeof subId === 'string' && subId) {
+    const ok = await syncStripeSubscription(c, p, subId);
+    if (!ok) return json({ error: 'sync_failed' }, 500);   // Stripe tries again later
+  }
+  return json({ ok: true });
+}
+
+/* ----- PayPal ----- */
+
+async function paypalToken(p) {
+  const r = await fetch(p.paypalBase + '/v1/oauth2/token', {
+    method: 'POST', body: 'grant_type=client_credentials',
+    headers: { authorization: 'Basic ' + btoa(`${p.paypalId}:${p.paypalSecret}`), 'content-type': 'application/x-www-form-urlencoded' },
+    signal: AbortSignal.timeout(20000),
+  });
+  if (r.status !== 200) return '';
+  try { return (await r.json()).access_token || ''; } catch { return ''; }
+}
+
+async function paypal(p, token, method, path, body) {
+  const r = await fetch(p.paypalBase + path, {
+    method, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(20000),
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', prefer: 'return=representation' },
+  });
+  let data = null;
+  try { data = await r.json(); } catch { data = null; }
+  return { status: r.status, data };
+}
+
+async function syncPaypalSubscription(c, p, token, subId) {
+  if (!/^I-[A-Z0-9]{6,40}$/.test(subId || '')) return false;
+  const { status, data } = await paypal(p, token, 'GET', `/v1/billing/subscriptions/${subId}`);
+  if (status !== 200 || !data) return false;
+  const userId = String(data.custom_id || '');
+  if (!ID_RE.test(userId)) return false;
+  const plans = await paypalPlans(c);
+  const yearly = data.plan_id && data.plan_id === plans.year;
+  const info = data.billing_info || {};
+  const next = Date.parse(info.next_billing_time || '') / 1000;
+  const last = Date.parse((info.last_payment && info.last_payment.time) || '') / 1000;
+  const paidUntil = last ? last + (yearly ? 366 : 31) * 86400 : 0;
+  // Active: paid up to the next charge. Cancelled or expired: what was already paid for still counts until it runs out.
+  const until = data.status === 'ACTIVE' ? (next || paidUntil) : data.status === 'APPROVAL_PENDING' ? 0 : (paidUntil || Date.now() / 1000);
+  return grantPremium(c, { user_id: userId, until, plan: yearly ? 'year' : 'month', source: 'paypal', ref: subId, status: String(data.status || '').toLowerCase() });
+}
+
+async function paypalPlans(c) {
+  const res = await bot(c, '/api/premium/admin');
+  return (res.status === 200 && res.data && res.data.paypal_plans) || {};
+}
+
+async function paypalWebhook(request, env, c) {
+  const p = payConfig(env);
+  if (!p.paypalId || !p.paypalSecret || !p.paypalHook) return json({ error: 'not_configured' }, 503);
+  const payload = await request.text();
+  if (payload.length > 200000) return json({ error: 'too_big' }, 413);
+  let event;
+  try { event = JSON.parse(payload); } catch { return json({ error: 'bad_request' }, 400); }
+  const token = await paypalToken(p);
+  if (!token) return json({ error: 'paypal_unreachable' }, 500);
+  const h = (k) => request.headers.get(k) || '';
+  const check = await paypal(p, token, 'POST', '/v1/notifications/verify-webhook-signature', {
+    auth_algo: h('paypal-auth-algo'), cert_url: h('paypal-cert-url'), transmission_id: h('paypal-transmission-id'),
+    transmission_sig: h('paypal-transmission-sig'), transmission_time: h('paypal-transmission-time'), webhook_id: p.paypalHook, webhook_event: event,
+  });
+  if (!check.data || check.data.verification_status !== 'SUCCESS') return json({ error: 'bad_signature' }, 400);
+  const r = event.resource || {};
+  const subId = String(event.event_type || '').startsWith('BILLING.SUBSCRIPTION.') ? r.id : r.billing_agreement_id;
+  if (subId) {
+    const ok = await syncPaypalSubscription(c, p, token, subId);
+    if (!ok) return json({ error: 'sync_failed' }, 500);
+  }
+  return json({ ok: true });
+}
+
+/* ----- what people do on /premium ----- */
+
+async function premiumApi(request, env, c, url, s, path) {
+  if (path === '/api/premium') {
+    if (request.method !== 'GET') return json({ error: 'method_not_allowed' }, 405);
+    const plans = await premiumPublic(c);
+    const p = payConfig(env);
+    const out = { ...plans, providers: { stripe: !!p.stripeKey, paypal: !!(p.paypalId && p.paypalSecret) }, signedIn: !!s.session };
+    if (!plans.enabled) return json({ enabled: false });
+    if (s.session) out.me = await premiumPerson(c, String(s.session.user.id));
+    return json(out);
+  }
+  if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+  if (request.headers.get('origin') !== url.origin) return json({ error: 'bad_origin' }, 403);
+  if (!s.session) return json({ error: 'signed_out' }, 401);
+  const plans = await premiumPublic(c, true);
+  if (!plans.enabled) return json({ error: 'premium_off' }, 403);
+  const userId = String(s.session.user.id);
+  const p = payConfig(env);
+  if (path === '/api/premium/checkout') {
+    const body = await readJson(request, 500);
+    const plan = body && body.plan === 'year' ? 'year' : 'month';
+    const provider = body && body.provider === 'paypal' ? 'paypal' : 'stripe';
+    const back = `${url.origin}/premium`;
+    if (provider === 'stripe') {
+      if (!p.stripeKey) return json({ error: 'stripe_not_set_up' }, 503);
+      const me = await premiumPerson(c, userId);
+      const session = {
+        mode: 'subscription', success_url: `${back}?paid=1`, cancel_url: `${back}?cancelled=1`, client_reference_id: userId,
+        allow_promotion_codes: 'true', metadata: { user_id: userId }, subscription_data: { metadata: { user_id: userId } },
+        line_items: { 0: { quantity: 1, price_data: { currency: 'gbp', unit_amount: plan === 'year' ? plans.year : plans.month,
+          recurring: { interval: plan }, product_data: { name: plan === 'year' ? 'BEV Premium (yearly)' : 'BEV Premium (monthly)' } } } },
+      };
+      if (me && /^cus_/.test(me.customer || '')) session.customer = me.customer;
+      const r = await stripe(p, 'POST', '/v1/checkout/sessions', session);
+      if (r.status !== 200 || !r.data || !/^https:\/\/checkout\.stripe\.com\//.test(r.data.url || '')) return json({ error: 'stripe_error' }, 502);
+      return json({ url: r.data.url });
+    }
+    if (!p.paypalId || !p.paypalSecret) return json({ error: 'paypal_not_set_up' }, 503);
+    const ids = await paypalPlans(c);
+    if (!ids[plan] || ids.mode !== p.paypalMode) return json({ error: 'paypal_plans_missing' }, 503);
+    const token = await paypalToken(p);
+    if (!token) return json({ error: 'paypal_error' }, 502);
+    const r = await paypal(p, token, 'POST', '/v1/billing/subscriptions', {
+      plan_id: ids[plan], custom_id: userId,
+      application_context: { brand_name: 'BEV', user_action: 'SUBSCRIBE_NOW', shipping_preference: 'NO_SHIPPING', return_url: `${back}?paid=1`, cancel_url: `${back}?cancelled=1` },
+    });
+    const link = r.data && Array.isArray(r.data.links) ? r.data.links.find((l) => l.rel === 'approve') : null;
+    if (!link || !/^https:\/\/www\.(sandbox\.)?paypal\.com\//.test(link.href || '')) return json({ error: 'paypal_error' }, 502);
+    return json({ url: link.href });
+  }
+  if (path === '/api/premium/manage') {
+    const me = await premiumPerson(c, userId);
+    if (!me || !me.source) return json({ error: 'no_subscription' }, 400);
+    if (me.source === 'paypal') return json({ url: p.paypalMode === 'live' ? 'https://www.paypal.com/myaccount/autopay/' : 'https://www.sandbox.paypal.com/myaccount/autopay/' });
+    if (me.source !== 'stripe' || !/^cus_/.test(me.customer || '') || !p.stripeKey) return json({ error: 'no_subscription' }, 400);
+    const r = await stripe(p, 'POST', '/v1/billing_portal/sessions', { customer: me.customer, return_url: `${url.origin}/premium` });
+    if (r.status !== 200 || !r.data || !/^https:\/\/billing\.stripe\.com\//.test(r.data.url || '')) return json({ error: 'stripe_portal_error' }, 502);
+    return json({ url: r.data.url });
+  }
+  return json({ error: 'not_found' }, 404);
+}
+
+/* ----- the Admin page's Premium section (admins allowed "premium" in their admin permissions) ----- */
+
+async function adminPremium(request, env, c, s, url, path) {
+  const p = payConfig(env);
+  const providerState = () => ({
+    stripe: { key: !!p.stripeKey, keyLive: /^sk_live_/.test(p.stripeKey), webhook: !!p.stripeHook, webhookUrl: `${url.origin}/api/stripe/webhook` },
+    paypal: { id: !!p.paypalId, secret: !!p.paypalSecret, webhook: !!p.paypalHook, mode: p.paypalMode, webhookUrl: `${url.origin}/api/paypal/webhook` },
+  });
+  const load = async () => {
+    const res = await bot(c, '/api/premium/admin');
+    if (res.error) return { error: res.error };
+    if (res.status === 404) return { error: 'bot_outdated' };
+    if (res.status !== 200 || !res.data) return { error: 'bot_error' };
+    return res.data;
+  };
+  const answer = (d) => (d.error ? json({ error: d.error }, d.error === 'bot_outdated' ? 501 : 503) : json({ ...cleanAdminPremium(d), providers: providerState() }));
+  if (path === '/api/admin/premium') return answer(await load());
+  const body = (await readJson(request, 60000)) || {};
+  if (path === '/api/admin/premium/set') {
+    const out = {};
+    if (typeof body.enabled === 'boolean') out.enabled = body.enabled;
+    if (body.reset_tiers === true) out.reset_tiers = true;
+    if (body.tiers && typeof body.tiers === 'object') {
+      out.tiers = { features: {}, settings: {} };
+      for (const part of ['features', 'settings']) {
+        for (const [k, v] of Object.entries(body.tiers[part] || {}).slice(0, 600)) if (/^[a-z0-9_]{1,60}$/.test(k) && typeof v === 'boolean') out.tiers[part][k] = v;
+      }
+    }
+    const res = await bot(c, '/api/premium/admin', { method: 'POST', body: JSON.stringify(out) });
+    premiumMemo = { at: 0, value: null };
+    if (res.status !== 200 || !res.data) return json({ error: res.error || 'bot_error' }, 502);
+    return answer(res.data);
+  }
+  if (path === '/api/admin/premium/gift') {
+    const id = String(body.user_id || '');
+    const days = Number(body.days);
+    if (!ID_RE.test(id) || !Number.isInteger(days) || days < 0 || days > 3660) return json({ error: 'bad_request' }, 400);
+    const until = days ? Date.now() / 1000 + days * 86400 : 0;
+    const ok = await grantPremium(c, { user_id: id, until, plan: 'gift', source: 'admin', status: days ? 'gift' : 'removed',
+      note: `${days ? `Given for ${days} days` : 'Taken away'} by ${s.session.user.name} (${s.session.user.id})` });
+    if (!ok) return json({ error: 'bot_error' }, 502);
+    return answer(await load());
+  }
+  if (path === '/api/admin/premium/paypal-plans') {
+    if (!p.paypalId || !p.paypalSecret) return json({ error: 'paypal_not_set_up' }, 400);
+    const token = await paypalToken(p);
+    if (!token) return json({ error: 'paypal_login_failed' }, 502);
+    const prices = await premiumPublic(c, true);
+    const product = await paypal(p, token, 'POST', '/v1/catalogs/products', { name: 'BEV Premium', type: 'SERVICE', category: 'SOFTWARE' });
+    if (!product.data || !product.data.id) return json({ error: 'paypal_error' }, 502);
+    const makePlan = (unit, pence, name) => paypal(p, token, 'POST', '/v1/billing/plans', {
+      product_id: product.data.id, name, status: 'ACTIVE',
+      billing_cycles: [{ frequency: { interval_unit: unit, interval_count: 1 }, tenure_type: 'REGULAR', sequence: 1, total_cycles: 0,
+        pricing_scheme: { fixed_price: { value: (pence / 100).toFixed(2), currency_code: 'GBP' } } }],
+      payment_preferences: { auto_bill_outstanding: true, payment_failure_threshold: 1 },
+    });
+    const month = await makePlan('MONTH', prices.month, 'BEV Premium (monthly)');
+    const year = await makePlan('YEAR', prices.year, 'BEV Premium (yearly)');
+    if (!month.data || !month.data.id || !year.data || !year.data.id) return json({ error: 'paypal_error' }, 502);
+    const res = await bot(c, '/api/premium/admin', { method: 'POST', body: JSON.stringify({ paypal_plans: { product: product.data.id, month: month.data.id, year: year.data.id, mode: p.paypalMode } }) });
+    if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
+    return answer(res.data);
+  }
+  if (path === '/api/admin/premium/check') {
+    const checks = [];
+    const add = (key, label, ok, detail) => checks.push({ key, label, ok, detail });
+    if (!p.stripeKey) add('stripe', 'Stripe', false, 'STRIPE_SECRET_KEY isn\'t set in Cloudflare yet.');
+    else {
+      const r = await stripe(p, 'GET', '/v1/balance');
+      add('stripe', 'Stripe', r.status === 200, r.status === 200 ? `Connected (${/^sk_live_/.test(p.stripeKey) ? 'live' : 'test'} mode).` : 'Stripe refused the key. Copy the secret key again.');
+    }
+    add('stripe_hook', 'Stripe webhook', !!p.stripeHook, p.stripeHook ? 'STRIPE_WEBHOOK_SECRET is set.' : 'STRIPE_WEBHOOK_SECRET isn\'t set, so payments can\'t switch Premium on.');
+    if (!p.paypalId || !p.paypalSecret) add('paypal', 'PayPal', false, 'PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET aren\'t both set.');
+    else {
+      const ok = !!(await paypalToken(p));
+      add('paypal', 'PayPal', ok, ok ? `Connected (${p.paypalMode}).` : 'PayPal refused the client ID and secret, or PAYPAL_MODE is wrong.');
+      const plans = await paypalPlans(c);
+      add('paypal_plans', 'PayPal plans', !!(plans.month && plans.year && plans.mode === p.paypalMode),
+        plans.month && plans.mode === p.paypalMode ? 'Monthly and yearly plans are made.' : 'Press "Make the PayPal plans".');
+    }
+    add('paypal_hook', 'PayPal webhook', !!p.paypalHook, p.paypalHook ? 'PAYPAL_WEBHOOK_ID is set.' : 'PAYPAL_WEBHOOK_ID isn\'t set, so PayPal payments can\'t switch Premium on.');
+    return json({ checks, providers: providerState() });
+  }
+  return json({ error: 'not_found' }, 404);
+}
+
+function cleanAdminPremium(d) {
+  const b = (v) => v === true;
+  return {
+    enabled: b(d.enabled), month: Number(d.month) || 500, year: Number(d.year) || 5400,
+    features: (Array.isArray(d.features) ? d.features : []).slice(0, 200).map((f) => ({ key: str(f.key, 60), name: str(f.name, 100), icon: str(f.icon, 16),
+      category: str(f.category, 30), premium: b(f.premium), default: b(f.default),
+      settings: (Array.isArray(f.settings) ? f.settings : []).slice(0, 60).map((x) => ({ key: str(x.key, 60), label: str(x.label, 120), premium: b(x.premium), default: b(x.default) })) })),
+    categories: (Array.isArray(d.categories) ? d.categories : []).slice(0, 30).map((x) => ({ key: str(x.key, 30), icon: str(x.icon, 16), name: str(x.name, 60) })),
+    people: (Array.isArray(d.people) ? d.people : []).slice(0, 500).map((x) => ({ user_id: str(x.user_id, 25), until: Number(x.until) || 0, plan: str(x.plan, 10),
+      source: str(x.source, 10), status: str(x.status, 40), note: str(x.note, 200), active: b(x.active) })),
+    paypalPlans: d.paypal_plans && typeof d.paypal_plans === 'object' ? { month: !!d.paypal_plans.month, year: !!d.paypal_plans.year, mode: str(d.paypal_plans.mode, 10) } : {},
+    freeCount: Number(d.free_count) || 0, premiumCount: Number(d.premium_count) || 0,
+  };
+}
+
+/* ---------- 4.64: what each site admin can see and do on /admin (chosen by the admin managers) ---------- */
+
+const ADMIN_SECTIONS = [
+  ['inbox', 'Inbox'], ['suggestions', 'Suggestions'], ['support', 'Support chats'], ['feats', 'Dashboard settings'], ['maint', 'Maintenance mode'],
+  ['alert', 'Discord alert'], ['bann', 'Announcement banner'], ['visits', 'Visits'], ['health', 'Bot health'], ['bdata', "BEV's data"],
+  ['check', 'Connection check'], ['premium', 'Premium and payments'], ['admins', 'Site admins'],
+];
+const ADMIN_SECTION_KEYS = new Set(ADMIN_SECTIONS.map(([k]) => k));
+const PERM_LEVELS = ['off', 'view', 'full'];
+// Until a manager changes it, admins can use what they always could; Premium and payments start hidden from them.
+const PERM_DEFAULT = { premium: 'off' };
+
+function adminPermsFor(c, s, id) {
+  if (ADMIN_MANAGER_IDS.includes(String(id))) return Object.fromEntries(ADMIN_SECTIONS.map(([k]) => [k, 'full']));
+  const saved = (s.site && s.site.adminPerms && s.site.adminPerms.perms && s.site.adminPerms.perms[String(id)]) || {};
+  return Object.fromEntries(ADMIN_SECTIONS.map(([k]) => [k, PERM_LEVELS.includes(saved[k]) ? saved[k] : (PERM_DEFAULT[k] || 'full')]));
+}
+
+function adminSectionOf(path) {
+  if (path.startsWith('/api/admin/inbox')) return 'inbox';
+  if (path.startsWith('/api/admin/suggestions')) return 'suggestions';
+  if (path.startsWith('/api/admin/support')) return 'support';
+  if (path.startsWith('/api/admin/features')) return 'feats';
+  if (path === '/api/admin/maintenance') return 'maint';
+  if (path.startsWith('/api/admin/alert')) return 'alert';
+  if (path === '/api/admin/banner') return 'bann';
+  if (path === '/api/admin/health') return 'health';
+  if (path.startsWith('/api/admin/data') || path.startsWith('/api/admin/backup')) return 'bdata';
+  if (path === '/api/admin/check') return 'check';
+  if (path.startsWith('/api/admin/premium')) return 'premium';
+  if (path === '/api/admin/admins' || path === '/api/admin/perms') return 'admins';
+  return null;
+}
+
+async function changeAdminPerms(request, env, c, s) {
+  const me = String(s.session.user.id);
+  if (!ADMIN_MANAGER_IDS.includes(me)) return json({ error: 'not_manager' }, 403);
+  if (!database(env)) return json({ error: 'no_database' }, 503);
+  const body = await readJson(request, 4000);
+  const id = body && String(body.id || '');
+  if (!ID_RE.test(id || '') || !c.adminIds.includes(id)) return json({ error: 'not_admin' }, 400);
+  if (ADMIN_MANAGER_IDS.includes(id)) return json({ error: 'manager_has_all' }, 400);
+  const changes = body.perms && typeof body.perms === 'object' ? body.perms : {};
+  const all = structuredClone((s.site.adminPerms && s.site.adminPerms.perms) || {});
+  const mine = { ...(all[id] || {}) };
+  for (const [k, v] of Object.entries(changes)) {
+    if (!ADMIN_SECTION_KEYS.has(k) || !PERM_LEVELS.includes(v)) return json({ error: 'bad_request' }, 400);
+    mine[k] = v;
+  }
+  all[id] = mine;
+  try {
+    await saveSetting(env, 'adminPerms', { perms: all }, `${s.session.user.name} (${me})`);
+  } catch {
+    return json({ error: 'database_error' }, 503);
+  }
+  s.site = await loadSite(env);
+  return json(await adminState(env, c, s, s.site));
+}
+
 /* ---------- entry ---------- */
 
 export default {
@@ -1848,13 +2284,16 @@ export default {
       const admin = !!session && c.adminIds.includes(String(session.user.id));
       const s = { site, session, admin, down: maintenanceOn(site.maintenance) };
 
+      // Payment providers telling BEV about a subscription: checked against the provider itself, so they skip sign-in.
+      if (path === '/api/stripe/webhook' && request.method === 'POST') return withSecurity(await stripeWebhook(request, env, c));
+      if (path === '/api/paypal/webhook' && request.method === 'POST') return withSecurity(await paypalWebhook(request, env, c));
       if (path.startsWith('/api/admin/')) return withSecurity(await adminApi(request, env, c, url, secure, s));
       if (s.down && !admin && path !== '/api/me') {
         if (path.startsWith('/api/')) return withSecurity(json({ error: 'maintenance' }, 503));
         return maintenancePage(site.maintenance, request.method);
       }
       if (path === '/api/updates') return withSecurity(await updatesApi(request, env, url, s));
-      if (path.startsWith('/api/')) return withSecurity(await api(request, c, url, secure, s));
+      if (path.startsWith('/api/')) return withSecurity(await api(request, c, url, secure, s, env));
       if (DASHBOARD_PATHS.has(path)) return await dashboardPage(request, env, ctx, c, secure, s);
       if (ADMIN_PATHS.has(path)) return await adminPage(request, env, ctx, secure, s);
       // A bracket's page: /bracket/<server>/<bracket> shows bracket.html, which loads the bracket itself.

@@ -445,6 +445,7 @@
     sw.classList.add('fsw');
     head.append(sw);
     card.append(head);
+    if (f.locked) lockPremium(card, title, f.name);
     var main = el('div', 'fmain');
     var gone = cleanupBox(f);
     if (gone) {
@@ -1584,6 +1585,22 @@
     doc.querySelectorAll('.fld[data-if]').forEach(function (w) { w.hidden = !shownNow(w); });
   }
 
+  // 4.64: something that needs Premium in this server: its name is greyed, nothing in it can be changed, and a click
+  // (or Enter on its "See Premium" link) opens the Premium page. Premium is off unless BEV's owner switched it on.
+  function lockPremium(box, nameHolder, name) {
+    box.classList.add('plocked');
+    var link = el('a', 'plock', '🔒 See Premium');
+    link.href = '/premium';
+    link.setAttribute('aria-label', name + ' needs Premium. See Premium');
+    nameHolder.append(link);
+    box.querySelectorAll('input, select, textarea, button').forEach(function (n) { n.tabIndex = -1; n.setAttribute('aria-disabled', 'true'); });
+    box.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      root.location.assign('/premium');
+    }, true);
+  }
+
   function fieldFor(s) {
     var wrap = el('div', 'fld');
     wrap.setAttribute('data-key', s.key);
@@ -1593,6 +1610,7 @@
     wrap.append(label);
     if (s.help) wrap.append(el('p', 'help', s.help));
     wrap.append(control(s, id, function () { return state.draft.settings[s.key]; }, function (v) { set(s.key, v); }, wrap));
+    if (s.locked) lockPremium(wrap, label, s.label);
     var err = el('p', 'ferr');
     err.hidden = true;
     wrap.append(err);
