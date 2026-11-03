@@ -59,7 +59,7 @@
     box.replaceChildren();
     var me = data.me;
     if (me && me.has) {
-      var until = me.until ? new Date(me.until * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      var until = me.until && me.until < 253402300000 ? new Date(me.until * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
       box.append(el('p', 'fnote ok', '💎 You have Premium' + (until ? (me.status === 'canceled' || me.status === 'cancelled' ? ' until ' : ', renewing on ') + until : '') + '.'));
       if (me.servers && me.servers.length) box.append(el('p', 'fnote', 'It covers: ' + me.servers.map(function (g) { return g.name; }).join(', ') + '.'));
       else box.append(el('p', 'fnote', 'It covers every server you own that has BEV. You don’t own one with BEV yet.'));

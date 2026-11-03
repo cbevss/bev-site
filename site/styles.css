@@ -1816,9 +1816,11 @@ input.field[type=color]{width:64px;height:44px;padding:4px;cursor:pointer}
 .pay2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
 .payc{border:1px solid var(--line);border-radius:14px;padding:14px 16px}
 .payc h3{margin:0 0 6px}
-.steps{margin:0;padding-left:1.3em;display:grid;gap:8px}
-.steps li{overflow-wrap:anywhere}
-.steps li.done::marker{content:"✅ "}
+.paysteps{margin:0;padding-left:1.4em;display:grid;gap:10px}
+.paysteps li{display:list-item;overflow-wrap:anywhere;color:var(--mut);line-height:1.5}
+.paysteps li b,.paysteps li code{color:var(--ink)}
+.paysteps li.done::marker{content:"✅ "}
+.pgforever{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
 .copyme{display:inline-block;max-width:100%;overflow-wrap:anywhere;padding:1px 6px;border-radius:6px;background:rgba(2,4,10,.6)}
 .ptiers{display:grid;gap:6px;margin-top:10px}
 .ptcat{margin:12px 0 2px;font-size:1rem}
@@ -1829,3 +1831,10 @@ input.field[type=color]{width:64px;height:44px;padding:4px;cursor:pointer}
 .permrow{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .permrow select{max-width:12em}
 .stat.goodon{background:rgba(59,165,93,.22);color:#B9F5C9}
+
+/* no up/down arrows on number boxes (type the number instead) */
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.pdel{margin-left:auto;flex:0 0 auto;min-width:34px;height:34px;padding:0 10px;border:1px solid rgba(237,66,69,.55);border-radius:10px;background:rgba(237,66,69,.14);color:#FF7A7C;font:inherit;font-weight:800;cursor:pointer}
+.pdel:hover,.pdel:focus-visible,.pdel.armed{background:#ED4245;color:#fff}
+.paysteps .mini{display:inline-flex;width:auto;min-width:0;margin:4px 0;padding:4px 14px}

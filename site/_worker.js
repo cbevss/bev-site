@@ -929,7 +929,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=c90dd3ab6d">
+<link rel="stylesheet" href="/styles.css?v=4aa14ccc6b">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1852,6 +1852,7 @@ async function adminSupport(request, c, s, path) {
 // (so a faked webhook can't give anyone Premium) and tells the bot how long that person's Premium runs.
 
 const PREMIUM_PATHS = new Set(['/premium']);
+const PREMIUM_FOREVER = 253402300799;
 let premiumMemo = { at: 0, value: null };
 
 function payConfig(env) {
@@ -2138,11 +2139,14 @@ async function adminPremium(request, env, c, s, url, path) {
   }
   if (path === '/api/admin/premium/gift') {
     const id = String(body.user_id || '');
-    const days = Number(body.days);
+    const forever = body.forever === true;
+    const days = forever ? 1 : Number(body.days);
     if (!ID_RE.test(id) || !Number.isInteger(days) || days < 0 || days > 3660) return json({ error: 'bad_request' }, 400);
-    const until = days ? Date.now() / 1000 + days * 86400 : 0;
+    // "Until I take it away": the last second of the year 9999, which the bot also treats as never ending.
+    const until = forever ? PREMIUM_FOREVER : days ? Date.now() / 1000 + days * 86400 : 0;
+    const what = forever ? 'Given until taken away' : days ? `Given for ${days} days` : 'Taken away';
     const ok = await grantPremium(c, { user_id: id, until, plan: 'gift', source: 'admin', status: days ? 'gift' : 'removed',
-      note: `${days ? `Given for ${days} days` : 'Taken away'} by ${s.session.user.name} (${s.session.user.id})` });
+      note: `${what} by ${s.session.user.name} (${s.session.user.id})` });
     if (!ok) return json({ error: 'bot_error' }, 502);
     return answer(await load());
   }

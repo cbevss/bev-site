@@ -271,9 +271,25 @@
     $('pcount').textContent = '(' + active.length + ' now)';
     (p.people || []).forEach(function (x) {
       var li = make('li', 'adm');
-      var when = x.until ? new Date(x.until * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      var forever = x.until >= 253402300000;
+      var when = forever ? 'you take it away' : x.until ? new Date(x.until * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       li.appendChild(make('b', null, x.user_id));
       li.appendChild(make('span', null, ' ' + (x.active ? '✅ until ' : 'ended ') + when + ' • ' + (x.plan || '') + (x.source ? ' via ' + x.source : '') + (x.note ? ' • ' + x.note : '')));
+      if (x.active) {
+        var del = make('button', 'pdel', '✕');
+        del.type = 'button';
+        del.title = 'Take Premium away';
+        del.setAttribute('aria-label', 'Take Premium away from ' + x.user_id);
+        del.addEventListener('click', function () {
+          if (!del.classList.contains('armed')) {
+            del.classList.add('armed'); del.textContent = 'Click again to take it away';
+            root.setTimeout(function () { del.classList.remove('armed'); del.textContent = '✕'; }, 6000);
+            return;
+          }
+          premiumPost('/api/admin/premium/gift', { user_id: x.user_id, days: 0 }, 'pgnote', '✅ Taken away from ' + x.user_id + '.');
+        });
+        li.appendChild(del);
+      }
       list.appendChild(li);
     });
     if (!(p.people || []).length) list.appendChild(make('li', 'empty', 'Nobody yet.'));
@@ -359,12 +375,27 @@
     if (!arm($('ptreset'), 'Click again to undo your changes')) return;
     premiumPost('/api/admin/premium/set', { reset_tiers: true }, 'ptnote', '✅ Back to BEV\'s suggested split.');
   });
-  $('pgive').addEventListener('click', function () {
-    var id = $('pgid').value.trim(), days = parseInt($('pgdays').value, 10);
-    if (!/^\d{5,25}$/.test(id)) { $('pgnote').textContent = 'Paste their Discord user ID (only numbers).'; return; }
-    if (!(days >= 0 && days <= 3660)) { $('pgnote').textContent = 'Pick 0 to 3660 days.'; return; }
-    premiumPost('/api/admin/premium/gift', { user_id: id, days: days }, 'pgnote', days ? '✅ Given for ' + days + ' days.' : '✅ Taken away.');
+  function giftId() {
+    var id = $('pgid').value.trim();
+    if (!/^\d{5,25}$/.test(id)) { $('pgnote').textContent = 'Paste their Discord user ID (only numbers).'; return null; }
+    return id;
+  }
+  $('pgforever').addEventListener('change', function () {
+    $('pgdays').disabled = this.checked;
+    $('pgdays').hidden = $('pgdaysl').hidden = this.checked;
   });
+  $('pgive').addEventListener('click', function () {
+    var id = giftId();
+    if (!id) return;
+    if ($('pgforever').checked) {
+      premiumPost('/api/admin/premium/gift', { user_id: id, forever: true }, 'pgnote', '✅ Given until you take it away.');
+      return;
+    }
+    var days = parseInt($('pgdays').value, 10);
+    if (!(days >= 1 && days <= 3660)) { $('pgnote').textContent = 'Pick 1 to 3660 days, or tick Until I take it away.'; return; }
+    premiumPost('/api/admin/premium/gift', { user_id: id, days: days }, 'pgnote', '✅ Given for ' + days + ' day' + (days === 1 ? '' : 's') + '.');
+  });
+
   $('ppplans').addEventListener('click', function () {
     premiumPost('/api/admin/premium/paypal-plans', {}, 'pchecknote', '✅ PayPal plans made: £5 a month and £54 a year.');
   });
@@ -376,8 +407,10 @@
       var ul = $('pchecks');
       ul.textContent = '';
       res.data.checks.forEach(function (c) {
-        var li = make('li', c.ok ? 'ok' : 'bad');
-        li.append(make('b', null, (c.ok ? '✅ ' : '❌ ') + c.label), make('span', null, ' ' + c.detail));
+        var li = make('li', c.ok ? 'good' : 'bad');
+        var body = make('div');
+        body.append(make('b', null, c.label + (c.ok ? ': working' : ': needs setting up')), make('p', null, c.detail));
+        li.append(make('span', 'ic', c.ok ? '✅' : '❌'), body);
         ul.appendChild(li);
       });
       ul.hidden = false;
