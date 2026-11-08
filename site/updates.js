@@ -7,6 +7,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.66',
+    date: '8 November 2026',
+    changes: [
+      { title: 'Anti-Link now works with GIF perms',
+        text: 'With GIF perms locked behind a level, GIF links from allowed websites (like Tenor) and GIF uploads are removed when the sender doesn\'t have the GIF role. Choose what happens to them: delete, warn, time out, jail or ban. Links that aren\'t allowed are still punished even if they are GIFs, and that punishment can now also be kick, jail or ban.' },
+      { title: 'Nicer live stream alerts',
+        text: 'Stream alerts now show the streamer\'s picture and name at the top, the stream title, what they\'re playing, how many are watching and when they started, with the live preview underneath and the Watch now button kept. BEV updates the alert once, about 5 minutes after posting, with a fresh preview and viewer count.' },
+    ],
+  },
+  {
     id: '4.65',
     date: '3 November 2026',
     changes: [

@@ -29,11 +29,13 @@
   - Setting: Lockdown ends. When a lockdown ends by itself Choices: After 10 minutes, After 30 minutes, After 1 hour, After 3 hours, Only when unlocked.
 - Anti-Link Filter (also called: link blocker, invite blocker, block Discord invites, anti-advertising): Removes links that members post, so nobody can spam invites, scams or ads. Allow certain websites, or only block Discord invites. Page: https://bevbotdiscord.com/features/anti-link
   - Setting: What to block. Choices: All links, Only Discord invites.
-  - Setting: When a link is found. Choices: Delete the message, Delete and warn them, Delete and time out for 10 minutes.
+  - Setting: When a link is found. Choices: Delete the message, Delete and warn them, Delete and time out for 10 minutes, Delete and kick, Delete and jail, Delete and ban.
   - Setting: Allowed websites. Websites members may still link to
   - Setting: Channels where links are fine. Links are never removed here
   - Setting: Roles that may post links. Members with these roles can post links
   - Setting: Test mode: only log what BEV would do. Nothing is deleted and nobody is punished. Each match goes to your log channel, so you can tune the settings first
+  - Setting: GIFs need GIF perms. Needs Leveling's "Unlock GIF perms at a level". Members without the GIF role can't post GIFs, even from allowed websites
+  - Setting: When someone without GIF perms posts a GIF. Choices: Delete the message, Delete and warn them, Delete and time out for 10 minutes, Delete and jail them, Delete and ban them.
 - Anti-Spam (also called: anti-spam, spam filter, mention spam, flood protection, caps filter): Catches message floods, copy-pasted spam, mass pings, walls of capitals, emoji spam and glitchy text. Also reports ghost pings. Page: https://bevbotdiscord.com/features/anti-spam
   - Setting: Messages allowed in the window. Choices: 4 messages, 5 messages, 6 messages, 8 messages, 10 messages.
   - Setting: Time window. Choices: 3 seconds, 5 seconds, 8 seconds, 10 seconds.
