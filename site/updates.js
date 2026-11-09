@@ -12,8 +12,10 @@ window.BEV_UPDATES = [
     changes: [
       { title: 'Anti-Link now works with GIF perms',
         text: 'With GIF perms locked behind a level, GIF links from allowed websites (like Tenor) and GIF uploads are removed when the sender doesn\'t have the GIF role. Choose what happens to them: delete, warn, time out, jail or ban. Links that aren\'t allowed are still punished even if they are GIFs, and that punishment can now also be kick, jail or ban.' },
+      { title: 'Stream ended, with stats',
+        text: 'When a stream ends, the alert changes to say the live has ended and shows how long they streamed, peak and average viewers, what they played, when they went live and ended, and how many times the title changed. You can choose to leave the alert as it is or delete it instead.' },
       { title: 'Live viewer counts on stream alerts',
-        text: 'Choose how often BEV updates a live alert\'s viewer count and preview, from every 30 seconds to every 10 minutes (or just once). Find it in Live Stream Alerts on the dashboard. When there\'s no live preview, the streamer\'s profile picture is shown big instead.' },
+        text: 'Choose how often BEV updates a live alert\'s viewer count and title, from every 30 seconds to every 10 minutes (or just once). The live preview picture is updated once, 3 minutes after the stream starts, then left alone so it doesn\'t flicker. Find it in Live Stream Alerts on the dashboard. When there\'s no live preview, the streamer\'s profile picture is shown big instead.' },
       { title: 'Nicer live stream alerts',
         text: 'Stream alerts now show the streamer\'s picture and name at the top, the stream title, what they\'re playing, how many are watching and when they started, with the live preview underneath and the Watch now button kept. BEV updates the alert once, about 5 minutes after posting, with a fresh preview and viewer count.' },
     ],
