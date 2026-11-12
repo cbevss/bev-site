@@ -269,7 +269,7 @@
   - Setting: Staff approve confessions first.
 - Join-to-Create Voice Rooms (also called: join to create, join-to-create, temporary voice channels, temp VC, auto voice channels, private voice rooms, dynamic voice): Joining the 'Create a room' voice channel gives you your own room that you can rename, lock or limit with /voice. It deletes itself when empty. Page: https://bevbotdiscord.com/features/temp-voice
   - Setting: 'Create a room' channel.
-  - Setting: Category for rooms.
+  - Setting: Category for 'Create a room'. Where BEV puts the 'Create a room' channel when it sets this up. Rooms always open right underneath 'Create a room'.
   - Setting: Room name.
   - Setting: Default member limit. Choices: No limit, 2 people, 3 people, 4 people, 5 people, 10 people.
 - Activity Statistics (also called: activity tracking, message stats, most active, server activity): Tracks messages per day, the busiest channels and hours, top chatters and voice time, shown with /activity. Page: https://bevbotdiscord.com/features/activity
@@ -490,11 +490,14 @@
 - /giveaway: Start, end and reroll giveaways that members enter with a button.
 - /hideme: Hide yourself from this server's leaderboards, or show yourself again.
 - /highlight: Get a DM when someone says your words.
+- /invite: Invite someone into your voice room.
 - /invites: See how many people you've invited and the server's invite leaderboard.
 - /marry: Propose to another member. They have to accept.
 - /my-birthday: Save or remove your birthday so the server can celebrate it with you.
 - /poll: Create a poll with buttons, a timer and live results.
+- /private: Make your voice room invite-only again.
 - /profile: Show your profile card, or someone else's: bio, level, coins, rep, badges and partner.
+- /public: Open your voice room to everyone.
 - /rep: Give another member a reputation point.
 - /report: Report a member to the staff privately, with a reason.
 - /roleplay: Post as roleplay characters: save a character with a tag, then start messages with that tag.

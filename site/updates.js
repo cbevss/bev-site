@@ -7,6 +7,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.67',
+    date: '12 November 2026',
+    changes: [
+      { title: 'Voice rooms: invite-only, with /invite, /public and /private',
+        text: 'New voice rooms open right underneath the Create a room channel, in its category. They start private: people with the Verified role (or everyone, if there\'s no Verified role) can see the room and who\'s in it, with a lock, but can\'t join. The owner uses /invite to let someone in, /public to open it up and /private to lock it again. BEV posts a panel in the room\'s chat listing the commands.' },
+    ],
+  },
+  {
     id: '4.66',
     date: '8 November 2026',
     changes: [
