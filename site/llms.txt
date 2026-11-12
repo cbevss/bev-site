@@ -424,6 +424,7 @@
   - Setting: DJ role. Optional. If set, only admins and this role can skip, stop or change other people's songs
   - Setting: Longest queue.
   - Setting: Longest song (minutes).
+  - Setting: Stay in a voice channel 24/7. Optional. BEV joins this voice channel and stays there, even when nothing is playing. It comes back on its own if it's disconnected.
   - Setting: Vote to skip. People who can't skip on their own vote instead. The song is skipped when half the listeners have voted
   - Setting: Song-request channel. Anything typed here is searched and added to the queue, like /music play. Leave empty for none
   - Setting: Most songs one person can queue. 0 means no limit. Stops one person filling the whole queue

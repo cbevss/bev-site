@@ -7,6 +7,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.68',
+    date: '12 November 2026',
+    changes: [
+      { title: 'Music Player: stay in a voice channel 24/7',
+        text: 'Pick a voice channel under Music Player on the dashboard and BEV joins it and stays, even when nothing is playing. It comes back on its own within about 30 seconds if it gets disconnected.' },
+      { title: 'Music and radio sound fix',
+        text: 'Discord now only lets apps be heard in calls if they support its voice encryption. BEV now installs what it needs for that, and the Now playing message warns you if it\'s still missing.' },
+    ],
+  },
+  {
     id: '4.67',
     date: '12 November 2026',
     changes: [
