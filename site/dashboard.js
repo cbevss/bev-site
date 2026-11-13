@@ -3272,10 +3272,18 @@
     var q = words.join(' ');
     if (q.length < 3) return [];
     var hits = [];
+    var fieldText = function (f) {
+      var label = f.querySelector('.flabel');
+      return ((label ? label.textContent : '') + ' ' + ((f.querySelector('.help') || {}).textContent || '')).toLowerCase();
+    };
+    var fuzzyFind = !Array.prototype.some.call(doc.querySelectorAll('.feat:not([hidden]) .fld'), function (f) {
+      var t = fieldText(f);
+      return words.every(function (w) { return t.indexOf(w) !== -1; });
+    });
     doc.querySelectorAll('.feat:not([hidden]) .fld').forEach(function (f) {
       var label = f.querySelector('.flabel');
       var text = ((label ? label.textContent : '') + ' ' + ((f.querySelector('.help') || {}).textContent || '')).toLowerCase();
-      if (!words.every(function (w) { return text.indexOf(w) !== -1; })) return;
+      if (!words.every(function (w) { return fuzzyFind ? fuzzyHas(text, w) : text.indexOf(w) !== -1; })) return;
       f.classList.add('findhit');
       hits.push(f);
       var d = f.closest('details.fset');
@@ -4771,11 +4779,22 @@
       var q = words(query);
       list.replaceChildren();
       shown = [];
+      function exact(o) {
+        var text = o.textContent, group = o.parentNode && o.parentNode.tagName === 'OPTGROUP' ? o.parentNode.label : '';
+        return words(text).indexOf(q) !== -1 || text.toLowerCase().indexOf(q) !== -1 || words(group).indexOf(q) !== -1;
+      }
+      function close(o) {     // typo-tolerant, used only when nothing matches as typed
+        var group = o.parentNode && o.parentNode.tagName === 'OPTGROUP' ? o.parentNode.label : '';
+        var hay = (o.textContent + ' ' + group).toLowerCase();
+        return q.split(/\s+/).filter(Boolean).every(function (w) { return fuzzyHas(hay, w); });
+      }
+      var usable = Array.prototype.filter.call(sel.options, function (o) { return !o.hidden && !isPrompt(o); });
+      var test = !q ? null : (usable.some(exact) ? exact : close);
       Array.prototype.forEach.call(sel.options, function (o) {
         if (o.hidden || isPrompt(o)) return;
+        if (test && !test(o)) return;
         var text = o.textContent;
         var group = o.parentNode && o.parentNode.tagName === 'OPTGROUP' ? o.parentNode.label : '';
-        if (q && words(text).indexOf(q) === -1 && text.toLowerCase().indexOf(q) === -1 && words(group).indexOf(q) === -1) return;
         var li = el('li', 'ssopt' + (o.disabled ? ' off' : '') + (o.selected ? ' on' : ''));
         li.id = list.id + '-' + shown.length;
         li.setAttribute('role', 'option');
