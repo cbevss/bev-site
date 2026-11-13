@@ -10,8 +10,10 @@ window.BEV_UPDATES = [
     id: '4.68',
     date: '12 November 2026',
     changes: [
-      { title: 'Music Player: stay in a voice channel 24/7',
-        text: 'Pick a voice channel under Music Player on the dashboard and BEV joins it and stays, even when nothing is playing. It comes back on its own within about 30 seconds if it gets disconnected.' },
+      { title: 'New feature: 24/7 Voice',
+        text: 'Pick a voice channel on the new 24/7 Voice card and press Join VC: BEV joins it and stays, even when nothing is playing, and comes back on its own if it gets disconnected. Members can still use /music in other channels: BEV goes there for the music and comes back afterwards.' },
+      { title: 'Search copes with typos',
+        text: 'The search boxes on the dashboard and the Features page still find what you meant when you make a typo, so "mudic" finds Music.' },
       { title: 'Music and radio sound fix',
         text: 'Discord now only lets apps be heard in calls if they support its voice encryption. BEV now installs what it needs for that, and the Now playing message warns you if it\'s still missing.' },
     ],

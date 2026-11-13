@@ -7,9 +7,43 @@
   var doc = root.document;
   if (!doc) return;
 
+  /* Typo-tolerant search: a word that isn't found as typed still matches a word in the text that's one letter off
+   * (two for long words), or the start of one, so "mudic" finds Music. Used only when nothing matches exactly. */
+  function editDistance(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    var pp = null, prev = [], cur, i, j;
+    for (j = 0; j <= b.length; j++) prev[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      cur = [i];
+      var best = i;
+      for (j = 1; j <= b.length; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (pp && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) cur[j] = Math.min(cur[j], pp[j - 2] + 1);   // swapped letters
+        if (cur[j] < best) best = cur[j];
+      }
+      if (best > max) return max + 1;
+      pp = prev; prev = cur;
+    }
+    return prev[b.length];
+  }
+  function fuzzyHas(text, word) {
+    if (text.indexOf(word) !== -1) return true;
+    if (word.length < 4) return false;
+    var max = word.length >= 7 ? 2 : 1;
+    var tokens = text.split(/[^a-z0-9]+/);
+    for (var k = 0; k < tokens.length; k++) {
+      var t = tokens[k];
+      if (t.length < 3) continue;
+      if (editDistance(word, t, max) <= max) return true;
+      if (t.length > word.length && editDistance(word, t.slice(0, word.length), max) <= max) return true;
+    }
+    return false;
+  }
+
+  var fuzzy = false;
   function matches(card, words) {
     var text = card.getAttribute('data-search') || '';
-    return words.every(function (w) { return text.indexOf(w) !== -1; });
+    return words.every(function (w) { return fuzzy ? fuzzyHas(text, w) : text.indexOf(w) !== -1; });
   }
 
   function boot() {
@@ -25,6 +59,9 @@
 
     function apply() {
       var words = box.value.toLowerCase().replace(/^\//, '').split(/\s+/).filter(Boolean);
+      fuzzy = false;
+      var anyExact = !words.length || Array.prototype.some.call(doc.querySelectorAll('.csec .cmd, .fsec .cmd'), function (c) { return matches(c, words); });
+      fuzzy = !anyExact;
       var shown = 0;
       var shownFeatures = 0;
       sections.forEach(function (sec) {

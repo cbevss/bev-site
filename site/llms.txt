@@ -424,7 +424,6 @@
   - Setting: DJ role. Optional. If set, only admins and this role can skip, stop or change other people's songs
   - Setting: Longest queue.
   - Setting: Longest song (minutes).
-  - Setting: Stay in a voice channel 24/7. Optional. BEV joins this voice channel and stays there, even when nothing is playing. It comes back on its own if it's disconnected.
   - Setting: Vote to skip. People who can't skip on their own vote instead. The song is skipped when half the listeners have voted
   - Setting: Song-request channel. Anything typed here is searched and added to the queue, like /music play. Leave empty for none
   - Setting: Most songs one person can queue. 0 means no limit. Stops one person filling the whole queue
@@ -457,6 +456,8 @@
 - Automations (also called: automation, workflows, triggers and actions, if this then that, auto roles on level, rule builder, no-code automations): Build your own rules without code: when someone joins, reaches a level, says a word, gets a role or boosts, BEV can do up to three things (give or take a role, give coins, post a message or DM them), straight away or after a wait, only if they pass the checks you choose. Every run is kept in Recent runs. Page: https://bevbotdiscord.com/features/automations
   - Setting: Rules. Each has: Name (only admins see it), When, Level, Word or phrase, Role, Only if, Role to check, Days or level, And only if, Role to check, Days or level, Then, Role, Coins, Channel, Message, Step 2: then also, Step 2: when, Step 2: role, Step 2: coins, Step 2: channel, Step 2: message, Step 3: then also, Step 3: when, Step 3: role, Step 3: coins, Step 3: channel, Step 3: message.
 - Insights (also called: server analytics, statistics, server stats charts, growth, retention, member growth, analytics dashboard): Charts of how your server is doing: members, joins and leaves, how many new members stay, messages and active members, moderation, how fast staff answer tickets and the coins in circulation. Over 7, 30 or 90 days. Page: https://bevbotdiscord.com/features/insights
+- 24/7 Voice: BEV sits in a voice channel of your choice around the clock, even when nothing is playing, and comes back on its own if it's disconnected. Members can still use /music or /radio in other channels: BEV goes there for it, then comes back. Page: https://bevbotdiscord.com/features/stay-vc
+  - Setting: Voice channel. Pick a voice channel, then press Join VC.
 
 ## Dashboard tools
 

@@ -87,6 +87,39 @@
     return mark + c.name + (c.category && c.type !== 'category' ? '  (' + c.category + ')' : '');
   }
 
+  /* Typo-tolerant search: a word that isn't found as typed still matches a word in the text that's one letter off
+   * (two for long words), or the start of one, so "mudic" finds Music. Used only when nothing matches exactly. */
+  function editDistance(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    var pp = null, prev = [], cur, i, j;
+    for (j = 0; j <= b.length; j++) prev[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      cur = [i];
+      var best = i;
+      for (j = 1; j <= b.length; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (pp && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) cur[j] = Math.min(cur[j], pp[j - 2] + 1);   // swapped letters
+        if (cur[j] < best) best = cur[j];
+      }
+      if (best > max) return max + 1;
+      pp = prev; prev = cur;
+    }
+    return prev[b.length];
+  }
+  function fuzzyHas(text, word) {
+    if (text.indexOf(word) !== -1) return true;
+    if (word.length < 4) return false;
+    var max = word.length >= 7 ? 2 : 1;
+    var tokens = text.split(/[^a-z0-9]+/);
+    for (var k = 0; k < tokens.length; k++) {
+      var t = tokens[k];
+      if (t.length < 3) continue;
+      if (editDistance(word, t, max) <= max) return true;
+      if (t.length > word.length && editDistance(word, t.slice(0, word.length), max) <= max) return true;
+    }
+    return false;
+  }
+
   function searchText(feature) {
     return [feature.name, feature.about, feature.command || '', (feature.member_commands || []).join(' ')]
       .concat((feature.settings || []).map(function (s) { return s.label + ' ' + (s.help || ''); })).join(' ').toLowerCase();
@@ -528,6 +561,7 @@
       var fields = el('div', 'fields');
       var making = (f.actions || []).find(function (a) { return a && a.key === 'level_roles'; });
       if (f.key === 'jail' && Array.isArray(f.jailed)) fields.append(jailList(f));
+      if (f.key === 'stay_vc') fields.append(stayVcButton());
       f.settings.forEach(function (s) {
         if (making && s.key === 'level_rewards') fields.append(levelRolesBox(making));
         var field = fieldFor(s);
@@ -563,6 +597,36 @@
   }
 
   // Jail: everyone in jail, each with a Free button.
+  // 24/7 Voice: "Join VC" uses the channel picked in the dropdown (saved or not); with none picked it says so under the button.
+  function stayVcButton() {
+    var box = el('div', 'stayvc');
+    var b = el('button', 'act', '🔊 Join VC');
+    b.type = 'button';
+    var note = el('p', 'fnote');
+    note.setAttribute('role', 'status');
+    note.hidden = true;
+    function show(ok, text) { note.hidden = false; note.className = 'fnote ' + (ok ? 'ok' : 'no'); note.textContent = text; }
+    b.addEventListener('click', function () {
+      var channel = state.draft.settings.stay_vc_channel;
+      if (!channel) { show(false, '❌ Pick a voice channel in the dropdown above first.'); return; }
+      b.disabled = true;
+      var guild = state.guild;
+      request('/api/action', {
+        method: 'POST',
+        headers: { accept: 'application/json', 'content-type': 'application/json' },
+        body: JSON.stringify({ guild_id: guild, owner: 'stay_vc', action: 'join', values: { channel: String(channel) } })
+      }).then(function (r) {
+        if (guild !== state.guild) return;
+        b.disabled = false;
+        var ok = r.status === 200 && r.data && r.data.ok;
+        show(ok, ok ? (r.data.note || 'Done.') : ('❌ ' + ((r.data && r.data.message) || errorText(r))));
+        if (ok) say(note.textContent);
+      });
+    });
+    box.append(b, note);
+    return box;
+  }
+
   function jailList(f) {
     var box = el('div', 'jlist');
     box.id = 'jlist';
@@ -3223,11 +3287,13 @@
   function applyFind() {
     var words = $('find').value.toLowerCase().split(/\s+/).filter(Boolean);
     var shown = 0;
+    var exactOk = function (text) { return words.every(function (w) { return text.indexOf(w) !== -1; }); };
+    var fuzzy = !Array.prototype.some.call(doc.querySelectorAll('.dsec .feat'), function (c) { return exactOk(c.getAttribute('data-search') || ''); });
     doc.querySelectorAll('.dsec').forEach(function (sec) {
       var visible = 0;
       sec.querySelectorAll('.feat').forEach(function (card) {
         var text = card.getAttribute('data-search') || '';
-        var ok = words.every(function (w) { return text.indexOf(w) !== -1; });
+        var ok = fuzzy ? words.every(function (w) { return fuzzyHas(text, w); }) : exactOk(text);
         card.hidden = !ok;
         if (ok) visible++;
       });
