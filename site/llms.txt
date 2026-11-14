@@ -392,7 +392,7 @@
   - Setting: Wait between trips. Choices: 5 minutes, 10 minutes, 30 minutes, 1 hour.
 - Mini-Games & Trivia (also called: trivia, mini-games, hangman, wordle, tic tac toe): Tic-tac-toe, Connect Four, hangman, a word game, duels and trivia with /game. Page: https://bevbotdiscord.com/features/minigames
   - Setting: Coins for a right trivia answer.
-- Fun Commands (also called: fun commands, memes, 8ball, jokes, hug, slap): 8-ball, would-you-rather, truth or dare, memes, roleplay actions with anime GIFs (hug, pat, kiss, slap and more) with /fun, and picture edits of anyone's avatar (Wanted poster, jail bars, RIP and more) with /image. Page: https://bevbotdiscord.com/features/fun
+- Fun Commands (also called: fun commands, memes, 8ball, jokes, hug, slap): 8-ball, would-you-rather, truth or dare, memes, roleplay actions with anime GIFs (hug, pat, kiss, slap and more) with /fun, and picture edits of anyone's avatar (Wanted poster, jail bars, RIP and more) with /image. /wheel makes a spin-the-wheel to pick someone at random. Page: https://bevbotdiscord.com/features/fun
 - Trading & Market (also called: trading, marketplace, auction, trade items): Members swap coins and items safely with /trade (both have to agree), and sell items to each other on the /market. Items listed for sale are held by BEV until they're bought or taken back. Page: https://bevbotdiscord.com/features/trading
   - Setting: Market fee. Taken from what the seller gets, so coins slowly leave the economy Choices: No fee, 5% of the price, 10% of the price.
   - Setting: Items one member can have for sale.
@@ -535,6 +535,7 @@
 - /game: Play tic-tac-toe, Connect Four, hangman, a word game, duels or trivia.
 - /image: Fun picture edits of someone's avatar: Wanted poster, jail bars, RIP and more.
 - /pet: Catch pets, build a team of 3 and battle other members.
+- /wheel: Spin a wheel of names to pick someone at random.
 - /afk: Set yourself as away. Anyone who pings you is told why.
 - /ask: Ask BEV's AI assistant a question.
 - /music: Play music from Spotify, SoundCloud or YouTube, with a player to control it.

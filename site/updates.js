@@ -7,6 +7,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.69',
+    date: '13 November 2026',
+    changes: [
+      { title: 'Spin the Wheel with /wheel',
+        text: 'Use /wheel to post a wheel with a green Spin button and an Edit names button (names split by commas or new lines). Spin posts an animated wheel that spins fast, slows right down and creeps onto someone at random, then reveals the winner.' },
+    ],
+  },
+  {
     id: '4.68',
     date: '12 November 2026',
     changes: [
