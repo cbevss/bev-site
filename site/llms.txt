@@ -458,6 +458,24 @@
 - Insights (also called: server analytics, statistics, server stats charts, growth, retention, member growth, analytics dashboard): Charts of how your server is doing: members, joins and leaves, how many new members stay, messages and active members, moderation, how fast staff answer tickets and the coins in circulation. Over 7, 30 or 90 days. Page: https://bevbotdiscord.com/features/insights
 - 24/7 Voice: BEV sits in a voice channel of your choice around the clock, even when nothing is playing, and comes back on its own if it's disconnected. Members can still use /music or /radio in other channels: BEV goes there for it, then comes back. Page: https://bevbotdiscord.com/features/stay-vc
   - Setting: Voice channel. Pick a voice channel, then press Join VC.
+- Claim Button: Post a message with a button. Pressing it gives each person a message only they can see: the same one for everyone, or a different one each from a list you give (each handed out once). Choose who can claim and whether it's once per person. Page: https://bevbotdiscord.com/features/claim
+  - Setting: Channel to post in.
+  - Setting: Title.
+  - Setting: Message.
+  - Setting: Colour.
+  - Setting: Picture (optional).
+  - Setting: Button text.
+  - Setting: Button emoji. One emoji, or leave it empty.
+  - Setting: Button colour. Choices: Green, Blue, Grey, Red.
+  - Setting: What people get. Choices: The same message for everyone, A different message each, from a list (each one given once).
+  - Setting: Message they get. Only the person who pressed the button sees it. {user} is their name.
+  - Setting: Messages to give out (one per line). Each person gets the next unused line. Add more lines any time; lines already given out are never given again.
+  - Setting: Once per person.
+  - Setting: Who can claim. Leave empty to let everyone claim.
+  - Setting: Send it. Choices: As a message only they can see, In a DM.
+  - Setting: If they've already claimed.
+  - Setting: When they've all gone.
+  - Setting: If they don't have a role that can claim.
 
 ## Dashboard tools
 

@@ -7,6 +7,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.70',
+    date: '18 November 2026',
+    changes: [
+      { title: 'New feature: Claim Button',
+        text: 'Post your own message with one button (your text, emoji and colour). Pressing it gives each person a message only they can see: the same one for everyone, or a different one each from a list you give, each handed out once. Choose who can claim, whether it\'s once per person, and what it says when they\'ve all gone.' },
+    ],
+  },
+  {
     id: '4.69',
     date: '13 November 2026',
     changes: [
