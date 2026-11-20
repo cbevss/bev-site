@@ -7,6 +7,16 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.72',
+    date: '20 November 2026',
+    changes: [
+      { title: 'Member Verification: invites that skip verification',
+        text: 'The Member Verification card now lists every invite to your server, including your custom invite link, with how long each lasts, its join limit and the roles it gives. Tick the ones that should skip verification: people who join with them don\'t get the Unverified role, and can get the Verified role straight away.' },
+      { title: 'Join messages know about your custom invite link',
+        text: 'When someone joins with your server\'s custom invite link (discord.gg/yourname), the welcome message, the join log and Server Logs now say so, instead of "I couldn\'t tell who invited them".' },
+    ],
+  },
+  {
     id: '4.71',
     date: '20 November 2026',
     changes: [
