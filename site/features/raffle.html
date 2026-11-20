@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raffles | BEV Discord bot</title>
+<meta property="og:site_name" content="BEV">
+<meta property="og:title" content="Raffles | BEV Discord bot">
+<meta property="og:description" content="Raffles in BEV, the free all-in-one Discord bot: Post a raffle people join with a button, now or at a time you schedule. Make it free, cost coins, or need a level, and limit it to roles. When time&#x27;s up BEV picks a winner for each prize you list, announces what everyone won, and winners see their pri">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bevbotdiscord.com/features/raffle">
+<meta property="og:image" content="https://bevbotdiscord.com/bev-app.png">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#2563EB">
+<meta name="description" content="Raffles in BEV, the free all-in-one Discord bot: Post a raffle people join with a button, now or at a time you schedule. Make it free, cost coins, or need a level, and limit it to roles. When time&#x27;s up BEV picks a winner for each prize you list, announces what everyone won, and winners see their pri">
+<meta name="keywords" content="Raffles, Discord bot, free Discord bot, BEV">
+<link rel="canonical" href="https://bevbotdiscord.com/features/raffle">
+<link rel="icon" type="image/png" href="/bev-icon.png?v=3c7be32d19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/styles.css?v=85116958eb">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "Raffles | BEV Discord bot", "description": "Raffles in BEV, the free all-in-one Discord bot: Post a raffle people join with a button, now or at a time you schedule. Make it free, cost coins, or need a level, and limit it to roles. When time's up BEV picks a winner for each prize you list, announces what everyone won, and winners see their pri", "url": "https://bevbotdiscord.com/features/raffle", "isPartOf": {"@type": "WebSite", "name": "BEV", "url": "https://bevbotdiscord.com"}, "about": {"@type": "SoftwareApplication", "name": "BEV", "applicationCategory": "CommunicationApplication", "operatingSystem": "Discord", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "featureList": ["Raffles"]}}</script>
+</head>
+<body class="features fpage">
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="hero">
+<div class="floor" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="wrap nav">
+<a class="logo disp" href="/">BEV</a>
+<nav class="tabs" aria-label="Main">
+<a class="tab" href="/">Home</a>
+<a class="tab on" href="/features" aria-current="page">Features</a>
+<a class="tab" href="/discover">Discover</a>
+<a class="tab" href="/status.html" data-status>Status</a>
+<a class="tab" href="/support.html">Support</a>
+</nav>
+<div class="navbtns"><a class="mini join" href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <a class="mini" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to server</a> <a class="mini" id="navin" href="/auth/login">Sign in with Discord</a> <div class="acct" id="acct" hidden><span class="acctme" id="navme" hidden><span class="av xs" id="navav" aria-hidden="true"></span> <span class="accttx"><span class="acctlab">Signed in as</span> <b id="navname"></b></span></span> <button class="acctout" id="navout" type="button">Sign out</button></div></div>
+</header>
+
+<div class="wrap head">
+<nav class="crumbs rise" aria-label="Breadcrumb"><a href="/features">Features</a> › <a href="/features#dash-community">Community</a> › <span>Raffles</span></nav>
+<h1 class="disp rise d1"><span aria-hidden="true">🎟️</span> Raffles</h1>
+<p class="lead rise d2">Post a raffle people join with a button, now or at a time you schedule. Make it free, cost coins, or need a level, and limit it to roles. When time&#x27;s up BEV picks a winner for each prize you list, announces what everyone won, and winners see their prize privately.</p>
+
+</div>
+</div>
+
+<main id="main" class="wrap">
+<section class="sec">
+<div class="panel fdetail">
+<p class="lab">A free BEV dashboard feature</p>
+<p>Switch it on and set it up on the <a class="inl" href="/dashboard">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>
+
+</div>
+</section>
+<section class="sec"><h2 class="disp">Settings</h2><ul class="setlist"><li><b>Channel to post in</b> <span class="kind">(a channel)</span></li><li><b>Title</b> <span class="kind">(text)</span></li><li><b>Message</b> <span class="kind">(text)</span></li><li><b>When to post it</b> <span class="kind">(a choice)</span><br><span class="sopts">Choices: As soon as I press Start, At a date and time I pick</span></li><li><b>Post it at</b> <span class="kind">(text)</span><br><span class="shelp">Year-month-day and 24-hour time, like 2026-12-01 18:00. The raffle runs for the time below from then.</span></li><li><b>Time zone</b> <span class="kind">(text)</span><br><span class="shelp">Like Europe/London, America/New_York or UTC+1.</span></li><li><b>Runs for</b> <span class="kind">(a number)</span></li><li><b>Minutes, hours or days</b> <span class="kind">(a choice)</span><br><span class="sopts">Choices: Minutes, Hours, Days</span></li><li><b>How people enter</b> <span class="kind">(a choice)</span><br><span class="sopts">Choices: Free for everyone, Pay coins to enter, Need a minimum level, Need a level and pay coins</span></li><li><b>Coins to enter</b> <span class="kind">(a number)</span></li><li><b>Minimum level</b> <span class="kind">(a number)</span></li><li><b>Only these roles can enter</b> <span class="kind">(roles)</span><br><span class="shelp">Leave empty to let everyone enter.</span></li><li><b>Button text</b> <span class="kind">(text)</span></li><li><b>How winners get their prize</b> <span class="kind">(a choice)</span><br><span class="shelp">With DMs, anyone whose DMs are closed can still use the Claim button on the announcement.</span><br><span class="sopts">Choices: A Claim button: only the winner sees their prize, BEV DMs it to each winner</span></li><li><b>Prizes (one winner each)</b> <span class="kind">(a list)</span><br><span class="shelp">Add one prize per winner. The title shows in the announcement; the prize message is only shown to that winner.</span><br><span class="shelp">Each one has (up to 20):</span><ul class="subf"><li>Prize title</li><li>What the winner sees (private)</li></ul></li></ul></section>
+
+<section class="sec"><h2 class="disp">Related</h2><p class="relrow"><a class="pill" href="/features/tickets">🎫 Support Tickets</a> <a class="pill" href="/features/giveaways">🎁 Giveaways</a> <a class="pill" href="/features/polls">📊 Polls</a> <a class="pill" href="/features/suggestions">💡 Suggestions</a> <a class="pill" href="/features/profiles">🪪 Profiles, Marriage &amp; Rep</a> <a class="pill" href="/features/listing">🌍 Server Listing</a> <a class="pill" href="/features/proxy">🎭 Roleplay Characters</a> <a class="pill" href="/features/starboard">⭐ Starboard</a> </p></section>
+<div class="band">
+<h2 class="disp">Add BEV to your server</h2>
+<span class="ctaw"><a class="cta" href="https://discord.com/oauth2/authorize?client_id=1562204643755429980&amp;permissions=8&amp;integration_type=0&amp;scope=bot+applications.commands" target="_blank" rel="noopener noreferrer"><span class="plus"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg></span><span>Add BEV, it's free</span></a></span>
+</div>
+</main>
+
+<footer class="wrap foot">
+<div class="logo disp small">BEV</div>
+<nav class="flinks" aria-label="More links"><a href="/features.html">Commands</a> <a href="/status.html">Bot status</a> <a href="/support.html">Support</a> <a href="/suggest">Suggest an idea</a> <a href="/discover">Find a server</a> <a href="https://discord.gg/cbevs" target="_blank" rel="noopener noreferrer">Join Discord</a> <span class="appdl"><a href="/#app">Windows app</a></span></nav>
+<p>BEV is not affiliated with or endorsed by Discord.</p>
+<nav class="llinks" aria-label="Legal"><a href="/terms">Terms of Service</a> <a href="/privacy">Privacy Policy</a> <a href="mailto:bevbotsupport@gmail.com">bevbotsupport@gmail.com</a></nav>
+</footer>
+
+<script src="/updates.js?v=7edc788f33" defer></script>
+<script src="/nav.js?v=e9152278b5" defer></script>
+<script src="/supportchat.js?v=56ad3f5691" defer></script>
+<script src="/features.js?v=636af20725" defer></script>
+</body>
+</html>

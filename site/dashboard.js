@@ -1769,7 +1769,10 @@
   function shownNow(wrap) {
     var conditions = [];
     try { conditions = JSON.parse(wrap.getAttribute('data-if') || '[]'); } catch (e) { conditions = []; }
-    return conditions.every(function (c) { return String(state.draft.settings[c.key]) === String(c.value); });
+    return conditions.every(function (c) {      // a value can be a list: shown while the setting is any one of them
+      var want = Array.isArray(c.value) ? c.value : [c.value];
+      return want.some(function (v) { return String(state.draft.settings[c.key]) === String(v); });
+    });
   }
 
   function showIfs() {

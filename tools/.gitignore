@@ -1,0 +1,3 @@
+.build.db
+.check.db
+__pycache__/

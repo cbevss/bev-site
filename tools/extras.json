@@ -1,0 +1,1068 @@
+{
+ "achievements": {
+  "aliases": [
+   "achievements",
+   "badges",
+   "milestones"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/achievements</code>: See every badge and how close you (or someone else) are to each one.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"achievements\" data-name=\"Achievements &amp; Badges\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "activity": {
+  "aliases": [
+   "activity tracking",
+   "message stats",
+   "most active",
+   "server activity"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/activity</code>: See server activity: messages per day, top chatters, busiest channels and hours.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "afk": {
+  "aliases": [
+   "AFK",
+   "away status",
+   "away message"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/afk</code>: Set yourself as away. Anyone who pings you is told why.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"afk\" data-name=\"AFK Status\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "age_gate": {
+  "aliases": [
+   "account age",
+   "new account filter",
+   "alt protection",
+   "minimum account age"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "ai": {
+  "aliases": [
+   "AI chat",
+   "ask AI",
+   "chatbot",
+   "Claude",
+   "AI assistant"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/ask</code>: Ask BEV&#x27;s AI assistant a question.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "ai_mod": {
+  "aliases": [
+   "AI moderation",
+   "toxicity filter",
+   "harassment detection",
+   "smart moderation"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"ai_mod\" data-name=\"AI Moderation\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "alt_detect": {
+  "aliases": [
+   "alt account detection",
+   "alt detector",
+   "ban evasion"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"alt_detect\" data-name=\"Alt Account Detection\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "anniversaries": {
+  "aliases": [],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "anti_link": {
+  "aliases": [
+   "link blocker",
+   "invite blocker",
+   "block Discord invites",
+   "anti-advertising"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "anti_nuke": {
+  "aliases": [
+   "anti-nuke",
+   "server protection",
+   "mass ban protection",
+   "rogue admin protection",
+   "audit log watcher"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "anti_raid": {
+  "aliases": [
+   "anti-raid",
+   "raid protection",
+   "join flood",
+   "raid mode",
+   "lockdown on raid"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "anti_spam": {
+  "aliases": [
+   "anti-spam",
+   "spam filter",
+   "mention spam",
+   "flood protection",
+   "caps filter"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "applications": {
+  "aliases": [
+   "staff applications",
+   "application form",
+   "apply",
+   "recruitment"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"applications\" data-name=\"Staff Applications\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "auto_publish": {
+  "aliases": [
+   "auto publish",
+   "announcement channel crosspost",
+   "auto crosspost"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "auto_replies": {
+  "aliases": [
+   "auto responder",
+   "auto reply",
+   "trigger words",
+   "autoresponse"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"auto_replies\" data-name=\"Auto-Replies\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "auto_roles": {
+  "aliases": [
+   "autorole",
+   "auto role",
+   "join role",
+   "sticky roles",
+   "role persistence"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "automations": {
+  "aliases": [
+   "automation",
+   "workflows",
+   "triggers and actions",
+   "if this then that",
+   "auto roles on level",
+   "rule builder",
+   "no-code automations"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "automod": {
+  "aliases": [
+   "AutoMod",
+   "auto moderation",
+   "Discord AutoMod rules",
+   "keyword filter"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "backup": {
+  "aliases": [
+   "server backup",
+   "restore server",
+   "template",
+   "save channels and roles"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "ban_appeals": {
+  "aliases": [],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "ban_sync": {
+  "aliases": [
+   "ban sync",
+   "shared bans",
+   "cross-server bans",
+   "network bans"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "bev_alerts": {
+  "aliases": [
+   "status alerts",
+   "maintenance notices",
+   "bot status"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"bev_alerts\" data-name=\"BEV Status Alerts\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "birthdays": {
+  "aliases": [
+   "birthday",
+   "birthday role",
+   "birthday announcements"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/my-birthday</code>: Save or remove your birthday so the server can celebrate it with you.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"birthdays\" data-name=\"Birthdays\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "booster_role": {
+  "aliases": [
+   "booster role",
+   "custom booster role",
+   "Nitro booster perks"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "bosses": {
+  "aliases": [
+   "boss battle",
+   "raid boss",
+   "boss fight",
+   "world boss",
+   "server event",
+   "co-op battle"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "bot_profile": {
+  "aliases": [
+   "custom bot name",
+   "custom bot avatar",
+   "per-server bot profile",
+   "white label",
+   "bot nickname",
+   "custom branding"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "brackets": {
+  "aliases": [
+   "tournament bracket",
+   "brackets",
+   "single elimination",
+   "tournaments",
+   "esports bracket",
+   "tourney"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/bracket</code>: See a tournament bracket&#x27;s current standings.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "builder": {
+  "aliases": [],
+  "preview": false
+ },
+ "bump_reminder": {
+  "aliases": [
+   "bump reminder",
+   "Disboard bump",
+   "bump ping"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"bump_reminder\" data-name=\"Bump Reminder\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "changes": {
+  "aliases": [],
+  "preview": false
+ },
+ "channel_modes": {
+  "aliases": [
+   "sticky messages",
+   "media only channel",
+   "image only",
+   "auto thread",
+   "slowmode per channel"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"channel_modes\" data-name=\"Channel Modes\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "claim": {
+  "aliases": [],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "collecting": {
+  "aliases": [
+   "collectibles",
+   "cards",
+   "gacha",
+   "collection"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/collect</code>: Roll for anime and game characters and race to claim them.<ul class=\"subf\"><li>Roll button: Roll for a random character. Anyone can press Claim on one nobody has yet.</li><li>Collection button: See your collection, or someone else&#x27;s.</li><li>Give button: Give one of your characters to another member.</li></ul></li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "confessions": {
+  "aliases": [
+   "anonymous confessions",
+   "anonymous messages",
+   "confession channel"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/confess</code>: Post an anonymous confession to the server.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"confessions\" data-name=\"Anonymous Confessions\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "counting": {
+  "aliases": [
+   "counting game",
+   "count to infinity",
+   "counting channel"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"counting\" data-name=\"Counting Channel\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "crafting": {
+  "aliases": [
+   "craft",
+   "crafting system",
+   "recipes",
+   "make items",
+   "forge"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/craft</code>: Make better items out of the ones you have.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "custom_commands": {
+  "aliases": [
+   "custom commands",
+   "custom slash replies",
+   "command builder"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"custom_commands\" data-name=\"Custom Commands\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "custom_messages": {
+  "aliases": [
+   "embed builder",
+   "embed creator",
+   "embed messages",
+   "custom embeds",
+   "JSON embeds",
+   "Discohook",
+   "message builder",
+   "buttons and dropdowns"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"custom_messages\" data-name=\"Message Designer\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "dashboard_access": {
+  "aliases": [
+   "dashboard permissions",
+   "staff dashboard access",
+   "web panel access"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "economy": {
+  "aliases": [
+   "economy",
+   "coins",
+   "currency",
+   "shop",
+   "daily reward",
+   "work command",
+   "bank"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/balance</code>: Check a member&#x27;s wallet and bank, see the richest members and open the shop.</li><li><code>/bank</code>: Move coins between your wallet and the bank, where they can&#x27;t be stolen.</li><li><code>/daily</code>: Claim your daily and weekly coin rewards and keep your streak going.</li><li><code>/inventory</code>: See everything in your inventory and how many of each you have.</li><li><code>/pay</code>: Send some of your coins to another member.</li><li><code>/rob</code>: Try to steal coins from another member&#x27;s wallet. Get caught and you pay a fine.</li><li><code>/shop</code>: Browse the shop, buy roles and items, and see or use your inventory.</li><li><code>/use</code>: Use a role or boost from your inventory.</li><li><code>/work</code>: Work a shift for coins. Better jobs unlock as you level up.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "emoji": {
+  "aliases": [],
+  "preview": false
+ },
+ "events": {
+  "aliases": [
+   "events",
+   "event signups",
+   "RSVP",
+   "scheduled events"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/event</code>: Create an event with Going, Maybe and Can&#x27;t buttons and a reminder before it starts.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"events\" data-name=\"Events\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "explore": {
+  "aliases": [
+   "fishing",
+   "hunting",
+   "mining",
+   "exploring",
+   "RPG"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/explore</code>: Go fishing, hunting or mining for items you can sell for coins.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "feeds": {
+  "aliases": [
+   "YouTube notifications",
+   "Reddit feed",
+   "RSS feed",
+   "Bluesky",
+   "Mastodon",
+   "free games",
+   "Epic free games",
+   "Steam free games",
+   "social notifications"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"feeds\" data-name=\"News Feeds &amp; Free Games\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "fun": {
+  "aliases": [
+   "fun commands",
+   "memes",
+   "8ball",
+   "jokes",
+   "hug",
+   "slap"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/fun</code>: Play with the magic 8-ball, would you rather, truth or dare, hugs and high-fives.<ul class=\"subf\"><li>8ball button: Ask the magic 8-ball a yes-or-no question and get its answer.</li><li>Would you rather button: Post a would-you-rather question that everyone can vote on.</li><li>Truth or dare button: Get a truth or a dare. Press the buttons to keep the game going.</li><li>Hug button: Give another member a hug. They can hug you back.</li><li>High five button: Give another member a high-five. They can high-five you back.</li><li>Pat button: Pat another member, with an anime GIF.</li><li>Kiss button: Kiss another member, with an anime GIF.</li><li>Slap button: Slap another member, with an anime GIF.</li><li>Cuddle button: Cuddle another member, with an anime GIF.</li><li>Poke button: Poke another member, with an anime GIF.</li><li>Bite button: Bite another member, with an anime GIF.</li><li>Tickle button: Tickle another member, with an anime GIF.</li><li>Feed button: Feed another member, with an anime GIF.</li><li>Handhold button: Handhold another member, with an anime GIF.</li><li>Punch button: Punch another member, with an anime GIF.</li><li>Wave button: Wave, on your own or with someone, with an anime GIF.</li><li>Cry button: Cry, on your own or with someone, with an anime GIF.</li><li>Dance button: Dance, on your own or with someone, with an anime GIF.</li><li>Laugh button: Laugh, on your own or with someone, with an anime GIF.</li><li>Meme button: A random meme from Reddit (safe for work only), with a button for another.</li></ul></li><li><code>/image</code>: Fun picture edits of someone&#x27;s avatar: Wanted poster, jail bars, RIP and more.<ul class=\"subf\"><li>Wanted button: A Wanted poster with a coin reward, made from someone&#x27;s avatar.</li><li>Jail button: Behind bars, made from someone&#x27;s avatar.</li><li>Rip button: A gravestone, made from someone&#x27;s avatar.</li><li>Wasted button: Grey, with WASTED across it, made from someone&#x27;s avatar.</li><li>Pixel button: Turned into pixel art, made from someone&#x27;s avatar.</li></ul></li><li><code>/wheel</code>: Spin a wheel of names to pick someone at random.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "games": {
+  "aliases": [
+   "casino",
+   "blackjack",
+   "slots",
+   "roulette",
+   "coinflip",
+   "gambling games"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/bet</code>: Casino games: blackjack, slots, roulette, dice, higher-or-lower, crash and the lottery.<ul class=\"subf\"><li>Blackjack button: Play blackjack against the dealer: get closer to 21 than them without going over.</li><li>Slots button: Spin the slot machine. Three of a kind pays up to 77 times your bet.</li><li>Roulette button: Bet on a colour, odd or even, a dozen or one number, then spin the wheel.</li><li>Dice button: Bet on two dice landing over 7, under 7, exactly 7 or doubles.</li><li>Higher lower button: Guess if the next card is higher or lower to grow your pot, and cash out any time.</li><li>Crash button: Watch the multiplier climb and cash out before the rocket crashes.</li><li>Lottery button: Buy tickets for this server&#x27;s weekly lottery. One ticket wins the whole pot.</li></ul></li><li><code>/coinflip</code>: Bet coins on heads or tails. Win and you double your bet, lose and it&#x27;s gone.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "giveaways": {
+  "aliases": [
+   "giveaway",
+   "raffle",
+   "contest",
+   "prize draw"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/giveaway</code>: Start, end and reroll giveaways that members enter with a button.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"giveaways\" data-name=\"Giveaways\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "global_blocklist": {
+  "aliases": [
+   "global ban list",
+   "shared ban list",
+   "known raiders"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "health": {
+  "aliases": [],
+  "preview": false
+ },
+ "highlights": {
+  "aliases": [],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/highlight</code>: Get a DM when someone says your words.<ul class=\"subf\"><li><code>/highlight add</code>: Add a word or phrase to your highlights.</li><li><code>/highlight remove</code>: Remove a word from your highlights.</li><li><code>/highlight list</code>: See your highlight words.</li><li><code>/highlight pause</code>: Stop highlight DMs for a while, or start them again.</li></ul></li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "honeypot": {
+  "aliases": [
+   "honeypot channel",
+   "bot trap",
+   "spam bot catcher"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "insights": {
+  "aliases": [
+   "server analytics",
+   "statistics",
+   "server stats charts",
+   "growth",
+   "retention",
+   "member growth",
+   "analytics dashboard"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "invite_tracker": {
+  "aliases": [
+   "invite tracking",
+   "who invited",
+   "invite leaderboard",
+   "invite logs"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/invites</code>: See how many people you&#x27;ve invited and the server&#x27;s invite leaderboard.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"invite_tracker\" data-name=\"Invite Tracker\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "jail": {
+  "aliases": [
+   "jail",
+   "quarantine",
+   "mute role",
+   "timeout channel",
+   "isolation"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/jail</code>: Lock a member in a jail channel without their roles, then free them with roles back.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"jail\" data-name=\"Jail\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "ladder": {
+  "aliases": [
+   "punishment ladder",
+   "auto punish",
+   "escalating punishments",
+   "warn thresholds"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "leveling": {
+  "aliases": [
+   "levels",
+   "XP",
+   "rank card",
+   "leaderboard",
+   "level roles",
+   "level up rewards",
+   "MEE6 levels"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/leaderboard</code>: See the top members in this server, ranked by level or by coins.</li><li><code>/rank</code>: Show a member&#x27;s level, XP progress and place on the server leaderboard.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"leveling\" data-name=\"Leveling &amp; XP\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "listing": {
+  "aliases": [
+   "server listing",
+   "server discovery",
+   "bump",
+   "advertise your server",
+   "server list"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/bump</code>: Move this server back to the top of BEV&#x27;s Find a server page (every hour).</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "lockdown": {
+  "aliases": [
+   "lock channels",
+   "server lockdown",
+   "emergency lock",
+   "slowmode everything"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/lockdown</code>: Lock or unlock every channel at once, and end a raid lockdown.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"lockdown\" data-name=\"Server Lockdown\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "members": {
+  "aliases": [],
+  "preview": false
+ },
+ "minigames": {
+  "aliases": [
+   "trivia",
+   "mini-games",
+   "hangman",
+   "wordle",
+   "tic tac toe"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/game</code>: Play tic-tac-toe, Connect Four, hangman, a word game, duels or trivia.<ul class=\"subf\"><li>Tictactoe button: Play tic-tac-toe against another member, or against BEV if you leave the opponent empty.</li><li>Connect4 button: Play Connect Four against another member, or against BEV if you leave the opponent empty.</li><li>Duel button: Challenge a member (or BEV) to a turn-based duel, with an optional coin bet.</li><li>Hangman button: Guess the hidden word one letter at a time before the drawing is finished.</li><li>Wordle button: Guess the secret five-letter word in six tries, with green and yellow hints.</li><li>Trivia button: Post a trivia question for everyone. The first right answer wins coins.</li></ul></li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "mod_logs": {
+  "aliases": [
+   "mod log",
+   "moderation log",
+   "audit log channel",
+   "case log"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"mod_logs\" data-name=\"Moderation Logs\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "modmail": {
+  "aliases": [
+   "modmail",
+   "mod mail",
+   "DM staff",
+   "contact staff"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"modmail\" data-name=\"Modmail\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "music": {
+  "aliases": [
+   "music bot",
+   "play music",
+   "SoundCloud",
+   "music queue",
+   "DJ"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/music</code>: Play music from Spotify, SoundCloud or YouTube, with a player to control it.<ul class=\"subf\"><li>Skip button: Skip the song that&#x27;s playing.</li><li>Stop button: Stop the music, clear the queue and leave the voice channel.</li><li>Pause button: Pause or carry on with the song that&#x27;s playing.</li><li>Queue button: See what&#x27;s playing and what&#x27;s next.</li><li>Loop button: Repeat the song that&#x27;s playing, the whole queue, or nothing.</li><li>Volume button: Change the music volume, from 1 to 100.</li><li>Shuffle button: Shuffle the songs waiting in the queue.</li><li>Remove button: Take a song out of the queue by its number.</li><li>Play button: Play a song, a song by an artist, or a mix of an artist&#x27;s songs. Links work too.</li><li>Playlist add button: Add the song that&#x27;s playing, or a song you search for, to one of your playlists.</li><li>Playlist show button: See the songs in one of your playlists, or all your playlists.</li><li>Playlist play button: Play one of your playlists.</li><li>Playlist remove button: Take a song out of one of your playlists, by its number.</li><li>Playlist delete button: Delete one of your playlists.</li><li>History button: The songs that played most recently in this server.</li></ul></li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "nickname_filter": {
+  "aliases": [
+   "nickname moderation",
+   "dehoist",
+   "name filter",
+   "hoisting"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "pets": {
+  "aliases": [
+   "pets",
+   "pet battles",
+   "virtual pet"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/pet</code>: Catch pets, build a team of 3 and battle other members.<ul class=\"subf\"><li>Catch button: Go looking for a new pet. Rarer pets are stronger.</li><li>List button: See your pets (or someone else&#x27;s) and your battle team.</li><li>Team button: Pick up to 3 pets for battles (by their numbers from /pet → List).</li><li>Rename button: Give one of your pets a name.</li><li>Release button: Let one of your pets go.</li><li>Battle button: Challenge another member&#x27;s pets to a battle, with an optional bet.</li></ul></li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "polls": {
+  "aliases": [
+   "poll",
+   "vote",
+   "survey",
+   "strawpoll"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/poll</code>: Create a poll with buttons, a timer and live results.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"polls\" data-name=\"Polls\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "profiles": {
+  "aliases": [
+   "profile",
+   "marriage",
+   "marry",
+   "reputation",
+   "rep",
+   "bio card"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/bio</code>: Set the short bio shown on your profile card.</li><li><code>/divorce</code>: End your marriage.</li><li><code>/marry</code>: Propose to another member. They have to accept.</li><li><code>/profile</code>: Show your profile card, or someone else&#x27;s: bio, level, coins, rep, badges and partner.</li><li><code>/rep</code>: Give another member a reputation point.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "proxy": {
+  "aliases": [
+   "roleplay",
+   "tupper",
+   "character proxy",
+   "RP characters",
+   "webhook characters"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/roleplay</code>: Post as roleplay characters: save a character with a tag, then start messages with that tag.<ul class=\"subf\"><li>Add button: Save a character. Messages starting with its tag are reposted as it.</li><li>List button: See your saved characters and their tags.</li><li>Remove button: Delete one of your characters.</li></ul></li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "qotd": {
+  "aliases": [
+   "question of the day",
+   "daily question",
+   "QOTD"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"qotd\" data-name=\"Question of the Day\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "quests": {
+  "aliases": [
+   "daily quests",
+   "missions",
+   "streaks",
+   "challenges"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/quests</code>: See today&#x27;s 3 daily quests, your progress and your streak.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "radio": {
+  "aliases": [
+   "radio",
+   "24/7 radio",
+   "lofi radio",
+   "music stations"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/radio</code>: Play an internet radio station in your voice channel.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "regex_rules": {
+  "aliases": [
+   "regex filter",
+   "custom patterns",
+   "advanced word filter"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "reminders": {
+  "aliases": [
+   "remind me",
+   "reminder",
+   "timers"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/remind</code>: Set a reminder and BEV will ping you when it&#x27;s time.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "reports": {
+  "aliases": [
+   "report",
+   "report a member",
+   "user reports"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/report</code>: Report a member to the staff privately, with a reason.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"reports\" data-name=\"Reports\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "rewards": {
+  "aliases": [
+   "vote rewards",
+   "bump rewards",
+   "top.gg vote"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/vote</code>: Vote for BEV on top.gg to get coins, and see when you can vote again.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"rewards\" data-name=\"Vote &amp; Bump Rewards\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "role_menus": {
+  "aliases": [
+   "reaction roles",
+   "self roles",
+   "button roles",
+   "dropdown roles",
+   "role picker",
+   "role selection"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"role_menus\" data-name=\"Role Menus\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "roleperms": {
+  "aliases": [],
+  "preview": false
+ },
+ "scam_blocker": {
+  "aliases": [
+   "phishing protection",
+   "scam links",
+   "fake Nitro links",
+   "malicious link filter"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "scan": {
+  "aliases": [],
+  "preview": false
+ },
+ "scheduled": {
+  "aliases": [
+   "scheduled messages",
+   "timed messages",
+   "announcements on a schedule",
+   "repeating messages"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"scheduled\" data-name=\"Scheduled Announcements\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "seasons": {
+  "aliases": [],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/season</code>: This season&#x27;s leaderboard, how long is left and last season&#x27;s winners.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "security_timeline": {
+  "aliases": [
+   "audit log",
+   "staff abuse",
+   "rogue staff",
+   "risk score",
+   "security log",
+   "admin abuse alerts",
+   "BEV Shield"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "server_logs": {
+  "aliases": [
+   "logging",
+   "message logs",
+   "edit and delete logs",
+   "join and leave logs",
+   "voice logs",
+   "audit logs"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "snipe": {
+  "aliases": [
+   "snipe",
+   "deleted messages",
+   "edit snipe"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/snipe</code>: Show the last deleted message in this channel.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "starboard": {
+  "aliases": [
+   "starboard",
+   "hall of fame",
+   "best messages",
+   "pin board"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/star</code>: Star a message for the starboard (reply to it with !star, or use its Apps menu).</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"starboard\" data-name=\"Starboard\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "stats": {
+  "aliases": [
+   "server stats",
+   "member count channel",
+   "counter channels",
+   "stat channels"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "stay_vc": {
+  "aliases": [],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "stream_alerts": {
+  "aliases": [
+   "Twitch notifications",
+   "YouTube live alerts",
+   "TikTok live",
+   "Kick alerts",
+   "go live notifications",
+   "stream notifications",
+   "multi-platform creators"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "suggestions": {
+  "aliases": [
+   "suggestion box",
+   "feedback channel",
+   "upvote downvote ideas"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/suggest</code>: Suggest a change to BEV (the bot or the website), or an idea for this server.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"suggestions\" data-name=\"Suggestions\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "tags": {
+  "aliases": [
+   "tags",
+   "snippets",
+   "FAQ commands",
+   "saved replies"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/tag</code>: Post one of the server&#x27;s saved answers, like the rules or an FAQ.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"tags\" data-name=\"FAQ Tags\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "temp_voice": {
+  "aliases": [
+   "join to create",
+   "join-to-create",
+   "temporary voice channels",
+   "temp VC",
+   "auto voice channels",
+   "private voice rooms",
+   "dynamic voice"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/invite</code>: Invite someone into your voice room.</li><li><code>/private</code>: Make your voice room invite-only again.</li><li><code>/public</code>: Open your voice room to everyone.</li><li><code>/voice</code>: Control your temporary voice room: rename it, lock it, limit it or hand it over.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "tickets": {
+  "aliases": [
+   "ticket system",
+   "support tickets",
+   "help desk",
+   "ticket panel",
+   "transcripts"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"tickets\" data-name=\"Support Tickets\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "trading": {
+  "aliases": [
+   "trading",
+   "marketplace",
+   "auction",
+   "trade items"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/market</code>: Buy and sell items with other members.<ul class=\"subf\"><li>Sell button: Put items up for sale. BEV holds them until they&#x27;re bought or you take them back.</li><li>Browse button: See what&#x27;s for sale, cheapest first, or search for an item.</li><li>Buy button: Buy a listing from the market.</li><li>Cancel button: Take one of your listings off the market and get the items back.</li></ul></li><li><code>/trade</code>: Offer another member a swap of coins and items. Nothing moves until they accept.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "transfer": {
+  "aliases": [],
+  "preview": false
+ },
+ "translate": {
+  "aliases": [
+   "translate",
+   "translation",
+   "language translator"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/set</code>: Your own BEV settings, like the language BEV replies to you in.<ul class=\"subf\"><li><code>/set language</code>: Pick the language BEV replies to you in. It beats the server&#x27;s language.</li></ul></li><li><code>/translate</code>: Translate any text into another language.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "verification": {
+  "aliases": [
+   "verify",
+   "captcha",
+   "verification gate",
+   "member screening",
+   "verified role"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"verification\" data-name=\"Member Verification\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "warnings": {
+  "aliases": [
+   "warn",
+   "warn system",
+   "infractions",
+   "strikes",
+   "case history"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/warnings</code>: Look up a member&#x27;s warnings, kicks, bans and timeouts, add staff notes or clear warnings.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"warnings\" data-name=\"Warnings\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "weather": {
+  "aliases": [
+   "weather",
+   "time zones",
+   "world clock"
+  ],
+  "commands": "<section class=\"sec\"><h2 class=\"disp\">Commands</h2><ul class=\"setlist\"><li><code>/time</code>: Set your time zone, or see what time it is for another member.</li><li><code>/weather</code>: Get the current weather and forecast for any place.</li></ul></section>",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "welcome": {
+  "aliases": [
+   "welcome message",
+   "welcome card",
+   "welcome image",
+   "goodbye message",
+   "leave message",
+   "boost message",
+   "join message"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n<p><button type=\"button\" class=\"act save pvbtn fpv\" data-preview=\"welcome\" data-name=\"Welcome, Goodbye &amp; Boosts\" aria-haspopup=\"dialog\">👀 See what it posts</button></p>\n",
+  "preview": true
+ },
+ "whitelist": {
+  "aliases": [
+   "trusted users",
+   "bypass list",
+   "exempt from moderation"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ },
+ "word_filter": {
+  "aliases": [
+   "bad word filter",
+   "swear filter",
+   "profanity filter",
+   "banned words",
+   "censor"
+  ],
+  "commands": "",
+  "panel": "\n<p class=\"lab\">A free BEV dashboard feature</p>\n<p>Switch it on and set it up on the <a class=\"inl\" href=\"/dashboard\">BEV dashboard</a>. Everything below can be changed there, with a preview before anything is posted.</p>\n\n",
+  "preview": false
+ }
+}

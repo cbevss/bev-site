@@ -11,7 +11,7 @@ window.BEV_UPDATES = [
     date: '20 November 2026',
     changes: [
       { title: 'New feature: Raffles',
-        text: 'Post a raffle people join with a button. Set how long it runs, and make it free, cost coins, need a minimum level (or both), or only for certain roles. Add as many prizes as you like, each with a title: BEV picks a different winner for each one, announces who won what, and each winner gets their prize privately (with a Claim button or by DM). You can end it early or cancel it, and cancelling gives back any coins paid.' },
+        text: 'Post a raffle people join with a button, straight away or at a date and time you schedule. Set how long it runs, and make it free, cost coins, need a minimum level (or both), or only for certain roles. Add as many prizes as you like, each with a title: BEV picks a different winner for each one, announces who won what, and each winner gets their prize privately (with a Claim button or by DM). You can end it early or cancel it, and cancelling gives back any coins paid.' },
     ],
   },
   {

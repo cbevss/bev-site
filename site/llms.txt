@@ -476,6 +476,22 @@
   - Setting: If they've already claimed.
   - Setting: When they've all gone.
   - Setting: If they don't have a role that can claim.
+- Raffles: Post a raffle people join with a button, now or at a time you schedule. Make it free, cost coins, or need a level, and limit it to roles. When time's up BEV picks a winner for each prize you list, announces what everyone won, and winners see their prize privately. Page: https://bevbotdiscord.com/features/raffle
+  - Setting: Channel to post in.
+  - Setting: Title.
+  - Setting: Message.
+  - Setting: When to post it. Choices: As soon as I press Start, At a date and time I pick.
+  - Setting: Post it at. Year-month-day and 24-hour time, like 2026-12-01 18:00. The raffle runs for the time below from then.
+  - Setting: Time zone. Like Europe/London, America/New_York or UTC+1.
+  - Setting: Runs for.
+  - Setting: Minutes, hours or days. Choices: Minutes, Hours, Days.
+  - Setting: How people enter. Choices: Free for everyone, Pay coins to enter, Need a minimum level, Need a level and pay coins.
+  - Setting: Coins to enter.
+  - Setting: Minimum level.
+  - Setting: Only these roles can enter. Leave empty to let everyone enter.
+  - Setting: Button text.
+  - Setting: How winners get their prize. With DMs, anyone whose DMs are closed can still use the Claim button on the announcement. Choices: A Claim button: only the winner sees their prize, BEV DMs it to each winner.
+  - Setting: Prizes (one winner each). Add one prize per winner. The title shows in the announcement; the prize message is only shown to that winner. Each has: Prize title, What the winner sees (private).
 
 ## Dashboard tools
 
