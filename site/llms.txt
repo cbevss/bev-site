@@ -481,8 +481,8 @@
   - Setting: Title.
   - Setting: Message.
   - Setting: When to post it. Choices: As soon as I press Start, At a date and time I pick.
-  - Setting: Post it at. Year-month-day and 24-hour time, like 2026-12-01 18:00. The raffle runs for the time below from then.
-  - Setting: Time zone. Like Europe/London, America/New_York or UTC+1.
+  - Setting: Post it on. Pick the day, then type the time (24-hour) and pick the time zone. The raffle runs for the time below from then.
+  - Setting: Time zone. Choices: Abidjan (Côte d’Ivoire) · UTC+0, Accra (Ghana) · UTC+0, Adak (United States) · UTC-10, Addis Ababa (Ethiopia) · UTC+3, Adelaide (Australia) · UTC+10:30 … (418 in all).
   - Setting: Runs for.
   - Setting: Minutes, hours or days. Choices: Minutes, Hours, Days.
   - Setting: How people enter. Choices: Free for everyone, Pay coins to enter, Need a minimum level, Need a level and pay coins.

@@ -4,6 +4,7 @@ These rebuild the parts of `site/` that come from the bot, so new features show 
 
     python3 tools/build_features.py ../bevmasterbot/bev_bot.py     # rebuild
     python3 tools/check_site.py ../bevmasterbot/bev_bot.py         # check (scripts parse, links work, nothing stale)
+    python3 tools/check_raffle_picker.py ../bevmasterbot/bev_bot.py  # browser check of the raffle date picker (needs Playwright)
 
 - `build_features.py` writes each feature's card and the count on `features.html`, a page per feature in `features/`,
   the sitemap and `llms.txt`, and refreshes every `?v=` cache-buster (the first 10 characters of the file's sha256).

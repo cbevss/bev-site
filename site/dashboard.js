@@ -1776,7 +1776,7 @@
   }
 
   function showIfs() {
-    doc.querySelectorAll('.fld[data-if]').forEach(function (w) { w.hidden = !shownNow(w); });
+    doc.querySelectorAll('.fld[data-if]:not(.inside)').forEach(function (w) { w.hidden = !shownNow(w); });
   }
 
   // 4.64: something that needs Premium in this server: its name is greyed, nothing in it can be changed, and a click
@@ -1795,15 +1795,119 @@
     }, true);
   }
 
+  // A date and time picker: a calendar to pick the day, two boxes for the time (hours : minutes, 24-hour) and every time
+  // zone in a list. It stores "YYYY-MM-DD HH:MM" in its own setting and the time zone in the setting named by tz_key.
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function dateTimeControl(s, id) {
+    var box = el('div', 'dtpick');
+    box.id = id;
+    var m = /^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2})[:.](\d{2})$/.exec(String(state.draft.settings[s.key] || ''));
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var picked = m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    var view = new Date((picked || today).getFullYear(), (picked || today).getMonth(), 1);
+    var cal = el('div', 'cal');
+    var head = el('div', 'calhead');
+    var prev = el('button', 'calnav', '‹');
+    var next = el('button', 'calnav', '›');
+    var title = el('span', 'caltitle');
+    title.setAttribute('aria-live', 'polite');
+    prev.type = next.type = 'button';
+    prev.setAttribute('aria-label', 'Previous month');
+    next.setAttribute('aria-label', 'Next month');
+    head.append(prev, title, next);
+    var grid = el('div', 'calgrid');
+    grid.setAttribute('role', 'grid');
+    cal.append(head, grid);
+    var row = el('div', 'dttime');
+    var hh = el('input', 'field dtnum');
+    var mm = el('input', 'field dtnum');
+    [hh, mm].forEach(function (n, i) {
+      n.type = 'text'; n.inputMode = 'numeric'; n.maxLength = 2; n.autocomplete = 'off';
+      n.placeholder = i ? 'MM' : 'HH';
+      n.setAttribute('aria-label', i ? 'Minutes' : 'Hours (24-hour)');
+    });
+    hh.id = id + '-h';
+    if (m) { hh.value = pad2(+m[4]); mm.value = m[5]; }
+    var tz = el('select', 'field dttz');
+    tz.id = id + '-tz';
+    tz.setAttribute('aria-label', 'Time zone');
+    var tzSetting = null;
+    (state.config.features || []).forEach(function (f) { (f.settings || []).forEach(function (x) { if (x.key === s.tz_key) tzSetting = x; }); });
+    optionsFor(tz, ((tzSetting && tzSetting.options) || [{ value: 'Europe/London', label: 'London (Europe)' }]).map(function (o) { return { value: o.value, label: o.label }; }),
+      state.draft.settings[s.tz_key] || 'Europe/London');
+    if (!state.draft.settings[s.tz_key]) state.draft.settings[s.tz_key] = 'Europe/London';
+    row.append(hh, el('span', 'dtcolon', ':'), mm, tz);
+    var said = el('p', 'fnote dtsaid');
+    said.setAttribute('aria-live', 'polite');
+    box.append(cal, row, said);
+
+    function time() {
+      var h = hh.value.trim(), mi = mm.value.trim();
+      if (!/^\d{1,2}$/.test(h) || !/^\d{1,2}$/.test(mi) || +h > 23 || +mi > 59) return null;
+      return pad2(+h) + ':' + pad2(+mi);
+    }
+    function store() {
+      var t = time();
+      var whole = picked && t ? picked.getFullYear() + '-' + pad2(picked.getMonth() + 1) + '-' + pad2(picked.getDate()) + ' ' + t : '';
+      if (whole !== (state.draft.settings[s.key] || '')) set(s.key, whole);
+      var zone = tz.options[tz.selectedIndex] ? tz.options[tz.selectedIndex].textContent.split(' (')[0] : '';
+      if (!picked) said.textContent = 'Pick a day.';
+      else if (!t) said.textContent = (hh.value || mm.value) ? 'Type a time like 18 : 30 (24-hour).' : 'Now type the time.';
+      else said.textContent = '📅 ' + picked.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' at ' + t + ' (' + zone + ' time)';
+    }
+    function draw() {
+      title.textContent = MONTHS[view.getMonth()] + ' ' + view.getFullYear();
+      prev.disabled = view <= new Date(today.getFullYear(), today.getMonth(), 1);
+      grid.replaceChildren();
+      ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].forEach(function (d) { grid.append(el('span', 'calwd', d)); });
+      var first = (view.getDay() + 6) % 7;                   // Monday first
+      for (var i = 0; i < first; i++) grid.append(el('span', 'calgap'));
+      var days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+      for (var d = 1; d <= days; d++) {
+        (function (day) {
+          var date = new Date(view.getFullYear(), view.getMonth(), day);
+          var b = el('button', 'calday', String(day));
+          b.type = 'button';
+          b.setAttribute('aria-label', date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+          var on = picked && date.getTime() === picked.getTime();
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          if (on) b.classList.add('on');
+          if (date.getTime() === today.getTime()) b.classList.add('today');
+          if (date < today) b.disabled = true;
+          b.addEventListener('click', function () { picked = date; draw(); store(); var nx = grid.querySelector('.calday.on'); if (nx) nx.focus(); });
+          grid.append(b);
+        }(d));
+      }
+    }
+    prev.addEventListener('click', function () { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); draw(); });
+    next.addEventListener('click', function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); draw(); });
+    [hh, mm].forEach(function (n) {
+      n.addEventListener('input', function () {
+        n.value = n.value.replace(/\D/g, '').slice(0, 2);
+        if (n === hh && n.value.length === 2) mm.focus();
+        store();
+      });
+      n.addEventListener('blur', function () { if (/^\d$/.test(n.value)) { n.value = pad2(+n.value); store(); } });
+    });
+    tz.addEventListener('change', function () { set(s.tz_key, tz.value); store(); });
+    draw();
+    store();
+    return box;
+  }
+
   function fieldFor(s) {
     var wrap = el('div', 'fld');
     wrap.setAttribute('data-key', s.key);
+    if (s.inside) { wrap.hidden = true; wrap.classList.add('inside'); return wrap; }   // shown inside another setting's picker
     var id = 's-' + s.key;
     var label = el('label', 'flabel', s.label);
     label.htmlFor = id;
     wrap.append(label);
     if (s.help) wrap.append(el('p', 'help', s.help));
-    wrap.append(control(s, id, function () { return state.draft.settings[s.key]; }, function (v) { set(s.key, v); }, wrap));
+    if (s.widget === 'datetime') { label.htmlFor = id + '-h'; wrap.append(dateTimeControl(s, id)); }
+    else wrap.append(control(s, id, function () { return state.draft.settings[s.key]; }, function (v) { set(s.key, v); }, wrap));
     if (s.locked) lockPremium(wrap, label, s.label);
     var err = el('p', 'ferr');
     err.hidden = true;

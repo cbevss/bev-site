@@ -1867,3 +1867,25 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .rocount{color:var(--mut);font-size:13px;flex:0 0 auto}
 .rograb{touch-action:none;padding:6px 4px;margin:-6px 0 -6px -4px}
 @media(pointer:coarse){.rograb{padding:10px 12px;margin:-10px 0 -10px -12px;font-size:18px}}
+
+/* 4.71: date and time picker (calendar, HH : MM, time zone) */
+.dtpick{display:flex;flex-direction:column;gap:12px;max-width:560px}
+.cal{border:1px solid var(--line);border-radius:12px;background:rgba(9,15,32,.7);padding:10px;max-width:320px}
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.caltitle{font-weight:700;color:var(--ink)}
+.calnav{min-width:40px;min-height:40px;border:1px solid var(--line);border-radius:10px;background:transparent;color:#fff;font:inherit;font-size:20px;cursor:pointer}
+.calnav:hover:not(:disabled){background:var(--ac)}
+.calnav:disabled{opacity:.35;cursor:not-allowed}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calwd{text-align:center;font-size:12px;color:var(--mut);padding:4px 0}
+.calday{min-height:38px;border:1px solid transparent;border-radius:9px;background:rgba(255,255,255,.04);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.calday:hover:not(:disabled){border-color:var(--ac2)}
+.calday.today{border-color:var(--line)}
+.calday.on{background:var(--ac);border-color:var(--ac2);color:#fff;font-weight:700;box-shadow:0 0 14px var(--glow)}
+.calday:disabled{opacity:.3;cursor:not-allowed}
+.calday:focus-visible,.calnav:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+.dttime{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dttime .dtnum{width:64px;max-width:64px;padding:0 8px;text-align:center;font-variant-numeric:tabular-nums}
+.dtcolon{font-weight:700;font-size:20px;color:var(--ink)}
+.dttime .ssel,.dttime .dttz{flex:1;min-width:200px;max-width:none}
+.dtsaid{margin:0}

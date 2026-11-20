@@ -38,12 +38,20 @@ KIND = {"channel": "a channel", "channels": "channels", "role": "a role", "roles
         "list": "a list", "text": "text", "number": "a number", "toggle": "on/off", "choice": "a choice", "multi": "several choices"}
 
 
+def choice_text(st):
+    """The choices, or for a very long list (like every time zone) the first few and how many there are."""
+    labels = [lab for _, lab, _ in st.options]
+    if st.kind == "choice" and len(labels) > 60:
+        return ", ".join(labels[:5]) + f" … ({len(labels)} in all)"
+    return ", ".join(labels)
+
+
 def setting_li(st):
     out = f'<li><b>{E(st.label)}</b> <span class="kind">({KIND.get(st.kind, st.kind)})</span>'
     if st.help:
         out += f'<br><span class="shelp">{E(st.help)}</span>'
     if st.options:
-        out += f'<br><span class="sopts">Choices: {E(", ".join(lab for _, lab, _ in st.options))}</span>'
+        out += f'<br><span class="sopts">Choices: {E(choice_text(st))}</span>'
     if st.fields:
         out += f'<br><span class="shelp">Each one has (up to {st.max_items}):</span><ul class="subf">' + "".join(f"<li>{E(sf.label)}" + (f' <span class="sopts">({E(", ".join(lab for _, lab, _ in sf.options))})</span>' if sf.options else "") + "</li>"
                                                                                                     for sf in st.fields) + "</ul>"
@@ -166,7 +174,7 @@ def build(check=False):
             if st.help:
                 bit += f" {st.help.rstrip('.')}."
             if st.options:
-                bit += " Choices: " + ", ".join(lab for _, lab, _ in st.options) + "."
+                bit += " Choices: " + choice_text(st) + "."
             if st.fields:
                 bit += " Each has: " + ", ".join(sf.label for sf in st.fields) + "."
             lines.append(bit)
