@@ -1897,6 +1897,44 @@
     return box;
   }
 
+  // The invite list (Member Verification): a dropdown of tick boxes, each with the invite in bold and its details below.
+  function inviteChecks(s, id) {
+    var box = el('details', 'invpick');
+    box.id = id;
+    var sum = el('summary', 'invsum');
+    var list = el('div', 'invlist');
+    function picked() { return (state.draft.settings[s.key] || []).map(String); }
+    function title() {
+      var n = picked().filter(function (v) { return s.options.some(function (o) { return String(o.value) === v; }); }).length;
+      sum.textContent = s.options.length ? (s.options.length + (s.options.length === 1 ? ' invite' : ' invites') + ' · ' + (n ? n + ' skip verification' : 'none ticked'))
+        : 'No invites to show';
+    }
+    s.options.forEach(function (o) {
+      var row = el('label', 'invrow');
+      var tick = el('input');
+      tick.type = 'checkbox';
+      tick.value = String(o.value);
+      tick.checked = picked().indexOf(String(o.value)) >= 0;
+      var text = el('span', 'invtext');
+      text.append(el('span', 'invcode', o.label));
+      if (o.detail) text.append(el('span', 'invinfo', o.detail));
+      row.append(tick, text);
+      tick.addEventListener('change', function () {
+        var now = Array.prototype.filter.call(list.querySelectorAll('input'), function (x) { return x.checked; }).map(function (x) {
+          var opt = s.options.find(function (q) { return String(q.value) === x.value; });
+          return opt ? opt.value : x.value;
+        });
+        set(s.key, now);
+        title();
+      });
+      list.append(row);
+    });
+    if (!s.options.length) list.append(el('p', 'fnote', 'There are no invites to this server right now.'));
+    title();
+    box.append(sum, list);
+    return box;
+  }
+
   function fieldFor(s) {
     var wrap = el('div', 'fld');
     wrap.setAttribute('data-key', s.key);
@@ -1907,6 +1945,7 @@
     wrap.append(label);
     if (s.help) wrap.append(el('p', 'help', s.help));
     if (s.widget === 'datetime') { label.htmlFor = id + '-h'; wrap.append(dateTimeControl(s, id)); }
+    else if (s.widget === 'invites') { label.removeAttribute('for'); wrap.append(inviteChecks(s, id)); }
     else wrap.append(control(s, id, function () { return state.draft.settings[s.key]; }, function (v) { set(s.key, v); }, wrap));
     if (s.locked) lockPremium(wrap, label, s.label);
     var err = el('p', 'ferr');

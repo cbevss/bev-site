@@ -1889,3 +1889,20 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .dtcolon{font-weight:700;font-size:20px;color:var(--ink)}
 .dttime .ssel,.dttime .dttz{flex:1;min-width:200px;max-width:none}
 .dtsaid{margin:0}
+
+/* 4.72: invite list on Member Verification */
+.invpick{max-width:620px;border:1px solid var(--line);border-radius:12px;background:rgba(9,15,32,.7)}
+.invsum{list-style:none;cursor:pointer;min-height:46px;display:flex;align-items:center;padding:0 44px 0 16px;position:relative;font-weight:600;color:var(--ink)}
+.invsum::-webkit-details-marker{display:none}
+.invsum::after{content:"▾";position:absolute;right:16px;color:var(--mut);transition:transform .2s}
+.invpick[open] .invsum::after{transform:rotate(180deg)}
+.invsum:focus-visible{outline:2px solid var(--ac2);outline-offset:2px;border-radius:12px}
+.invlist{display:flex;flex-direction:column;border-top:1px solid var(--line);max-height:420px;overflow-y:auto}
+.invrow{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(110,160,255,.1)}
+.invrow:last-child{border-bottom:0}
+.invrow:hover{background:rgba(37,99,235,.12)}
+.invrow input{margin-top:4px;width:18px;height:18px;flex:none;accent-color:var(--ac)}
+.invtext{display:flex;flex-direction:column;gap:3px;min-width:0}
+.invcode{font-weight:700;font-size:16.5px;color:#fff;overflow-wrap:anywhere}
+.invinfo{font-weight:400;font-size:13.5px;color:var(--mut);overflow-wrap:anywhere}
+.invlist .fnote{padding:12px 16px;margin:0}
