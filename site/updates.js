@@ -12,6 +12,8 @@ window.BEV_UPDATES = [
     changes: [
       { title: 'Member Verification: invites that skip verification',
         text: 'The Member Verification card now lists every invite to your server, including your custom invite link, with how long each lasts, its join limit and the roles it gives. Tick the ones that should skip verification: people who join with them don\'t get the Unverified role, and can get the Verified role straight away.' },
+      { title: 'Invite Tracker: credit for custom invite link joins',
+        text: 'Pick who gets the credit when people join with your server\'s custom invite link, under Invite Tracker on the dashboard. Joins BEV can\'t trace to any invite now count as custom link joins too (you can switch that off), because Discord doesn\'t always update the custom link\'s count.' },
       { title: 'Join messages know about your custom invite link',
         text: 'When someone joins with your server\'s custom invite link (discord.gg/yourname), the welcome message, the join log and Server Logs now say so, instead of "I couldn\'t tell who invited them".' },
     ],
