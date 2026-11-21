@@ -13,7 +13,7 @@ window.BEV_UPDATES = [
       { title: 'Member Verification: invites that skip verification',
         text: 'The Member Verification card now lists every invite to your server, including your custom invite link, with how long each lasts, its join limit and the roles it gives. Tick the ones that should skip verification: people who join with them don\'t get the Unverified role, and can get the Verified role straight away.' },
       { title: 'Raffles: see who entered',
-        text: 'The Raffles card now lists your recent raffles (running and scheduled ones first) with everyone who entered each one: when they entered, the coins they paid, and what the winners won. Big raffles have a search box to find someone. BEV also logs each person who enters (you can switch that off).' },
+        text: 'The Raffles card now lists your recent raffles (running and scheduled ones first) with everyone who entered each one: when they entered, the coins they paid, and what the winners won. Big raffles have a search box to find someone. BEV can also post a message in Server Logs (or Moderation Logs) each time someone enters: pick which on the card.' },
       { title: 'Invite Tracker: credit for custom invite link joins',
         text: 'Pick who gets the credit when people join with your server\'s custom invite link, under Invite Tracker on the dashboard. Joins BEV can\'t trace to any invite now count as custom link joins too (you can switch that off), because Discord doesn\'t always update the custom link\'s count.' },
       { title: 'Join messages know about your custom invite link',
