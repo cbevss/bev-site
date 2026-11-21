@@ -562,6 +562,7 @@
       var making = (f.actions || []).find(function (a) { return a && a.key === 'level_roles'; });
       if (f.key === 'jail' && Array.isArray(f.jailed)) fields.append(jailList(f));
       if (f.key === 'stay_vc') fields.append(stayVcButton());
+      if (f.key === 'raffle' && Array.isArray(f.raffles)) fields.append(raffleEntries(f));
       f.settings.forEach(function (s) {
         if (making && s.key === 'level_rewards') fields.append(levelRolesBox(making));
         var field = fieldFor(s);
@@ -624,6 +625,64 @@
       });
     });
     box.append(b, note);
+    return box;
+  }
+
+  // Raffles: every recent raffle, and who entered it (running and scheduled ones first).
+  function raffleEntries(f) {
+    var box = el('div', 'rlist');
+    box.id = 'rlist';
+    box.append(el('p', 'flabel', 'Who entered each raffle'));
+    if (!f.raffles.length) { box.append(el('p', 'fnote', 'No raffles yet. Start one and everyone who enters shows up here.')); return box; }
+    var states = { running: '🟢 Running', scheduled: '📅 Scheduled', ended: '🏁 Ended', cancelled: '🚫 Cancelled' };
+    var when = function (t) { return new Date(t * 1000).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }); };
+    f.raffles.forEach(function (r, i) {
+      var d = el('details', 'rraffle');
+      if (i === 0 && (r.state === 'running' || r.state === 'scheduled')) d.open = true;
+      var sum = el('summary', 'rsum');
+      var top = el('span', 'rtitle', r.title);
+      var bits = [states[r.state] || r.state, r.count + (r.count === 1 ? ' entry' : ' entries')];
+      if (r.state === 'scheduled' && r.posts) bits.push('posts ' + when(r.posts));
+      else if (r.ends) bits.push((r.state === 'running' ? 'ends ' : 'ended ') + when(r.ends));
+      if (r.channel) bits.push('#' + r.channel);
+      sum.append(top, el('span', 'rmeta', bits.join(' · ')));
+      d.append(sum);
+      var body = el('div', 'rbody');
+      if (!r.entries.length) body.append(el('p', 'fnote', r.state === 'scheduled' ? 'It hasn\'t been posted yet.' : 'Nobody entered.'));
+      else {
+        var find = null;
+        if (r.entries.length > 12) {
+          find = el('input', 'field rfind');
+          find.type = 'search';
+          find.placeholder = 'Find someone in this raffle';
+          find.setAttribute('aria-label', 'Find someone in ' + r.title);
+          body.append(find);
+        }
+        var list = el('ol', 'rentries');
+        r.entries.forEach(function (p) {
+          var li = el('li', 'rentry' + (p.won ? ' won' : ''));
+          li.setAttribute('data-search', ((p.display || '') + ' ' + (p.name || '') + ' ' + p.id).toLowerCase());
+          li.append(avatarNode(p.avatar, p.display || p.id, 'av sm'));
+          var who = el('div', 'jwho');
+          who.append(el('b', null, p.display || 'Someone who left the server'));
+          var meta = [];
+          if (p.name) meta.push('@' + p.name);
+          if (p.joined) meta.push('entered ' + when(p.joined));
+          if (p.paid) meta.push('paid ' + p.paid.toLocaleString('en-GB') + ' 🪙');
+          who.append(el('span', 'jmeta', meta.join(' • ')));
+          if (p.won) who.append(el('span', 'rwon', '🏆 Won ' + p.won));
+          li.append(who);
+          list.append(li);
+        });
+        body.append(list);
+        if (find) find.addEventListener('input', function () {
+          var q = find.value.trim().toLowerCase();
+          list.querySelectorAll('.rentry').forEach(function (li) { li.hidden = !!q && li.getAttribute('data-search').indexOf(q) === -1; });
+        });
+      }
+      d.append(body);
+      box.append(d);
+    });
     return box;
   }
 

@@ -1906,3 +1906,22 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .invcode{font-weight:700;font-size:16.5px;color:#fff;overflow-wrap:anywhere}
 .invinfo{font-weight:400;font-size:13.5px;color:var(--mut);overflow-wrap:anywhere}
 .invlist .fnote{padding:12px 16px;margin:0}
+
+/* 4.72: who entered each raffle */
+.rlist{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.rraffle{border:1px solid var(--line);border-radius:12px;background:rgba(9,15,32,.7)}
+.rsum{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:3px;padding:12px 44px 12px 16px;position:relative}
+.rsum::-webkit-details-marker{display:none}
+.rsum::after{content:"▾";position:absolute;right:16px;top:16px;color:var(--mut);transition:transform .2s}
+.rraffle[open] .rsum::after{transform:rotate(180deg)}
+.rsum:focus-visible{outline:2px solid var(--ac2);outline-offset:2px;border-radius:12px}
+.rtitle{font-weight:700;font-size:16px;color:#fff;overflow-wrap:anywhere}
+.rmeta{font-size:13.5px;color:var(--mut)}
+.rbody{border-top:1px solid var(--line);padding:10px 16px 12px}
+.rfind{margin-bottom:10px;max-width:none}
+.rentries{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;max-height:440px;overflow-y:auto}
+.rentry{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(110,160,255,.1)}
+.rentry:last-child{border-bottom:0}
+.rentry.won .jwho b{color:#ffd166}
+.rwon{font-size:13px;color:#ffd166;font-weight:600}
+.rbody .fnote{margin:0}
