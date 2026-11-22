@@ -7,6 +7,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.78',
+    date: '22 November 2026',
+    changes: [
+      { title: 'The whole website in your language',
+        text: 'Pick a language with the flag button and every page is translated: the dashboard, every feature and setting, the support chat, What\'s new and the rest. The first time a page is opened in a language it takes a few seconds (you\'ll see "Translating…" in the corner), then it\'s instant for everyone. Names, server descriptions and messages people wrote stay as they are.' },
+    ],
+  },
+  {
     id: '4.77',
     date: '22 November 2026',
     changes: [

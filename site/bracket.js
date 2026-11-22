@@ -32,6 +32,7 @@
     doc.title = b.name + ' | BEV bracket';
     $('title').textContent = b.name;
     $('gname').textContent = b.guild.name;
+    $('title').setAttribute('translate', 'no'); $('gname').setAttribute('translate', 'no');
     $('sub').textContent = b.entrants.length + ' ' + (b.mode === 'teams' ? 'teams' : 'players') + ' • ' + (b.format === 'double' ? 'double' : 'single') + ' elimination';
     var status = $('bstatus');
     status.replaceChildren();

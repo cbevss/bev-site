@@ -226,6 +226,7 @@
       state.guild = null;
       state.config = null;
       $('addname').textContent = server.name;
+      $('addname').setAttribute('translate', 'no');
       $('addlink').href = inviteFor(server.id);
       return show('addbev');
     }
@@ -640,7 +641,7 @@
       var d = el('details', 'rraffle');
       if (i === 0 && (r.state === 'running' || r.state === 'scheduled')) d.open = true;
       var sum = el('summary', 'rsum');
-      var top = el('span', 'rtitle', r.title);
+      var top = el('span', 'rtitle notr', r.title);
       var bits = [states[r.state] || r.state, r.count + (r.count === 1 ? ' entry' : ' entries')];
       if (r.state === 'scheduled' && r.posts) bits.push('posts ' + when(r.posts));
       else if (r.ends) bits.push((r.state === 'running' ? 'ends ' : 'ended ') + when(r.ends));
@@ -664,7 +665,7 @@
           li.setAttribute('data-search', ((p.display || '') + ' ' + (p.name || '') + ' ' + p.id).toLowerCase());
           li.append(avatarNode(p.avatar, p.display || p.id, 'av sm'));
           var who = el('div', 'jwho');
-          who.append(el('b', null, p.display || 'Someone who left the server'));
+          who.append(el('b', p.display ? 'notr' : null, p.display || 'Someone who left the server'));
           var meta = [];
           if (p.name) meta.push('@' + p.name);
           if (p.joined) meta.push('entered ' + when(p.joined));
@@ -705,7 +706,7 @@
         li.setAttribute('data-id', p.id);
         li.append(avatarNode(p.avatar, p.display || p.id, 'av sm'));
         var who = el('div', 'jwho');
-        who.append(el('b', null, p.display || 'Someone who left the server'));
+        who.append(el('b', p.display ? 'notr' : null, p.display || 'Someone who left the server'));
         var bits = [];
         if (p.name) bits.push('@' + p.name);
         if (p.since) bits.push('jailed ' + new Date(p.since * 1000).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }));
@@ -1156,7 +1157,7 @@
           var av = el('img', 'mtopav'); av.alt = ''; av.referrerPolicy = 'no-referrer';
           av.addEventListener('error', function () { av.hidden = true; });
           if (row.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(row.avatar)) av.src = row.avatar; else av.hidden = true;
-          li.append(av, el('b', null, row.name), el('span', 'mtopv', row.value));
+          li.append(av, el('b', 'notr', row.name), el('span', 'mtopv', row.value));
           list.append(li);
         });
       });
@@ -1249,7 +1250,7 @@
           var li = el('li');
           var b = el('button', 'mpick');
           b.type = 'button';
-          b.append(avatarNode(m.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(m.avatar) ? m.avatar : null, m.display, 'av xs'), el('b', null, m.display), el('span', 'mname', '@' + m.name));
+          b.append(avatarNode(m.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(m.avatar) ? m.avatar : null, m.display, 'av xs'), el('b', 'notr', m.display), el('span', 'mname', '@' + m.name));
           b.addEventListener('click', function () { pick(m); });
           li.append(b);
           found.append(li);
@@ -1280,7 +1281,7 @@
       var top = el('div', 'mtop');
       top.append(avatarNode(d.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(d.avatar) ? d.avatar : null, d.display, 'av'));
       var who = el('div');
-      who.append(el('b', null, d.display), el('span', 'mname', '@' + d.name));
+      who.append(el('b', 'notr', d.display), el('span', 'mname', '@' + d.name));
       top.append(who);
       summary.append(top);
       var facts = el('dl', 'finfo');
@@ -1305,7 +1306,7 @@
           var li = el('li');
           var head = (pl.status === 'approved' && pl.outcome ? '✅ ' + pl.outcome : (WORD[pl.status] || pl.status)) + ' • asked ' +
             new Date(pl.at * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-          li.append(el('b', null, head), el('span', 'mpq', '“' + pl.text + '”'));
+          li.append(el('b', null, head), el('span', 'mpq notr', '“' + pl.text + '”'));
           if (pl.note) li.append(el('span', 'mpn', 'Staff note: ' + pl.note));
           plist.append(li);
         });
@@ -1317,7 +1318,7 @@
         var blist = el('ul', 'minv');
         bag.forEach(function (it) {
           var li = el('li');
-          li.append(el('b', null, it.name), el('span', 'minvq', '× ' + Number(it.qty).toLocaleString()));
+          li.append(el('b', 'notr', it.name), el('span', 'minvq', '× ' + Number(it.qty).toLocaleString()));
           if (it.about) li.append(el('span', 'minva', it.about.replace(/<@&\d+>/g, 'a role')));
           blist.append(li);
         });
@@ -1711,7 +1712,7 @@
             if (!list.length) mFound.append(el('li', 'empty', 'Nobody in the server matches that.'));
             list.forEach(function (m) {
               var li = el('li'); var b = el('button', 'mpick'); b.type = 'button';
-              b.append(avatarNode(m.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(m.avatar) ? m.avatar : null, m.display, 'av xs'), el('b', null, m.display), el('span', 'mname', '@' + m.name));
+              b.append(avatarNode(m.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(m.avatar) ? m.avatar : null, m.display, 'av xs'), el('b', 'notr', m.display), el('span', 'mname', '@' + m.name));
               b.addEventListener('click', function () {
                 pickedMember = { id: m.id };
                 mPick.textContent = 'Picked: ' + m.display;
@@ -1975,7 +1976,7 @@
       tick.value = String(o.value);
       tick.checked = picked().indexOf(String(o.value)) >= 0;
       var text = el('span', 'invtext');
-      text.append(el('span', 'invcode', o.label));
+      text.append(el('span', 'invcode notr', o.label));
       if (o.detail) text.append(el('span', 'invinfo', o.detail));
       row.append(tick, text);
       tick.addEventListener('change', function () {
@@ -2291,7 +2292,7 @@
             var li = el('li');
             var b = el('button', 'mpick');
             b.type = 'button';
-            b.append(avatarNode(m.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(m.avatar) ? m.avatar : null, m.display, 'av xs'), el('b', null, m.display), el('span', 'mname', '@' + m.name));
+            b.append(avatarNode(m.avatar && /^https:\/\/cdn\.discordapp\.com\//.test(m.avatar) ? m.avatar : null, m.display, 'av xs'), el('b', 'notr', m.display), el('span', 'mname', '@' + m.name));
             b.addEventListener('click', function () { addUser(m); });
             li.append(b);
             found.append(li);
@@ -3234,6 +3235,7 @@
       var items = list();
       items.forEach(function (t, i) {
         var b = el('button', 'mtab' + (i === designer.pick ? ' on' : ''), String(t.name || '').trim() || 'Message ' + (i + 1));
+        if (String(t.name || '').trim()) b.setAttribute('translate', 'no');
         b.type = 'button';
         b.setAttribute('role', 'tab');
         b.setAttribute('aria-selected', i === designer.pick ? 'true' : 'false');
@@ -3732,6 +3734,7 @@
     var data = builderData();
     if (!data) return;
     $('bname').textContent = state.config.guild.name;
+    $('bname').setAttribute('translate', 'no');
     $('bperm').hidden = data.can !== false;
     var grid = $('bsets');
     grid.replaceChildren();
@@ -3947,7 +3950,7 @@
             var li = el('li');
             var b = el('button', 'mpick');
             b.type = 'button';
-            b.append(el('b', null, m.display), el('span', 'mname', '@' + m.name));
+            b.append(el('b', 'notr', m.display), el('span', 'mname', '@' + m.name));
             b.addEventListener('mousedown', function (e) { e.preventDefault(); });
             b.addEventListener('click', function () {
               if (single) { chosen.length = 0; input.value = m.display; }
@@ -4339,7 +4342,7 @@
       var b = el('button', 'tkitem' + (tk.pick === t.id ? ' on' : '') + ' p-' + t.priority);
       b.type = 'button';
       var top = el('span', 'tktop');
-      top.append(el('b', null, t.opener), el('span', 'tkwhen', tkAgo(t.last)));
+      top.append(el('b', 'notr', t.opener), el('span', 'tkwhen', tkAgo(t.last)));
       var tags = el('span', 'tktags');
       tags.append(el('span', 'tkpri', tkPriorityLabel(t.priority)));
       tags.append(el('span', 'tkans ' + (t.answered ? 'yes' : 'no'), t.answered ? 'Answered' : 'Waiting ' + tkAgo(t.opened).replace(' ago', '')));
@@ -4596,7 +4599,7 @@
     var sl = el('ul', 'tlscores');
     scores.forEach(function (r) {
       var li = el('li', r.hour >= limit ? 'hot' : r.hour >= limit / 2 ? 'warm' : '');
-      li.append(el('b', null, r.actor || 'Someone'));
+      li.append(el('b', r.actor ? 'notr' : null, r.actor || 'Someone'));
       var bar = el('span', 'tlbar');
       var fill = el('i');
       fill.style.width = Math.min(100, Math.round(r.hour / limit * 100)) + '%';
@@ -4613,7 +4616,7 @@
       li.append(el('span', 'tlicon', e.icon || '•'));
       var txt = el('div', 'tltx');
       var line = el('p');
-      line.append(el('b', null, e.actor), document.createTextNode(' ' + String(e.action).charAt(0).toLowerCase() + String(e.action).slice(1) + (e.target ? ' ' + e.target : '')));
+      line.append(el('b', 'notr', e.actor), document.createTextNode(' ' + String(e.action).charAt(0).toLowerCase() + String(e.action).slice(1) + (e.target ? ' ' + e.target : '')));
       txt.append(line);
       if (e.detail) txt.append(el('span', 'tldetail', e.detail));
       txt.append(el('span', 'tlwhen', new Date(e.at * 1000).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) + (e.weight ? ' • +' + e.weight + ' risk' : '')));

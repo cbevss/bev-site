@@ -1965,3 +1965,6 @@ html.langlock,html.langlock body{overflow:hidden;overscroll-behavior:none}
 .pcard>.plist,.pcard>.pbuy{align-self:stretch}
 /* Find a server: on phones the tag filters sit in one row you can swipe sideways */
 @media(max-width:520px){#dtags{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-right:-20px;padding-right:20px}#dtags::-webkit-scrollbar{display:none}#dtags .pill{flex:none}}
+/* Shown in the corner while a page is being translated for the first time */
+.i18nbusy{position:fixed;left:16px;bottom:16px;z-index:80;padding:8px 14px;border-radius:999px;background:rgba(15,23,42,.92);border:1px solid rgba(96,165,250,.45);color:#fff;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.i18nbusy[hidden]{display:none}

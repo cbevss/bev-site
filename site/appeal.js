@@ -32,6 +32,7 @@
     if (d.guild && d.guild.name) {
       $('aph').textContent = 'Appeal your ban from ' + d.guild.name;
       $('apname').textContent = d.guild.name;
+      $('apname').setAttribute('translate', 'no');
       if (d.guild.icon && /^https:\/\/cdn\.discordapp\.com\//.test(d.guild.icon)) { $('apicon').src = d.guild.icon; $('apicon').hidden = false; }
     }
     min = Number(d.min) || min; max = Number(d.max) || max;

@@ -106,6 +106,7 @@
     if (!user || typeof user.name !== 'string' || !user.name) { me.hidden = true; return; }
     var name = doc.getElementById('navname');
     name.textContent = user.name;
+    name.setAttribute('translate', 'no');
     name.title = user.name;   // the whole name on hover, when a long one is cut short
     var old = doc.getElementById('navav');
     var url = pictureUrl(user);
@@ -660,28 +661,206 @@
   pick.c = (C.filter(function (r) { return r[1] === pick.l; })[0] || C[0])[0];   // each language has one flag
   doc.documentElement.lang = pick.l;
 
+  /*
+   * Translating the page. Each paragraph, heading, button or label is one piece of text. Bold words, links and the like
+   * inside it become markers (⟦0⟧…⟦/0⟧), and numbers become {0}, so a sentence is translated as a whole and the same
+   * sentence with another number is still the same piece. Translations come from /lang.js (built in) and from
+   * /api/i18n (made once by BEV, then kept), and are remembered in this browser.
+   * Anything marked translate="no" or data-notr (names, server descriptions, messages people wrote) is left alone.
+   */
   var dict = null, attrs = ['placeholder', 'title', 'aria-label'];
-  function tr(s) {
-    if (!dict || !s) return null;
-    var t = s.trim();
-    if (!t || !dict[t]) return null;
-    return s.replace(t, dict[t]);
+  var SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEXTAREA: 1, CODE: 1, PRE: 1, KBD: 1, SVG: 1, svg: 1, TEMPLATE: 1, IFRAME: 1, CANVAS: 1 };
+  var INLINE = { B: 1, STRONG: 1, I: 1, EM: 1, A: 1, SPAN: 1, SMALL: 1, CODE: 1, KBD: 1, MARK: 1, U: 1, S: 1, SUP: 1, SUB: 1, BR: 1, IMG: 1, ABBR: 1, TIME: 1 };
+  var KEEP = { CODE: 1, KBD: 1, BR: 1, IMG: 1 };              // shown as they are
+  var cache = {}, outputs = {}, queue = [], queued = {}, tries = {}, busy = 0, timer = 0, saveTimer = 0, done = {};
+  var CACHE_KEY = 'bev_i18n_' + pick.l + '_v1';
+  // Things people wrote or named themselves: previews of BEV's messages, member, role, emoji and server names, chat messages.
+  var NOTR = ['dprev', 'mprev', 'pvprev', 'mname', 'roname', 'ename', 'bcbub', 'dtag', 'ddesc', 'notr'];
+  function skipEl(e) {
+    if (e.nodeType !== 1) return false;
+    if (SKIP[e.tagName] || e.getAttribute('translate') === 'no' || e.hasAttribute('data-notr') || e.isContentEditable) return true;
+    for (var i = 0; i < NOTR.length; i++) if (e.classList.contains(NOTR[i])) return true;
+    if (e.tagName === 'OPTION' && /^\d{15,}$/.test(e.value)) return true;      // channel and role names
+    return false;
+  }
+  function letters(t) { return /[A-Za-z]{2}/.test(t); }
+  function boring(t) {   // nothing to translate: slash commands, links, emails, codes, names
+    return t === 'BEV' || /^BEV( \d[\d.]*)?$/.test(t) || /^[@#:]/.test(t) || /^\/[\w-]+( [\w-]+)?$/.test(t) || /^(https?:\/\/|www\.)\S+$/.test(t) || /^\S+@\S+\.\S+$/.test(t) || /^[#@]?[\w.-]+#?\d*$/.test(t) && !/\s/.test(t) && t.length < 3;
+  }
+  // "4 of 96 features" -> ["{0} of {1} features", ["4", "96"]]
+  function template(t) {
+    var nums = [];
+    var tpl = t.replace(/⟦\/?\d+\/?⟧|\d[\d,.:]*/g, function (m) {
+      if (m.charAt(0) === '⟦') return m;                // markers stay as they are
+      var tail = /[.,:]$/.test(m) ? m.slice(-1) : '';
+      if (tail) m = m.slice(0, -1);
+      nums.push(m);
+      return '{' + (nums.length - 1) + '}' + tail;
+    });
+    return [tpl, nums];
+  }
+  function fill(tpl, nums) { return tpl.replace(/\{(\d+)\}/g, function (m, i) { return nums[+i] != null ? nums[+i] : m; }); }
+  function norm(t) { return t.replace(/\s+/g, ' ').trim(); }
+
+  // An element whose children are only text and simple inline tags is translated as one piece.
+  // A row of links or buttons with no words of its own between them (a menu) isn't one sentence: each is done alone.
+  function asUnit(e) {
+    var own = false, wordy = 0;
+    for (var c = e.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType === 3) { if (letters(c.nodeValue)) own = true; continue; }
+      if (c.nodeType !== 1) continue;
+      if (!INLINE[c.tagName]) return false;
+      if (KEEP[c.tagName] || skipEl(c)) continue;
+      for (var g = c.firstChild; g; g = g.nextSibling) if (g.nodeType === 1) return false;
+      if (letters(c.textContent)) wordy++;
+    }
+    return own || wordy === 1;
+  }
+  function unitSource(e) {
+    var parts = [], kids = [], k = 0;
+    for (var c = e.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType === 3) parts.push(c.nodeValue);
+      else if (c.nodeType === 1) {
+        kids.push(c);
+        parts.push(KEEP[c.tagName] || skipEl(c) || !letters(c.textContent) && !/\S/.test(c.textContent) ? '⟦' + k + '/⟧' : '⟦' + k + '⟧' + c.textContent + '⟦/' + k + '⟧');
+        k++;
+      }
+    }
+    return { text: norm(parts.join('')), kids: kids };
+  }
+  function applyUnit(e, kids, out) {
+    var lead = /^\s/.test(e.firstChild && e.firstChild.nodeType === 3 ? e.firstChild.nodeValue : '') ? ' ' : '';
+    var frag = doc.createDocumentFragment(), re = /⟦(\d+)(\/?)⟧(?:([\s\S]*?)⟦\/\1⟧)?/g, last = 0, m;
+    while ((m = re.exec(out))) {
+      if (m.index > last) frag.appendChild(doc.createTextNode(out.slice(last, m.index)));
+      var kid = kids[+m[1]];
+      if (kid) {
+        if (!m[2] && m[3] != null && !KEEP[kid.tagName] && !skipEl(kid)) kid.textContent = m[3];
+        frag.appendChild(kid);
+      }
+      last = re.lastIndex;
+    }
+    if (last < out.length) frag.appendChild(doc.createTextNode(out.slice(last)));
+    while (e.firstChild) e.removeChild(e.firstChild);
+    if (lead) e.appendChild(doc.createTextNode(lead));
+    e.appendChild(frag);
+  }
+  function lookup(tpl) { return cache[tpl] || (dict && dict[tpl]) || null; }
+  function want(tpl) {
+    if (queued[tpl] || done[tpl] || (tries[tpl] || 0) >= 2) return;
+    queued[tpl] = 1; queue.push(tpl);
+    if (!timer) timer = root.setTimeout(flush, 120);
+  }
+  // One piece: translated already (leave it), known (put it in), or new (ask for it).
+  function handle(text, put) {
+    if (!letters(text) || boring(text)) return;
+    var t = template(text), tpl = t[0];
+    if (outputs[tpl]) return;
+    var out = lookup(tpl);
+    if (out) {
+      var shown = put(fill(out, t[1]));            // what the page now says, so it's never sent off to be translated again
+      outputs[template(shown == null ? fill(out, t[1]) : shown)[0]] = 1;
+    }
+    else want(tpl);
+  }
+  // The outermost element around this one that is translated as one piece (or null).
+  function unitAbove(e) {
+    var top = null;
+    while (e && e.nodeType === 1 && e !== doc.body && !skipEl(e) && asUnit(e)) { top = e; e = e.parentNode; }
+    return top;
   }
   function walk(node) {
-    if (node.nodeType === 3) { var n = tr(node.nodeValue); if (n !== null && n !== node.nodeValue) node.nodeValue = n; return; }
-    if (node.nodeType !== 1 || node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.hasAttribute('data-notr')) return;
-    for (var i = 0; i < attrs.length; i++) { var a = node.getAttribute(attrs[i]); var x = tr(a); if (x !== null && x !== a) node.setAttribute(attrs[i], x); }
+    if (!dict) return;
+    var p = node.nodeType === 3 ? node.parentNode : node.parentNode;
+    var up = p && p.nodeType === 1 ? unitAbove(p) : null;
+    if (up && up !== node) { if (inside(up)) walkUnit(up); return; }
+    if (node.nodeType === 3) {
+      var raw = node.nodeValue, text = norm(raw);
+      handle(text, function (v) { node.nodeValue = raw.replace(raw.trim(), v); return v; });
+      return;
+    }
+    if (node.nodeType !== 1 || skipEl(node)) return;
+    for (var i = 0; i < attrs.length; i++) {
+      (function (name) {
+        var v = node.getAttribute(name);
+        if (v) handle(norm(v), function (x) { node.setAttribute(name, x); return x; });
+      })(attrs[i]);
+    }
+    if (node.tagName === 'INPUT' && /^(button|submit)$/i.test(node.type) && node.value) handle(norm(node.value), function (x) { node.value = x; return x; });
+    if (node !== doc.body && asUnit(node)) { walkUnit(node); return; }
     for (var c = node.firstChild; c; c = c.nextSibling) walk(c);
   }
+  function inside(e) {     // not in a part of the page that's left alone
+    for (var x = e; x && x !== doc.body; x = x.parentNode) if (x.nodeType === 1 && skipEl(x)) return false;
+    return true;
+  }
+  function walkUnit(node) {
+    for (var i = 0; i < attrs.length; i++) {
+      (function (name) {
+        var v = node.getAttribute(name);
+        if (v) handle(norm(v), function (x) { node.setAttribute(name, x); return x; });
+      })(attrs[i]);
+    }
+    var u = unitSource(node);
+    handle(u.text, function (v) { applyUnit(node, u.kids, v); return unitSource(node).text; });
+  }
+  function remember() {
+    root.clearTimeout(saveTimer);
+    saveTimer = root.setTimeout(function () {
+      try { root.localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) {
+        try { root.localStorage.removeItem(CACHE_KEY); } catch (e2) {}
+      }
+    }, 400);
+  }
+  var note = null;
+  var WAIT = { es: 'Traduciendo…', fr: 'Traduction…', de: 'Wird übersetzt…', pt: 'Traduzindo…', it: 'Traduzione…', nl: 'Vertalen…', pl: 'Tłumaczenie…', tr: 'Çevriliyor…', ja: '翻訳中…' };
+  function showBusy(on) {
+    if (on && !note) {
+      note = doc.createElement('div'); note.className = 'i18nbusy'; note.setAttribute('role', 'status'); note.setAttribute('translate', 'no');
+      note.textContent = WAIT[pick.l] || '…';
+      doc.body.appendChild(note);
+    }
+    if (note) note.hidden = !on;
+  }
+  function flush() {
+    timer = 0;
+    while (queue.length && busy < 3) {
+      var batch = queue.splice(0, 40);
+      busy++; showBusy(true);
+      batch.forEach(function (t) { tries[t] = (tries[t] || 0) + 1; });
+      (function (batch) {
+        root.fetch('/api/i18n', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ lang: pick.l, strings: batch }) })
+          .then(function (r) { return r.ok ? r.json() : { t: {} }; }, function () { return { t: {} }; })
+          .then(function (data) {
+            var got = (data && data.t) || {}, anyNew = false;
+            batch.forEach(function (t) {
+              delete queued[t];
+              if (typeof got[t] === 'string') { cache[t] = got[t]; done[t] = 1; anyNew = true; }
+              else if ((tries[t] || 0) < 2) root.setTimeout(function () { want(t); }, 6000);
+            });
+            busy--;
+            if (anyNew) { remember(); walk(doc.body); if (doc.title) handleTitle(); }
+            if (!busy && !queue.length) showBusy(false);
+            if (queue.length) flush();
+          });
+      })(batch);
+    }
+  }
+  function handleTitle() { handle(norm(doc.title), function (v) { doc.title = v; return v; }); }
   function start() {
-    dict = (root.BEV_LANG_DATA || {})[pick.l];
-    if (!dict) return;
+    dict = (root.BEV_LANG_DATA || {})[pick.l] || {};
+    try { cache = JSON.parse(root.localStorage.getItem(CACHE_KEY) || '{}') || {}; } catch (e) { cache = {}; }
+    Object.keys(cache).forEach(function (k) { done[k] = 1; });
     walk(doc.body);
+    handleTitle();
     if (root.MutationObserver) new root.MutationObserver(function (ms) {
       ms.forEach(function (m) {
         if (m.type === 'characterData') walk(m.target);
         else if (m.type === 'attributes') walk(m.target);
-        else m.addedNodes.forEach(walk);
+        else {
+          m.addedNodes.forEach(walk);
+          if (m.target && m.target.nodeType === 1 && m.target !== doc.body && asUnit(m.target)) walk(m.target);
+        }
       });
     }).observe(doc.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: attrs });
   }

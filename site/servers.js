@@ -115,7 +115,7 @@
   function card(s) {
     var row = el('div', 'srv');
     var nm = el('div', 'nm');
-    var name = el('b', '', s.name);
+    var name = el('b', 'notr', s.name);
     name.title = s.name;
     nm.append(name, el('span', '', s.owner ? 'Owner' : 'Administrator'));
 
@@ -166,6 +166,7 @@
     var servers = Array.isArray(data.servers) ? data.servers : [];
     var user = data.user || {};
     $('who').textContent = user.name || 'your account';
+    if (user.name) $('who').setAttribute('translate', 'no');
     var av = avatarNode(avatarUrl(user), user.name || '?', 'av sm');
     $('meav').replaceChildren(av);
 

@@ -479,8 +479,42 @@ const PRIVATE = { '/api/suggest': ['POST'], '/api/me': ['GET'], '/api/servers': 
                   '/api/support/mine': ['GET'], '/api/support/new': ['POST'], '/api/support/ticket': ['GET'], '/api/support/topic': ['POST'],
                   '/api/support/send': ['POST'], '/api/support/close': ['POST'], '/api/appeal': ['GET', 'POST'] };
 
+// The website in other languages: the browser sends the English text on the page, BEV answers with translations
+// (made once with its AI, then kept). Kept here too, so busy pages don't ask the bot again.
+const I18N_LANGS = new Set(['es', 'fr', 'de', 'pt', 'it', 'nl', 'pl', 'tr', 'ja']);
+const i18nMemo = new Map();
+async function i18nApi(request, c, url) {
+  if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+  if (request.headers.get('origin') !== url.origin) return json({ error: 'bad_origin' }, 403);
+  const body = await readJson(request, 120000);
+  if (!body || !I18N_LANGS.has(body.lang) || !Array.isArray(body.strings)) return json({ error: 'bad_request' }, 400);
+  const lang = body.lang;
+  const strings = [...new Set(body.strings.filter((x) => typeof x === 'string' && x.length > 1 && x.length <= 2000 && /[A-Za-z]/.test(x)))].slice(0, 60);
+  const t = {};
+  const ask = [];
+  for (const x of strings) {
+    const hit = i18nMemo.get(lang + '\u0000' + x);
+    if (hit) t[x] = hit; else ask.push(x);
+  }
+  let pending = 0;
+  if (ask.length) {
+    const res = await bot(c, '/api/i18n', { method: 'POST', body: JSON.stringify({ lang, strings: ask }) });
+    const got = res.status === 200 && res.data && res.data.t && typeof res.data.t === 'object' ? res.data.t : {};
+    for (const x of ask) {
+      const out = typeof got[x] === 'string' ? got[x].slice(0, 8000) : null;
+      if (out) {
+        t[x] = out;
+        if (i18nMemo.size > 20000) i18nMemo.clear();
+        i18nMemo.set(lang + '\u0000' + x, out);
+      } else pending++;
+    }
+  }
+  return json({ lang, t, pending });
+}
+
 async function api(request, c, url, secure, s, env) {
   const path = url.pathname;
+  if (path === '/api/i18n') return i18nApi(request, c, url);
   if (path === '/api/premium' || path === '/api/premium/checkout' || path === '/api/premium/manage') return premiumApi(request, env, c, url, s, path);
   if (path === '/api/status' || path === '/api/leaderboard' || path === '/api/directory') return publicApi(request, c, url);
   if (!Object.prototype.hasOwnProperty.call(PRIVATE, path)) return json({ error: 'not_found' }, 404);
@@ -929,7 +963,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=63610beef0">
+<link rel="stylesheet" href="/styles.css?v=232ae70db1">
 </head>
 <body class="notice">
 <div class="hero">

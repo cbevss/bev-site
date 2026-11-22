@@ -35,7 +35,7 @@
     li.append(el('span', 'place mono', m.place <= 3 ? ['🥇', '🥈', '🥉'][m.place - 1] : '#' + m.place));
     li.append(picture(m.avatar, m.name, 'av'));
     var who = el('div', 'lwho');
-    who.append(el('b', null, m.name));
+    who.append(el('b', 'notr', m.name));
     var bar = el('div', 'lbar');
     var fill = el('span');
     fill.style.width = Math.max(2, Math.min(100, Math.round((m.xp / Math.max(1, m.needed)) * 100))) + '%';
@@ -57,7 +57,7 @@
     li.append(el('span', 'place mono', m.place <= 3 ? ['🥇', '🥈', '🥉'][m.place - 1] : '#' + m.place));
     li.append(picture(m.avatar, m.name, 'av'));
     var who = el('div', 'lwho');
-    who.append(el('b', null, m.name));
+    who.append(el('b', 'notr', m.name));
     var bar = el('div', 'lbar');
     var fill = el('span');
     fill.style.width = Math.max(2, Math.min(100, Math.round((m.gained / Math.max(1, best)) * 100))) + '%';
@@ -108,7 +108,7 @@
           var a = el('a', 'lbsrv');
           a.href = '/leaderboard?guild=' + s.id;
           var icon = s.icon && /^[\w]+$/.test(s.icon) ? 'https://cdn.discordapp.com/icons/' + s.id + '/' + s.icon + '.png?size=64' : null;
-          a.append(picture(icon, s.name, 'av sm'), el('span', null, s.name));
+          a.append(picture(icon, s.name, 'av sm'), el('span', 'notr', s.name));
           li.append(a);
           box.append(li);
         });

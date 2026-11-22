@@ -39,7 +39,7 @@
       var li = el('li', 'dcard');
       var top = el('div', 'dtop');
       var who = el('div', 'dwho');
-      who.append(el('h2', 'disp', s.name), el('p', 'dstats', s.members.toLocaleString() + ' members'));
+      who.append(el('h2', 'disp notr', s.name), el('p', 'dstats', s.members.toLocaleString() + ' members'));
       top.append(icon(s), who);
       li.append(top);
       li.append(s.description ? el('p', 'ddesc', s.description) : el('p', 'ddesc none', 'No description yet.'));
