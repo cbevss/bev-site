@@ -146,6 +146,11 @@ def build(check=False):
         if not n:
             raise SystemExit(f"Couldn't find the {cat} group on the Features page")
     fp = re.sub(r'(<span class="stat" id="found" aria-live="polite">\d+ commands, )\d+( features</span>)', rf"\g<1>{len(b.FEATURES)}\g<2>", fp)
+    # the intro's numbers: slash commands listed on the page, and dashboard features
+    slash = len(set(re.findall(r'class="k mono on copy" data-copy="(/[^"]+)"', fp)))
+    fp = re.sub(r'(<p class="lead rise d2">)\d+( slash commands)', rf"\g<1>{slash}\g<2>", fp)
+    fp = re.sub(r"(feature's commands only show in a server once that feature is on\. All )\d+( are listed)", rf"\g<1>{len(b.FEATURES)}\g<2>", fp)
+    fp = re.sub(r'(<span class="stat" id="found" aria-live="polite">)\d+( commands, )', rf"\g<1>{slash}\g<2>", fp)
     fp = bust(fp, hashes)
     if fp != read("features.html"):
         changed.append("features.html")

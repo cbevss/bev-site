@@ -3672,9 +3672,9 @@
     var stat = $('bentrystat');
     $('bentrynote').hidden = true;
     // People given Dashboard Access without the Server Builder don't see it at all.
-    $('bentry').hidden = !data && !!(state.config && state.config.access && state.config.access.limited);
+    // No builder data means the bot is too old for it: hide the card rather than show a half-working one.
+    $('bentry').hidden = !data;
     if (!data) {
-      stat.textContent = 'Upload the newest bev_bot.py to use the Server Builder.';
       $('bopen').disabled = true;
       return;
     }

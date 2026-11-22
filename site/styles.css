@@ -310,6 +310,7 @@ button.mini:disabled{opacity:.6;cursor:progress;background:transparent;box-shado
   /* A row where a card is open stops sharing: every card keeps the size it had (dashboard.js sets the heights) and
      only the open card grows, so the card beside it stays as it was. */
   .feat.loose{display:flex;flex-direction:column;align-self:start}
+  .feat.loose>*{align-self:stretch}
   #sections.measuring .fset[open]>.fields,#sections.measuring .actform:not([hidden]),#sections.measuring .tres.grows{position:absolute!important;left:0;right:0;top:0}
 }
 .fmain{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -1949,3 +1950,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .langnone{margin:6px 8px;opacity:.6}
 @media(max-width:520px){.navbtns .lang{grid-column:1/-1;display:block}.navbtns .langbtn{width:100%;justify-content:center}.langbox{left:0;right:0;width:auto;max-width:none}}
 @media(min-width:521px){.langbox{max-height:min(70vh,440px);display:flex;flex-direction:column}.langbox[hidden]{display:none}.langlist{flex:1}}
+/* Status page: the four figures sit in one row on wide screens and two-by-two on tablets */
+@media(min-width:900px){#facts.cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:899px){#facts.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}

@@ -7,6 +7,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.76',
+    date: '22 November 2026',
+    changes: [
+      { title: 'Tidier dashboard cards',
+        text: 'When you open a feature\'s settings, the boxes now use the full width of the card, so long choices aren\'t cut off.' },
+      { title: 'Better /help',
+        text: '/help now only counts and lists the commands that are switched on in your server, and links straight to the dashboard.' },
+      { title: 'Cleaner status in the member list',
+        text: 'BEV\'s status now reads like "🛡️ Protecting 12 servers" instead of starting with "Watching".' },
+      { title: 'Small fixes on the site',
+        text: 'The Status page shows its four numbers in one row, the Features page counts are correct again, and the Server Builder card no longer shows a setup message when it isn\'t available.' },
+    ],
+  },
+  {
     id: '4.75',
     date: '22 November 2026',
     changes: [
