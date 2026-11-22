@@ -492,6 +492,14 @@
   - Setting: Button text.
   - Setting: How winners get their prize. With DMs, anyone whose DMs are closed can still use the Claim button on the announcement. Choices: A Claim button: only the winner sees their prize, BEV DMs it to each winner.
   - Setting: Prizes (one winner each). Add one prize per winner. The title shows in the announcement; the prize message is only shown to that winner. Each has: Prize title, What the winner sees (private).
+- Voice Channel Name Buttons: Post a panel with buttons that rename a voice channel. You choose each button's text, emoji, colour and the name it changes the channel to, and who can press them. Page: https://bevbotdiscord.com/features/vc-names
+  - Setting: Voice channel to rename.
+  - Setting: Post the panel in. Leave empty to post it in the voice channel's own chat.
+  - Setting: Panel title.
+  - Setting: Panel message.
+  - Setting: Buttons. Each button renames the channel to its name. Discord allows 2 renames every 10 minutes. Each has: Button text, Emoji, Rename the channel to, Colour.
+  - Setting: Who can press the buttons. Leave empty to let everyone press them.
+  - Setting: Only people in the voice channel.
 
 ## Dashboard tools
 

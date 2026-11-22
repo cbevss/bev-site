@@ -7,6 +7,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.73',
+    date: '22 November 2026',
+    changes: [
+      { title: 'New feature: Voice Channel Name Buttons',
+        text: 'Pick a voice channel and BEV posts a panel with buttons that rename it. Set each button\'s text, emoji, colour and the name it changes the channel to, and who can press them. Discord only allows 2 renames every 10 minutes, so BEV tells people when they can rename again.' },
+    ],
+  },
+  {
     id: '4.72',
     date: '20 November 2026',
     changes: [
