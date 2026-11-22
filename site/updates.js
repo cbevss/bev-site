@@ -7,6 +7,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.79',
+    date: '22 November 2026',
+    changes: [
+      { title: 'Music and radio have sound again',
+        text: 'BEV showed the green ring as if it was playing, but nobody could hear it. A voice package BEV uses had a new version that doesn\'t work with Discord\'s call encryption yet, so BEV now stays on the version that does.' },
+    ],
+  },
+  {
     id: '4.78',
     date: '22 November 2026',
     changes: [
