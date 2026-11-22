@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=1ff46a75c1">
+<link rel="stylesheet" href="/styles.css?v=ed216d8aa7">
 </head>
 <body class="dash">
 <a class="skip" href="#main">Skip to content</a>
@@ -102,6 +102,11 @@
 <p class="accessnote" id="accessnote" role="note" hidden></p>
 <div class="tools">
 <input class="field" id="find" type="search" placeholder="Find a feature or setting" aria-label="Find a feature or setting" autocomplete="off">
+<div class="ffilter" id="ffilter" role="group" aria-label="Show features">
+<button type="button" class="ffbtn" data-filter="all" aria-pressed="true">All</button>
+<button type="button" class="ffbtn" data-filter="on" aria-pressed="false">Active</button>
+<button type="button" class="ffbtn" data-filter="off" aria-pressed="false">Inactive</button>
+</div>
 <span class="stat here" id="oncount"></span>
 </div>
 <nav class="jump" id="cats" aria-label="Sections"></nav>
@@ -166,6 +171,6 @@
 <script src="/updates.js?v=97e4e5d525" defer></script>
 <script src="/nav.js?v=e9152278b5" defer></script>
 <script src="/supportchat.js?v=56ad3f5691" defer></script>
-<script src="/dashboard.js?v=5ead688262" defer></script>
+<script src="/dashboard.js?v=ebc8a1b163" defer></script>
 </body>
 </html>

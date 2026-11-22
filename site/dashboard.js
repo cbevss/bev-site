@@ -3497,6 +3497,13 @@
     return hits;
   }
 
+  var featureFilter = 'all';
+  function setFilter(which) {
+    featureFilter = which;
+    doc.querySelectorAll('#ffilter .ffbtn').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-filter') === which)); });
+    applyFind();
+  }
+
   function applyFind() {
     var words = $('find').value.toLowerCase().split(/\s+/).filter(Boolean);
     var shown = 0;
@@ -3507,6 +3514,10 @@
       sec.querySelectorAll('.feat').forEach(function (card) {
         var text = card.getAttribute('data-search') || '';
         var ok = fuzzy ? words.every(function (w) { return fuzzyHas(text, w); }) : exactOk(text);
+        if (ok && featureFilter !== 'all') {          // All / Active / Inactive buttons (tools only show under All)
+          var key = card.getAttribute('data-key') || '';
+          ok = key.indexOf('tool:') !== 0 && !!state.draft.features[key] === (featureFilter === 'on');
+        }
         card.hidden = !ok;
         if (ok) visible++;
       });
@@ -3514,6 +3525,7 @@
       shown += visible;
     });
     $('nofind').hidden = shown !== 0;
+    $('nofind').textContent = words.length ? 'Nothing matches that search.' : featureFilter === 'on' ? 'No features are on yet.' : 'Every feature is on.';
     var hits = findSettings(words);
     $('find').setAttribute('data-hits', String(hits.length));
   }
@@ -4842,6 +4854,7 @@
       });
     });
     $('find').addEventListener('input', applyFind);
+    doc.querySelectorAll('#ffilter .ffbtn').forEach(function (b) { b.addEventListener('click', function () { setFilter(b.getAttribute('data-filter')); }); });
     // Enter jumps to the first matching setting (or the first matching card).
     $('find').addEventListener('keydown', function (e) {
       if (e.key !== 'Enter') return;

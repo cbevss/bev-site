@@ -1925,3 +1925,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .rentry.won .jwho b{color:#ffd166}
 .rwon{font-size:13px;color:#ffd166;font-weight:600}
 .rbody .fnote{margin:0}
+
+/* 4.73: All / Active / Inactive filter on the dashboard */
+.ffilter{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;background:rgba(9,15,32,.7)}
+.ffbtn{min-height:36px;padding:0 16px;border:0;border-radius:999px;background:transparent;color:var(--mut);font:inherit;font-weight:600;cursor:pointer}
+.ffbtn:hover{color:#fff}
+.ffbtn[aria-pressed="true"]{background:var(--ac);color:#fff;box-shadow:0 0 12px var(--glow)}
+.ffbtn:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
