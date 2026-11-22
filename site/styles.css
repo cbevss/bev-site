@@ -1947,3 +1947,5 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .langtx small{opacity:.7;font-size:.8em}
 .langcode{opacity:.6;font-size:.8em;font-weight:600}
 .langnone{margin:6px 8px;opacity:.6}
+@media(max-width:520px){.navbtns .lang{grid-column:1/-1;display:block}.navbtns .langbtn{width:100%;justify-content:center}.langbox{left:0;right:0;width:auto;max-width:none}}
+@media(min-width:521px){.langbox{max-height:min(70vh,440px);display:flex;flex-direction:column}.langbox[hidden]{display:none}.langlist{flex:1}}

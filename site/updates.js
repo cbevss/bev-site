@@ -7,6 +7,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.75',
+    date: '22 November 2026',
+    changes: [
+      { title: 'New command: /bancamp',
+        text: 'Type someone\'s username, user ID or @mention and BEV bans them the moment they join, before any welcome message or roles. If they\'re already in the server, BEV offers a "Ban them now" button. Use /bancamp on its own to see the list and take people off it. Needs the Ban Members permission.' },
+      { title: 'Account Age Gate: kick first, then ban',
+        text: 'A new choice for accounts that are too young: BEV kicks them the first time and tells them when they can come back. If they join again before then, they\'re banned. This is now the default for servers that haven\'t picked an option.' },
+      { title: 'Language button on phones',
+        text: 'The language list now fits the screen properly in the phone menu.' },
+    ],
+  },
+  {
     id: '4.74',
     date: '22 November 2026',
     changes: [
