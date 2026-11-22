@@ -7,6 +7,14 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.80',
+    date: '22 November 2026',
+    changes: [
+      { title: 'Music: original versions only',
+        text: 'A new 💿 Originals only button on the music panel and the player. When it\'s on, BEV skips live, concert and festival recordings and plays the original version of the song instead. If you ask for a live version by name, or paste a link yourself, BEV plays what you asked for. It\'s also in Music\'s settings on the dashboard.' },
+    ],
+  },
+  {
     id: '4.79',
     date: '22 November 2026',
     changes: [
