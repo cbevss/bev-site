@@ -755,6 +755,7 @@
   function handle(text, put) {
     if (!letters(text) || boring(text)) return;
     var t = template(text), tpl = t[0];
+    if (!/[A-Za-z]{2}/.test(tpl.replace(/\b[AP]M\b/g, ''))) return;     // only numbers and times
     if (outputs[tpl]) return;
     var out = lookup(tpl);
     if (out) {
@@ -779,13 +780,15 @@
       handle(text, function (v) { node.nodeValue = raw.replace(raw.trim(), v); return v; });
       return;
     }
-    if (node.nodeType !== 1 || skipEl(node)) return;
+    if (node.nodeType !== 1) return;
+    if (skipEl(node) && !(node.tagName === 'TEXTAREA' && node.getAttribute('translate') !== 'no')) return;   // a text box's hint is still translated
     for (var i = 0; i < attrs.length; i++) {
       (function (name) {
         var v = node.getAttribute(name);
         if (v) handle(norm(v), function (x) { node.setAttribute(name, x); return x; });
       })(attrs[i]);
     }
+    if (node.tagName === 'TEXTAREA') return;
     if (node.tagName === 'INPUT' && /^(button|submit)$/i.test(node.type) && node.value) handle(norm(node.value), function (x) { node.value = x; return x; });
     if (node !== doc.body && asUnit(node)) { walkUnit(node); return; }
     for (var c = node.firstChild; c; c = c.nextSibling) walk(c);

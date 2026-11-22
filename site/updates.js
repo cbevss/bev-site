@@ -12,6 +12,8 @@ window.BEV_UPDATES = [
     changes: [
       { title: 'The whole website in your language',
         text: 'Pick a language with the flag button and every page is translated: the dashboard, every feature and setting, the support chat, What\'s new and the rest. The first time a page is opened in a language it takes a few seconds (you\'ll see "Translating…" in the corner), then it\'s instant for everyone. Names, server descriptions and messages people wrote stay as they are.' },
+      { title: 'Language list on phones',
+        text: 'In the phone menu the language list now opens inside the menu, so it\'s never cut off.' },
     ],
   },
   {
