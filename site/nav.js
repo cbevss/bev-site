@@ -639,24 +639,25 @@
   if (!doc) return;
   var LANG_V = '235b198a45';
   var NAMES = { en: 'English', es: 'Español', fr: 'Français', de: 'Deutsch', pt: 'Português', it: 'Italiano', nl: 'Nederlands', pl: 'Polski', tr: 'Türkçe', ja: '日本語' };
-  // [flag country code, language, country name in that language, country name in English]
+  // One row per language: [flag country code, language, words people might search for]
   var C = [
-    ['gb','en','United Kingdom','United Kingdom'],['us','en','United States','United States'],['ca','en','Canada','Canada'],['au','en','Australia','Australia'],['ie','en','Ireland','Ireland'],['nz','en','New Zealand','New Zealand'],['za','en','South Africa','South Africa'],['in','en','India','India'],['ng','en','Nigeria','Nigeria'],['ph','en','Philippines','Philippines'],['sg','en','Singapore','Singapore'],
-    ['es','es','España','Spain'],['mx','es','México','Mexico'],['ar','es','Argentina','Argentina'],['co','es','Colombia','Colombia'],['cl','es','Chile','Chile'],['pe','es','Perú','Peru'],['ve','es','Venezuela','Venezuela'],['ec','es','Ecuador','Ecuador'],['uy','es','Uruguay','Uruguay'],['cr','es','Costa Rica','Costa Rica'],
-    ['fr','fr','France','France'],['be','fr','Belgique','Belgium'],['ch','fr','Suisse','Switzerland'],['ca','fr','Canada','Canada'],['sn','fr','Sénégal','Senegal'],['ci','fr',"Côte d'Ivoire",'Ivory Coast'],['ma','fr','Maroc','Morocco'],
-    ['de','de','Deutschland','Germany'],['at','de','Österreich','Austria'],['ch','de','Schweiz','Switzerland'],['li','de','Liechtenstein','Liechtenstein'],
-    ['pt','pt','Portugal','Portugal'],['br','pt','Brasil','Brazil'],['ao','pt','Angola','Angola'],['mz','pt','Moçambique','Mozambique'],
-    ['it','it','Italia','Italy'],['sm','it','San Marino','San Marino'],['ch','it','Svizzera','Switzerland'],
-    ['nl','nl','Nederland','Netherlands'],['be','nl','België','Belgium'],['sr','nl','Suriname','Suriname'],
-    ['pl','pl','Polska','Poland'],
-    ['tr','tr','Türkiye','Turkey'],['cy','tr','Kıbrıs','Cyprus'],
-    ['jp','ja','日本','Japan']
+    ['gb', 'en', 'english anglais inglés englisch united kingdom uk britain usa america'],
+    ['es', 'es', 'spanish espagnol spanisch spain mexico argentina colombia latino'],
+    ['fr', 'fr', 'french français francés französisch france belgique canada'],
+    ['de', 'de', 'german allemand alemán germany deutschland austria österreich schweiz'],
+    ['pt', 'pt', 'portuguese portugais portugués portugal brasil brazil'],
+    ['it', 'it', 'italian italien italiano italy italia'],
+    ['nl', 'nl', 'dutch néerlandais holländisch netherlands nederland belgië flemish'],
+    ['pl', 'pl', 'polish polonais polnisch poland polska'],
+    ['tr', 'tr', 'turkish turc türkisch turkey türkiye'],
+    ['jp', 'ja', 'japanese japonais japanisch japan nihongo 日本']
   ];
   function flag(cc) { return cc.toUpperCase().replace(/./g, function (ch) { return String.fromCodePoint(127397 + ch.charCodeAt(0)); }); }
   function load() { try { return JSON.parse(root.localStorage.getItem('bev_lang') || 'null'); } catch (e) { return null; } }
   function save(v) { try { root.localStorage.setItem('bev_lang', JSON.stringify(v)); } catch (e) {} }
-  var pick = load() || { l: 'en', c: 'gb' };
-  if (!NAMES[pick.l]) pick = { l: 'en', c: 'gb' };
+  var pick = load() || { l: 'en' };
+  if (!NAMES[pick.l]) pick = { l: 'en' };
+  pick.c = (C.filter(function (r) { return r[1] === pick.l; })[0] || C[0])[0];   // each language has one flag
   doc.documentElement.lang = pick.l;
 
   var dict = null, attrs = ['placeholder', 'title', 'aria-label'];
@@ -701,12 +702,12 @@
     var list = el('ul', 'langlist'); list.setAttribute('role', 'listbox');
     C.forEach(function (r) {
       var li = el('li', 'langopt'); li.setAttribute('role', 'option'); li.tabIndex = 0;
-      if (r[0] === pick.c && r[1] === pick.l) { li.classList.add('on'); li.setAttribute('aria-selected', 'true'); }
+      if (r[1] === pick.l) { li.classList.add('on'); li.setAttribute('aria-selected', 'true'); }
       li.appendChild(el('span', 'langflag', flag(r[0])));
-      var t = el('span', 'langtx'); t.appendChild(el('b', null, NAMES[r[1]])); t.appendChild(el('small', null, r[2]));
+      var t = el('span', 'langtx'); t.appendChild(el('b', null, NAMES[r[1]]));
       li.appendChild(t); li.appendChild(el('span', 'langcode', r[1].toUpperCase()));
-      li.setAttribute('data-q', (NAMES[r[1]] + ' ' + r[1] + ' ' + r[2] + ' ' + r[3]).toLowerCase());
-      function choose() { save({ l: r[1], c: r[0] }); root.location.reload(); }
+      li.setAttribute('data-q', (NAMES[r[1]] + ' ' + r[1] + ' ' + r[2]).toLowerCase());
+      function choose() { if (r[1] === pick.l) { open(false); return; } save({ l: r[1] }); root.location.reload(); }
       li.addEventListener('click', choose);
       li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); } });
       list.appendChild(li);
@@ -717,7 +718,7 @@
       Array.prototype.forEach.call(list.children, function (li) { var ok = !s || li.getAttribute('data-q').indexOf(s) >= 0; li.hidden = !ok; any = any || ok; });
       none.hidden = any;
     });
-    function open(v) { box.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); if (v) { q.value = ''; q.dispatchEvent(new Event('input')); q.focus(); } }
+    function open(v) { box.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); if (v) { q.value = ''; q.dispatchEvent(new Event('input')); if (!root.matchMedia || root.matchMedia('(pointer: fine)').matches) q.focus(); } }
     btn.addEventListener('click', function (e) { e.stopPropagation(); open(box.hidden); });
     box.addEventListener('click', function (e) { e.stopPropagation(); });
     doc.addEventListener('click', function () { open(false); });
