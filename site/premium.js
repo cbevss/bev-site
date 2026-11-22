@@ -32,15 +32,33 @@
   };
   function errText(res) { return ERR[res.data && res.data.error] || 'That didn’t work. Try again in a minute.'; }
 
+  // Long lists show the first few, with a button to see the rest, so the two cards stay a sensible length.
+  var SHORT = 10;
   function list(ul, items, first) {
     ul.replaceChildren();
     if (first) { var li0 = el('li', 'pall'); li0.append(el('b', null, first)); ul.append(li0); }
-    items.forEach(function (x) {
-      var li = el('li');
+    var long = items.length > SHORT + 2;
+    items.forEach(function (x, i) {
+      var li = el('li', long && i >= SHORT ? 'pmore' : null);
+      if (long && i >= SHORT) li.hidden = true;
       li.append(el('span', 'pico', x.icon || '•'), el('span', null, x.name));
       ul.append(li);
     });
     if (!items.length && !first) ul.append(el('li', 'empty', 'Nothing here yet.'));
+    var old = ul.nextElementSibling;
+    if (old && old.classList.contains('pshow')) old.remove();
+    if (long) {
+      var btn = el('button', 'pshow', 'Show all ' + items.length);
+      btn.type = 'button';
+      btn.setAttribute('aria-expanded', 'false');
+      btn.addEventListener('click', function () {
+        var open = btn.getAttribute('aria-expanded') !== 'true';
+        Array.prototype.forEach.call(ul.querySelectorAll('.pmore'), function (li) { li.hidden = !open; });
+        btn.setAttribute('aria-expanded', String(open));
+        btn.textContent = open ? 'Show fewer' : 'Show all ' + items.length;
+      });
+      ul.after(btn);
+    }
   }
 
   function drawPrice() {

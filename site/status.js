@@ -49,6 +49,12 @@
       }
       bars.appendChild(b);
     });
+    // The key only lists the colours that are actually in the bars.
+    [['lgpart', function (v) { return typeof v === 'number' && v > 0 && v < 0.99; }], ['lgoff', function (v) { return v === 0; }],
+     ['lgnone', function (v) { return typeof v !== 'number'; }]].forEach(function (k) {
+      var el = doc.getElementById(k[0]);
+      if (el) el.hidden = !hours.some(k[1]);
+    });
     var pct = known.reduce(function (a, b) { return a + b; }, 0) / known.length * 100;
     var text = (pct >= 99.95 ? '100' : pct.toFixed(pct >= 99 ? 2 : 1)) + '% online';
     set('uppct', text);

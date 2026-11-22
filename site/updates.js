@@ -7,6 +7,20 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.77',
+    date: '22 November 2026',
+    changes: [
+      { title: 'Commands fully in your language',
+        text: 'Every command\'s description, its options and their choices now show in the language your Discord app is set to (Spanish, French, German, Portuguese, Italian, Dutch, Polish, Turkish or Japanese), not just the command names.' },
+      { title: 'Simpler language list',
+        text: 'The language button on the website now lists each language once, with its flag. While the list is open, only the list scrolls.' },
+      { title: 'Status page',
+        text: 'The numbers are big and easy to read again, and the key under the last 7 days only shows the colours that are actually there.' },
+      { title: 'Find a server',
+        text: 'Servers without a picture show their initials like Discord does, servers without a description say so, and on phones the tag filters sit in one row you can swipe.' },
+    ],
+  },
+  {
     id: '4.76',
     date: '22 November 2026',
     changes: [

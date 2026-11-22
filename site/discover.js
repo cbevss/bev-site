@@ -5,7 +5,11 @@
   var state = { servers: [], tag: '', q: '', sort: 'bumped' };
   function $(id) { return doc.getElementById(id); }
   function el(tag, cls, text) { var n = doc.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
-  function initials(name) { return Array.from(String(name || '').trim()).slice(0, 2).join('').toUpperCase() || '?'; }
+  // Like Discord: the first letter of each word, up to three ("Rocket League Lounge" → "RLL").
+  function initials(name) {
+    var words = String(name || '').trim().split(/\s+/).filter(Boolean);
+    return words.slice(0, 3).map(function (w) { return Array.from(w)[0]; }).join('').toUpperCase() || '?';
+  }
   function ago(t) {
     var s = Math.max(0, Math.round(Date.now() / 1000 - t));
     if (!t) return 'not bumped yet';
@@ -38,7 +42,7 @@
       who.append(el('h2', 'disp', s.name), el('p', 'dstats', s.members.toLocaleString() + ' members'));
       top.append(icon(s), who);
       li.append(top);
-      if (s.description) li.append(el('p', 'ddesc', s.description));
+      li.append(s.description ? el('p', 'ddesc', s.description) : el('p', 'ddesc none', 'No description yet.'));
       if (s.tags.length) {
         var tags = el('div', 'dtaglist');
         s.tags.forEach(function (t) {
@@ -72,6 +76,7 @@
     var count = {};
     state.servers.forEach(function (s) { s.tags.forEach(function (t) { count[t] = (count[t] || 0) + 1; }); });
     var top = Object.keys(count).sort(function (a, b) { return count[b] - count[a] || a.localeCompare(b); }).slice(0, 12);
+    if (state.tag && top.indexOf(state.tag) === -1) top.unshift(state.tag);   // a tag picked on a card stays visible so it can be cleared
     var box = $('dtags');
     box.replaceChildren();
     top.forEach(function (t) {

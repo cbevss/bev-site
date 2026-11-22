@@ -470,7 +470,7 @@ body.dash{padding-bottom:132px}
 .bigstat .dot{margin-top:0}
 .bigstat.down{border-color:rgba(255,138,138,.6);color:#FFC4C4}
 .bigstat.down .dot{background:transparent;border:2px solid #FF8A8A;box-shadow:none;animation:none}
-.fig{margin:0;font-family:'Unbounded','Arial Black',system-ui,sans-serif;font-weight:700;font-size:clamp(1.4rem,1rem + 1.4vw,2rem);color:#fff!important}
+.fig,.card .fig{margin:4px 0 0;font-family:'Unbounded','Arial Black',system-ui,sans-serif;font-weight:700;font-size:clamp(1.4rem,1rem + 1.4vw,2rem);color:#fff!important}
 
 /* ===== footer legal links, Terms of Service and Privacy Policy pages ===== */
 .llinks{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:2px}
@@ -1220,6 +1220,7 @@ a.cardlink:hover .cardgo{color:#fff}
 .upbars .none{background:rgba(151,164,203,.18)}
 .upkey{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;margin-top:10px;font-size:13px;color:var(--mut)}
 .upleg{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.upleg .lg{display:inline-flex;align-items:center;gap:5px}.upleg .lg[hidden]{display:none}
 .upleg i{display:inline-block;width:10px;height:10px;border-radius:2px;background:#22C55E}
 .upleg i.part{background:#F59E0B}.upleg i.off{background:#EF4444}.upleg i.none{background:rgba(151,164,203,.3)}
 @media(max-width:520px){.upbars{height:34px;gap:0}.upleg{order:3;flex:1 0 100%}}
@@ -1799,11 +1800,15 @@ input.field[type=color]{width:64px;height:44px;padding:4px;cursor:pointer}
 .pcur{display:inline-block;margin:0 0 8px;padding:3px 10px;border-radius:999px;font-size:.85em;font-weight:700;background:rgba(127,166,255,.18);color:#CFE0FF}
 .pprice{margin:6px 0 10px;color:var(--mut)}
 .pprice b{font-size:2em;color:#fff;font-family:inherit}
-.plist{list-style:none;margin:10px 0 16px;padding:0;display:grid;gap:6px;max-height:520px;overflow:auto}
+.plist{list-style:none;margin:10px 0 16px;padding:0;display:grid;gap:6px}
+.plist li[hidden]{display:none}
+.pshow{display:inline-flex;align-items:center;gap:6px;margin:-6px 0 18px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.pshow:hover{border-color:rgba(255,255,255,.35)}.pshow:focus-visible{outline:2px solid #60A5FA;outline-offset:2px}
 .plist li{display:flex;gap:8px;align-items:flex-start;overflow-wrap:anywhere}
 .plist li.pall{padding-bottom:6px;border-bottom:1px solid var(--line)}
 .pico{flex:0 0 1.4em;text-align:center}
 .pbuy{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pbuy>.act{flex:1 1 100%;justify-content:center;text-align:center}
 .pbuy .fnote{flex-basis:100%;margin:0}
 /* a feature or setting that needs Premium in this server: greyed, and a click opens /premium */
 .plocked h3,.plocked .flabel{color:var(--mut);opacity:.55}
@@ -1956,3 +1961,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 /* While the language list is open the page behind it doesn't scroll */
 html.langlock,html.langlock body{overflow:hidden;overscroll-behavior:none}
 .langlist{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.ddesc.none{font-style:italic;opacity:.6}
+.pcard>.plist,.pcard>.pbuy{align-self:stretch}
+/* Find a server: on phones the tag filters sit in one row you can swipe sideways */
+@media(max-width:520px){#dtags{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-right:-20px;padding-right:20px}#dtags::-webkit-scrollbar{display:none}#dtags .pill{flex:none}}
