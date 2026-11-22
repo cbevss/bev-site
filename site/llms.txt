@@ -500,6 +500,11 @@
   - Setting: Buttons. Each button renames the channel to its name. Discord allows 2 renames every 10 minutes. Each has: Button text, Emoji, Rename the channel to, Colour.
   - Setting: Who can press the buttons. Leave empty to let everyone press them.
   - Setting: Only people in the voice channel.
+- Auto Translate: When a member writes in a different language from the server's, BEV posts a panel with the translation, starting with their display name, like "cbevs: hello everyone". Page: https://bevbotdiscord.com/features/auto-translate
+  - Setting: Server's language. Messages in any other language get translated into this one. Choices: Same as BEV's language (Translate card), English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Ukrainian, Turkish, Arabic, Hindi, Japanese, Korean, Chinese (Simplified), Chinese (Traditional), Vietnamese, Thai, Indonesian, Swedish, Norwegian, Danish, Finnish, Greek, Czech, Romanian, Hungarian, Hebrew, Persian, Bengali, Urdu, Malay, Filipino.
+  - Setting: Shortest message to translate (letters).
+  - Setting: Don't translate messages from. For example bots' roles or staff.
+  - Setting: Channels to skip.
 
 ## Dashboard tools
 

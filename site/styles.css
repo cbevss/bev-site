@@ -1932,3 +1932,18 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .ffbtn:hover{color:#fff}
 .ffbtn[aria-pressed="true"]{background:var(--ac);color:#fff;box-shadow:0 0 12px var(--glow)}
 .ffbtn:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+
+/* Language picker */
+.lang{position:relative;display:inline-block}
+.langbtn{white-space:nowrap;cursor:pointer}
+.langbox{position:absolute;right:0;top:calc(100% + 8px);z-index:60;width:280px;max-width:90vw;background:var(--panel,#151821);border:1px solid rgba(255,255,255,.12);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.45);padding:8px}
+.langq{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.25);color:inherit;font:inherit;margin-bottom:6px}
+.langlist{list-style:none;margin:0;padding:0;max-height:320px;overflow-y:auto}
+.langopt{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer}
+.langopt:hover,.langopt:focus{background:rgba(255,255,255,.08);outline:none}
+.langopt.on{background:rgba(88,101,242,.25)}
+.langflag{font-size:1.25em;line-height:1}
+.langtx{display:flex;flex-direction:column;flex:1;min-width:0}
+.langtx small{opacity:.7;font-size:.8em}
+.langcode{opacity:.6;font-size:.8em;font-weight:600}
+.langnone{margin:6px 8px;opacity:.6}

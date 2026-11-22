@@ -7,6 +7,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.74',
+    date: '22 November 2026',
+    changes: [
+      { title: 'New feature: Auto Translate',
+        text: 'When someone writes in a different language from your server\'s, BEV posts a small panel with just the translation, starting with their name, like "cbevs: hello everyone". Switch it on in the dashboard and pick the server\'s language.' },
+      { title: 'The website in your language',
+        text: 'Use the flag button at the top right of any page to pick your language. Search the list by language or country. The menus, buttons and main page text are translated so far.' },
+      { title: 'Commands in your language',
+        text: 'BEV\'s command names now show in the language your Discord app is set to (Spanish, French, German, Portuguese, Italian, Dutch, Polish, Turkish or Japanese).' },
+    ],
+  },
+  {
     id: '4.73',
     date: '22 November 2026',
     changes: [

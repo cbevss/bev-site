@@ -626,3 +626,113 @@
   pauseOffscreen();
   boot();
 })(window);
+
+/*
+ * Language picker: a flag + 2-letter code button at the top right of every page.
+ * The list shows countries with each language written in that language, and has a search box.
+ * The choice is saved in this browser. Translations live in /lang.js (made by tools/build_lang.py)
+ * and are only downloaded when a language other than English is picked.
+ */
+(function (root) {
+  'use strict';
+  var doc = root.document;
+  if (!doc) return;
+  var LANG_V = '235b198a45';
+  var NAMES = { en: 'English', es: 'Español', fr: 'Français', de: 'Deutsch', pt: 'Português', it: 'Italiano', nl: 'Nederlands', pl: 'Polski', tr: 'Türkçe', ja: '日本語' };
+  // [flag country code, language, country name in that language, country name in English]
+  var C = [
+    ['gb','en','United Kingdom','United Kingdom'],['us','en','United States','United States'],['ca','en','Canada','Canada'],['au','en','Australia','Australia'],['ie','en','Ireland','Ireland'],['nz','en','New Zealand','New Zealand'],['za','en','South Africa','South Africa'],['in','en','India','India'],['ng','en','Nigeria','Nigeria'],['ph','en','Philippines','Philippines'],['sg','en','Singapore','Singapore'],
+    ['es','es','España','Spain'],['mx','es','México','Mexico'],['ar','es','Argentina','Argentina'],['co','es','Colombia','Colombia'],['cl','es','Chile','Chile'],['pe','es','Perú','Peru'],['ve','es','Venezuela','Venezuela'],['ec','es','Ecuador','Ecuador'],['uy','es','Uruguay','Uruguay'],['cr','es','Costa Rica','Costa Rica'],
+    ['fr','fr','France','France'],['be','fr','Belgique','Belgium'],['ch','fr','Suisse','Switzerland'],['ca','fr','Canada','Canada'],['sn','fr','Sénégal','Senegal'],['ci','fr',"Côte d'Ivoire",'Ivory Coast'],['ma','fr','Maroc','Morocco'],
+    ['de','de','Deutschland','Germany'],['at','de','Österreich','Austria'],['ch','de','Schweiz','Switzerland'],['li','de','Liechtenstein','Liechtenstein'],
+    ['pt','pt','Portugal','Portugal'],['br','pt','Brasil','Brazil'],['ao','pt','Angola','Angola'],['mz','pt','Moçambique','Mozambique'],
+    ['it','it','Italia','Italy'],['sm','it','San Marino','San Marino'],['ch','it','Svizzera','Switzerland'],
+    ['nl','nl','Nederland','Netherlands'],['be','nl','België','Belgium'],['sr','nl','Suriname','Suriname'],
+    ['pl','pl','Polska','Poland'],
+    ['tr','tr','Türkiye','Turkey'],['cy','tr','Kıbrıs','Cyprus'],
+    ['jp','ja','日本','Japan']
+  ];
+  function flag(cc) { return cc.toUpperCase().replace(/./g, function (ch) { return String.fromCodePoint(127397 + ch.charCodeAt(0)); }); }
+  function load() { try { return JSON.parse(root.localStorage.getItem('bev_lang') || 'null'); } catch (e) { return null; } }
+  function save(v) { try { root.localStorage.setItem('bev_lang', JSON.stringify(v)); } catch (e) {} }
+  var pick = load() || { l: 'en', c: 'gb' };
+  if (!NAMES[pick.l]) pick = { l: 'en', c: 'gb' };
+  doc.documentElement.lang = pick.l;
+
+  var dict = null, attrs = ['placeholder', 'title', 'aria-label'];
+  function tr(s) {
+    if (!dict || !s) return null;
+    var t = s.trim();
+    if (!t || !dict[t]) return null;
+    return s.replace(t, dict[t]);
+  }
+  function walk(node) {
+    if (node.nodeType === 3) { var n = tr(node.nodeValue); if (n !== null && n !== node.nodeValue) node.nodeValue = n; return; }
+    if (node.nodeType !== 1 || node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.hasAttribute('data-notr')) return;
+    for (var i = 0; i < attrs.length; i++) { var a = node.getAttribute(attrs[i]); var x = tr(a); if (x !== null && x !== a) node.setAttribute(attrs[i], x); }
+    for (var c = node.firstChild; c; c = c.nextSibling) walk(c);
+  }
+  function start() {
+    dict = (root.BEV_LANG_DATA || {})[pick.l];
+    if (!dict) return;
+    walk(doc.body);
+    if (root.MutationObserver) new root.MutationObserver(function (ms) {
+      ms.forEach(function (m) {
+        if (m.type === 'characterData') walk(m.target);
+        else if (m.type === 'attributes') walk(m.target);
+        else m.addedNodes.forEach(walk);
+      });
+    }).observe(doc.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: attrs });
+  }
+
+  function el(tag, cls, text) { var e = doc.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function build() {
+    var host = doc.querySelector('.navbtns');
+    if (!host || doc.getElementById('langbtn')) return;
+    var wrap = el('div', 'lang'); wrap.setAttribute('data-notr', '');
+    var btn = el('button', 'mini langbtn', flag(pick.c) + ' ' + pick.l.toUpperCase());
+    btn.id = 'langbtn'; btn.type = 'button';
+    btn.setAttribute('aria-haspopup', 'listbox'); btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', 'Language: ' + NAMES[pick.l]);
+    var box = el('div', 'langbox'); box.hidden = true;
+    var q = el('input', 'langq'); q.type = 'search';
+    q.placeholder = (dict && dict['Search languages']) || 'Search languages';
+    q.setAttribute('aria-label', q.placeholder);
+    var list = el('ul', 'langlist'); list.setAttribute('role', 'listbox');
+    C.forEach(function (r) {
+      var li = el('li', 'langopt'); li.setAttribute('role', 'option'); li.tabIndex = 0;
+      if (r[0] === pick.c && r[1] === pick.l) { li.classList.add('on'); li.setAttribute('aria-selected', 'true'); }
+      li.appendChild(el('span', 'langflag', flag(r[0])));
+      var t = el('span', 'langtx'); t.appendChild(el('b', null, NAMES[r[1]])); t.appendChild(el('small', null, r[2]));
+      li.appendChild(t); li.appendChild(el('span', 'langcode', r[1].toUpperCase()));
+      li.setAttribute('data-q', (NAMES[r[1]] + ' ' + r[1] + ' ' + r[2] + ' ' + r[3]).toLowerCase());
+      function choose() { save({ l: r[1], c: r[0] }); root.location.reload(); }
+      li.addEventListener('click', choose);
+      li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); } });
+      list.appendChild(li);
+    });
+    var none = el('p', 'langnone', '—'); none.hidden = true;
+    q.addEventListener('input', function () {
+      var s = q.value.trim().toLowerCase(), any = false;
+      Array.prototype.forEach.call(list.children, function (li) { var ok = !s || li.getAttribute('data-q').indexOf(s) >= 0; li.hidden = !ok; any = any || ok; });
+      none.hidden = any;
+    });
+    function open(v) { box.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); if (v) { q.value = ''; q.dispatchEvent(new Event('input')); q.focus(); } }
+    btn.addEventListener('click', function (e) { e.stopPropagation(); open(box.hidden); });
+    box.addEventListener('click', function (e) { e.stopPropagation(); });
+    doc.addEventListener('click', function () { open(false); });
+    doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !box.hidden) { open(false); btn.focus(); } });
+    box.appendChild(q); box.appendChild(list); box.appendChild(none);
+    wrap.appendChild(btn); wrap.appendChild(box);
+    host.appendChild(wrap);
+  }
+  function ready() {
+    if (pick.l === 'en') { build(); return; }
+    var s = doc.createElement('script');
+    s.src = '/lang.js?v=' + LANG_V;
+    s.onload = function () { start(); build(); };
+    s.onerror = build;
+    doc.head.appendChild(s);
+  }
+  if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', ready); else ready();
+})(typeof window !== 'undefined' ? window : this);
