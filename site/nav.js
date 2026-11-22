@@ -920,7 +920,7 @@
       doc[f]('touchstart', touchStart, { passive: true });
       doc[f]('touchmove', touchMove, { passive: false });
     }
-    function open(v) { box.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); lockPage(!!v); if (v) { q.value = ''; q.dispatchEvent(new Event('input')); if (!root.matchMedia || root.matchMedia('(pointer: fine)').matches) q.focus(); } }
+    function open(v) { box.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); lockPage(!!v); if (v) { q.value = ''; q.dispatchEvent(new Event('input')); if (!root.matchMedia || root.matchMedia('(pointer: fine)').matches) q.focus(); if (box.scrollIntoView) box.scrollIntoView({ block: 'nearest' }); } }
     btn.addEventListener('click', function (e) { e.stopPropagation(); open(box.hidden); });
     box.addEventListener('click', function (e) { e.stopPropagation(); });
     doc.addEventListener('click', function () { open(false); });

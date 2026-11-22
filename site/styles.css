@@ -1968,3 +1968,11 @@ html.langlock,html.langlock body{overflow:hidden;overscroll-behavior:none}
 /* Shown in the corner while a page is being translated for the first time */
 .i18nbusy{position:fixed;left:16px;bottom:16px;z-index:80;padding:8px 14px;border-radius:999px;background:rgba(15,23,42,.92);border:1px solid rgba(96,165,250,.45);color:#fff;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .i18nbusy[hidden]{display:none}
+/* In the phone menu the language list opens inside the menu (pushing it down) instead of floating over the page,
+   so the menu's edge can't cut it off */
+@media(max-width:760px){
+  .nav.open .navbtns .lang{display:block;grid-column:1/-1;flex:1 0 100%;width:100%}
+  .nav.open .navbtns .langbtn{width:100%;justify-content:center}
+  .nav.open .langbox{position:static;width:auto;max-width:none;margin-top:8px;box-shadow:none}
+  .nav.open .langlist{max-height:min(52vh,420px)}
+}
