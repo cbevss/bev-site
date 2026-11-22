@@ -1953,3 +1953,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 /* Status page: the four figures sit in one row on wide screens and two-by-two on tablets */
 @media(min-width:900px){#facts.cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:899px){#facts.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+/* While the language list is open the page behind it doesn't scroll */
+html.langlock,html.langlock body{overflow:hidden;overscroll-behavior:none}
+.langlist{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}

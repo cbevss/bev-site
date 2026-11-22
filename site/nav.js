@@ -718,7 +718,30 @@
       Array.prototype.forEach.call(list.children, function (li) { var ok = !s || li.getAttribute('data-q').indexOf(s) >= 0; li.hidden = !ok; any = any || ok; });
       none.hidden = any;
     });
-    function open(v) { box.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); if (v) { q.value = ''; q.dispatchEvent(new Event('input')); if (!root.matchMedia || root.matchMedia('(pointer: fine)').matches) q.focus(); } }
+    // While the list is open only the list scrolls: the page behind it stays still (wheel, touch and keys).
+    function blockScroll(e) {
+      if (box.hidden) return;
+      var inList = list.contains(e.target);
+      if (!inList) { e.preventDefault(); return; }
+      var dy = e.deltaY != null ? e.deltaY : 0;
+      if (e.type === 'wheel' && ((dy < 0 && list.scrollTop <= 0) || (dy > 0 && list.scrollTop + list.clientHeight >= list.scrollHeight - 1))) e.preventDefault();
+    }
+    var touchY = 0;
+    function touchStart(e) { touchY = e.touches && e.touches[0] ? e.touches[0].clientY : 0; }
+    function touchMove(e) {
+      if (box.hidden) return;
+      if (!list.contains(e.target)) { e.preventDefault(); return; }
+      var y = e.touches && e.touches[0] ? e.touches[0].clientY : touchY, up = y > touchY;
+      if ((up && list.scrollTop <= 0) || (!up && list.scrollTop + list.clientHeight >= list.scrollHeight - 1)) e.preventDefault();
+    }
+    function lockPage(on) {
+      doc.documentElement.classList.toggle('langlock', on);
+      var f = on ? 'addEventListener' : 'removeEventListener';
+      doc[f]('wheel', blockScroll, { passive: false });
+      doc[f]('touchstart', touchStart, { passive: true });
+      doc[f]('touchmove', touchMove, { passive: false });
+    }
+    function open(v) { box.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); lockPage(!!v); if (v) { q.value = ''; q.dispatchEvent(new Event('input')); if (!root.matchMedia || root.matchMedia('(pointer: fine)').matches) q.focus(); } }
     btn.addEventListener('click', function (e) { e.stopPropagation(); open(box.hidden); });
     box.addEventListener('click', function (e) { e.stopPropagation(); });
     doc.addEventListener('click', function () { open(false); });
