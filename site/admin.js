@@ -1314,11 +1314,12 @@
       fact('Tickets open / all time', num(d.tickets.open) + ' / ' + num(d.tickets.total));
       fact('Songs played (30 days)', num(d.music_month));
       fact('Boosts', num(d.boosts));
-      fill('sslevels', d.levels, function (x) { return [x.name, 'Level ' + x.level + ' • ' + num(x.xp) + ' XP']; }, 'Nobody has XP yet (Leveling may be off).');
+      function who(x) { return x.name + (x.user && x.user.toLowerCase() !== String(x.name).toLowerCase() ? ' (@' + x.user + ')' : ''); }
+      fill('sslevels', d.levels, function (x) { return [who(x), 'Level ' + x.level + ' • ' + num(x.xp) + ' XP total']; }, 'Nobody has XP yet (Leveling may be off).');
       fill('sscmds', d.commands.top, function (x) { return ['/' + x.command, num(x.uses) + '×']; }, 'No commands counted yet.');
       $('sscmdnote').textContent = d.commands.since ? 'Counted since ' + d.commands.since + '.' : 'BEV started counting commands with this update.';
-      fill('sstalk', d.activity.top, function (x) { return [x.name, num(x.messages)]; }, 'No messages counted in the last 30 days.');
-      fill('sscoins', d.coins, function (x) { return [x.name, num(x.coins) + ' 🪙']; }, 'Nobody has coins yet (Economy may be off).');
+      fill('sstalk', d.activity.top, function (x) { return [who(x), num(x.messages)]; }, 'No messages counted in the last 30 days.');
+      fill('sscoins', d.coins, function (x) { return [who(x), num(x.coins) + ' 🪙']; }, 'Nobody has coins yet (Economy may be off).');
       $('ssfeatsum').textContent = 'Features switched on (' + d.features_on.length + ')';
       d.features_on.forEach(function (f) { $('ssfeats').append(make('span', 'pill', f.icon + ' ' + f.name)); });
     });
