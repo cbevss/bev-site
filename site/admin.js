@@ -1197,6 +1197,66 @@
   }
   $('hrun').addEventListener('click', runHealth);
 
+  // ---------- BEV's servers: the list, and join DMs ----------
+  var serversLoaded = false;
+  function loadServers() {
+    if (serversLoaded) return;
+    serversLoaded = true;
+    $('srvstate').textContent = 'Loading…';
+    call('/api/admin/servers').then(function (res) {
+      if (!res.ok) {
+        serversLoaded = false;
+        $('srvstate').textContent = 'Not available';
+        $('srvsum').textContent = res.data && res.data.error === 'bot_outdated' ? 'The bot needs updating before this works' : 'BEV didn’t answer. Open this again to retry';
+        return;
+      }
+      var list = res.data.servers || [];
+      $('srvnotify').checked = !!res.data.notify;
+      $('srvnotify').disabled = false;
+      var withLink = list.filter(function (g) { return g.vanity; }).length;
+      $('srvstate').textContent = plural(list.length, 'server', 'servers');
+      $('srvstate').className = 'stat here';
+      $('srvsum').textContent = 'Show all ' + plural(list.length, 'server', 'servers') + (withLink ? ' (' + withLink + ' with a custom link)' : '');
+      var rows = $('srvrows'); rows.textContent = '';
+      list.forEach(function (g) {
+        var li = make('li', 'srvrow');
+        li.dataset.q = (g.name + ' ' + (g.vanity || '') + ' ' + g.id).toLowerCase();
+        var pic = make('span', 'srvicon');
+        if (g.icon) { var img = make('img'); img.src = g.icon; img.alt = ''; img.loading = 'lazy'; img.width = 32; img.height = 32; pic.append(img); }
+        else pic.textContent = (g.name.trim().split(/\s+/).slice(0, 2).map(function (w) { return Array.from(w)[0] || ''; }).join('') || '?').toUpperCase();
+        var text = make('span', 'srvtext');
+        var name = make('b', 'notr', g.name);
+        text.append(name, make('small', null, plural(g.members, 'member', 'members') + (g.joined ? ' • joined ' + ago(g.joined) : '')));
+        li.append(pic, text);
+        if (g.vanity) {
+          var a = make('a', 'srvlink notr', g.vanity.replace('https://', ''));
+          a.href = g.vanity; a.target = '_blank'; a.rel = 'noopener noreferrer';
+          li.append(a);
+        } else li.append(make('span', 'srvlink none', 'No custom link'));
+        rows.append(li);
+      });
+      filterServers();
+    });
+  }
+  function filterServers() {
+    var q = $('srvfind').value.trim().toLowerCase(), any = false;
+    Array.prototype.forEach.call($('srvrows').children, function (li) { var ok = !q || li.dataset.q.indexOf(q) >= 0; li.hidden = !ok; any = any || ok; });
+    $('srvnone').hidden = any || !$('srvrows').children.length;
+  }
+  $('srvfind').addEventListener('input', filterServers);
+  $('srvdrop').addEventListener('toggle', function () { if ($('srvdrop').open) loadServers(); });
+  $('srvnotify').addEventListener('change', function () {
+    var box = $('srvnotify'), want = box.checked;
+    box.disabled = true;
+    call('/api/admin/servers/notify', { notify: want }).then(function (res) {
+      box.disabled = false;
+      if (!res.ok) { box.checked = !want; toast('Couldn’t change that. Try again in a minute.'); return; }
+      box.checked = !!res.data.notify;
+      toast(box.checked ? 'BEV will DM you when it joins a server.' : 'BEV won’t DM you when it joins a server.');
+    });
+  });
+  loadServers();
+
   /* ---------- BEV's data: download, upload and look through it (main admins) ---------- */
   var bdata = { overview: null, guild: '', table: '', page: 0, total: 0 };
   function mb(n) { return n === null || n === undefined ? 'Unknown' : (n / 1048576).toFixed(1) + ' MB'; }

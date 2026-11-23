@@ -963,7 +963,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=50c9e44e34">
+<link rel="stylesheet" href="/styles.css?v=4724731ef8">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1177,6 +1177,7 @@ const ADMIN_ROUTES = {
   '/api/admin/backup': 'GET', '/api/admin/backup/set': 'POST',
   '/api/admin/premium': 'GET', '/api/admin/premium/set': 'POST', '/api/admin/premium/gift': 'POST', '/api/admin/premium/paypal-plans': 'POST',
   '/api/admin/premium/check': 'POST', '/api/admin/perms': 'POST',
+  '/api/admin/servers': 'GET', '/api/admin/servers/notify': 'POST',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1511,6 +1512,7 @@ async function adminApi(request, env, c, url, secure, s) {
   if (path === '/api/admin/support' || path === '/api/admin/support/act') return adminSupport(request, c, s, path);
   if (path === '/api/admin/admins') return changeAdmins(request, env, c, s);
   if (path === '/api/admin/health') return botHealth(c);
+  if (path.startsWith('/api/admin/servers')) return adminServers(request, c, s, path);
   if (path.startsWith('/api/admin/data')) return botData(request, c, s, url, path);
   if (path.startsWith('/api/admin/backup')) return backupTiming(request, c, s, path);
 
@@ -1603,6 +1605,30 @@ async function backupTiming(request, c, s, path) {
   if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
   if (res.data.every_minutes === undefined) return json({ error: 'bot_outdated' }, 501);
   return json(cleanBackup(res.data));
+}
+
+/* ---------- every server BEV is in, and join DMs for the admin asking (site admins only) ---------- */
+
+async function adminServers(request, c, s, path) {
+  const me = String(s.session.user.id);
+  let res;
+  if (path === '/api/admin/servers/notify') {
+    const body = await readJson(request, 2000);
+    if (!body || typeof body.notify !== 'boolean') return json({ error: 'bad_request' }, 400);
+    res = await bot(c, '/api/admin-servers', { method: 'POST', body: JSON.stringify({ user: me, notify: body.notify }) });
+  } else res = await bot(c, '/api/admin-servers?user=' + encodeURIComponent(me));
+  if (res.error) return json({ error: res.error }, 503);
+  if (res.status === 404) return json({ error: 'bot_outdated' }, 501);
+  if (res.status !== 200 || !res.data) return json({ error: 'bot_error' }, 502);
+  if (path === '/api/admin/servers/notify') return json({ notify: !!res.data.notify });
+  const str = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
+  const servers = (Array.isArray(res.data.servers) ? res.data.servers : []).slice(0, 5000).map((g) => ({
+    id: str(g.id, 25), name: str(g.name, 100), members: Number.isFinite(g.members) ? g.members : 0,
+    vanity: typeof g.vanity === 'string' && /^https:\/\/discord\.gg\/[\w-]+$/.test(g.vanity) ? g.vanity : null,
+    description: str(g.description, 300), icon: typeof g.icon === 'string' && g.icon.startsWith('https://cdn.discordapp.com/') ? g.icon : null,
+    joined: Number.isFinite(g.joined) ? g.joined : null,
+  }));
+  return json({ servers, notify: !!res.data.notify });
 }
 
 /* ---------- bot health: each part of BEV, its background jobs and recent errors (site admins only) ---------- */

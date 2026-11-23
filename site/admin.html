@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=50c9e44e34">
+<link rel="stylesheet" href="/styles.css?v=4724731ef8">
 </head>
 <body class="admin">
 <a class="skip" href="#main">Skip to content</a>
@@ -208,6 +208,17 @@
 </div>
 </section>
 
+<section class="asec" id="servers" aria-labelledby="servers-h">
+<div class="ahead"><h2 class="disp" id="servers-h">BEV's servers</h2><span class="stat" id="srvstate">Not loaded</span></div>
+<p class="adesc">Every server BEV is in, with its custom invite link if it has one.</p>
+<label class="srvnotify"><input type="checkbox" id="srvnotify" disabled> <span><b>DM me when BEV joins a server</b><small>BEV sends you a panel with the server's name, description and custom invite link.</small></span></label>
+<details class="fset srvlist" id="srvdrop"><summary id="srvsum">Show every server</summary>
+<input class="srvfind" id="srvfind" type="search" placeholder="Search servers" aria-label="Search servers" autocomplete="off">
+<ul class="srvrows" id="srvrows"></ul>
+<p class="note" id="srvnone" hidden>No servers match that search.</p>
+</details>
+</section>
+
 <section class="asec" id="health" aria-labelledby="health-h">
 <div class="ahead"><h2 class="disp" id="health-h">Bot health</h2><span class="stat" id="hstate">Not checked</span></div>
 <p class="adesc">How each part of BEV is doing: errors in the last day, the background jobs (when each last ran and whether it worked) and the latest errors, so problems can be fixed before anyone reports them.</p>
@@ -334,6 +345,6 @@
 <script src="/updates.js?v=bb5940b20f" defer></script>
 <script src="/nav.js?v=97cda7a200" defer></script>
 <script src="/supportchat.js?v=56ad3f5691" defer></script>
-<script src="/admin.js?v=3a61a254cd" defer></script>
+<script src="/admin.js?v=3758e997ad" defer></script>
 </body>
 </html>
