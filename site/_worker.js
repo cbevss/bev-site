@@ -963,7 +963,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=4724731ef8">
+<link rel="stylesheet" href="/styles.css?v=184fbfe9de">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1627,6 +1627,7 @@ async function adminServers(request, c, s, path) {
     vanity: typeof g.vanity === 'string' && /^https:\/\/discord\.gg\/[\w-]+$/.test(g.vanity) ? g.vanity : null,
     description: str(g.description, 300), icon: typeof g.icon === 'string' && g.icon.startsWith('https://cdn.discordapp.com/') ? g.icon : null,
     joined: Number.isFinite(g.joined) ? g.joined : null,
+    owner_name: str(g.owner_name, 100) || null, owner_user: str(g.owner_user, 40) || null,
   }));
   return json({ servers, notify: !!res.data.notify });
 }

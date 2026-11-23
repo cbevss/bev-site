@@ -1220,13 +1220,22 @@
       var rows = $('srvrows'); rows.textContent = '';
       list.forEach(function (g) {
         var li = make('li', 'srvrow');
-        li.dataset.q = (g.name + ' ' + (g.vanity || '') + ' ' + g.id).toLowerCase();
+        li.dataset.q = (g.name + ' ' + (g.vanity || '') + ' ' + g.id + ' ' + (g.owner_name || '') + ' ' + (g.owner_user || '')).toLowerCase();
         var pic = make('span', 'srvicon');
         if (g.icon) { var img = make('img'); img.src = g.icon; img.alt = ''; img.loading = 'lazy'; img.width = 32; img.height = 32; pic.append(img); }
         else pic.textContent = (g.name.trim().split(/\s+/).slice(0, 2).map(function (w) { return Array.from(w)[0] || ''; }).join('') || '?').toUpperCase();
         var text = make('span', 'srvtext');
-        var name = make('b', 'notr', g.name);
-        text.append(name, make('small', null, plural(g.members, 'member', 'members') + (g.joined ? ' • joined ' + ago(g.joined) : '')));
+        var top = make('span', 'srvtop');
+        top.append(make('b', 'notr', g.name));
+        if (g.owner_name || g.owner_user) {
+          top.append(make('span', 'srvdot', '•'));
+          if (g.owner_name) top.append(make('span', 'srvowner notr', g.owner_name));
+          if (g.owner_user) top.append(make('span', 'srvuser notr', '@' + g.owner_user));
+        }
+        text.append(top, make('small', null, plural(g.members, 'member', 'members') + (g.joined ? ' • joined ' + ago(g.joined) : '')));
+        li.dataset.members = g.members || 0;
+        li.dataset.joined = g.joined || 0;
+        li.dataset.name = g.name.toLowerCase();
         li.append(pic, text);
         if (g.vanity) {
           var a = make('a', 'srvlink notr', g.vanity.replace('https://', ''));
@@ -1235,9 +1244,25 @@
         } else li.append(make('span', 'srvlink none', 'No custom link'));
         rows.append(li);
       });
+      sortServers();
       filterServers();
     });
   }
+  // Name, most or least members, most recently or longest ago joined (servers with no join date go last)
+  function sortServers() {
+    var how = $('srvsort').value, rows = $('srvrows');
+    var items = Array.prototype.slice.call(rows.children);
+    items.sort(function (a, b) {
+      var am = +a.dataset.members, bm = +b.dataset.members, aj = +a.dataset.joined, bj = +b.dataset.joined;
+      if (how === 'most') return bm - am || a.dataset.name.localeCompare(b.dataset.name);
+      if (how === 'least') return am - bm || a.dataset.name.localeCompare(b.dataset.name);
+      if (how === 'new') return (bj || -1) - (aj || -1);
+      if (how === 'old') return (aj || Infinity) - (bj || Infinity);
+      return a.dataset.name.localeCompare(b.dataset.name);
+    });
+    items.forEach(function (li) { rows.append(li); });
+  }
+  $('srvsort').addEventListener('change', sortServers);
   function filterServers() {
     var q = $('srvfind').value.trim().toLowerCase(), any = false;
     Array.prototype.forEach.call($('srvrows').children, function (li) { var ok = !q || li.dataset.q.indexOf(q) >= 0; li.hidden = !ok; any = any || ok; });
