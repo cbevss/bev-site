@@ -505,6 +505,11 @@
   - Setting: Shortest message to translate (letters).
   - Setting: Don't translate messages from. For example bots' roles or staff.
   - Setting: Channels to skip.
+- Price Tracker: Members give BEV a link to an item on a shop's website. BEV keeps an eye on the price and DMs them when it drops. They can ask for the price any time with /price check, here or in their DMs. Page: https://bevbotdiscord.com/features/price-watch
+  - Setting: Check prices every. Choices: 1 hour, 3 hours, 6 hours, 12 hours, 24 hours.
+  - Setting: Items each person can track.
+  - Setting: Who can use it. Leave empty to let everyone use it.
+  - Setting: Also post price drops in (optional). Price drops always go to the person's DMs. Pick a channel to post them there too.
 
 ## Dashboard tools
 

@@ -7,6 +7,18 @@
  */
 window.BEV_UPDATES = [
   {
+    id: '4.83',
+    date: '23 November 2026',
+    changes: [
+      { title: 'New feature: Price Tracker',
+        text: 'Give BEV a link to an item on a shop\'s website with /price track and it DMs you a panel when the price drops, or when it reaches a price you pick. /price check shows the price now (choose DM to get it in your DMs) and /price list shows everything you\'re tracking. Switch it on in the dashboard. Some big shops block bots, so a few sites may not work.' },
+      { title: 'Claim Button: give a role',
+        text: 'The claim button can now give a role to whoever claims: the same role every time, or a different role for each claim in order (1st claim gets the 1st role, and so on).' },
+      { title: 'Ask BEV to DM you',
+        text: 'Put "DM me" in your /ask question and BEV sends the answer to your DMs. If your DMs are closed, it tells you how to open them.' },
+    ],
+  },
+  {
     id: '4.80',
     date: '22 November 2026',
     changes: [
