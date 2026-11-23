@@ -2001,3 +2001,20 @@ html.langlock,html.langlock body{overflow:hidden;overscroll-behavior:none}
 .srvtext{flex:1 1 0;min-width:0;overflow:hidden}
 .srvtop b{min-width:0}
 .srvrows{grid-template-columns:minmax(0,1fr)}.srvrow{min-width:0}
+/* Admin: one server's stats */
+.srvrow{cursor:pointer;transition:border-color .15s}.srvrow:hover,.srvrow:focus-visible{border-color:rgba(96,165,250,.6);outline:none}
+.srvstats{margin-top:12px}.srvstats:focus{outline:none}
+.ssbar{margin-bottom:12px}
+.sshead{display:flex;gap:14px;align-items:center;margin-bottom:12px}.sshead h3{margin:0;font-size:22px;word-break:break-word}.sshead .note{margin:4px 0 0}
+.srvicon.big{width:56px;height:56px;font-size:20px}
+.ssgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0 16px}
+.ssfact{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:4px}
+.ssfact b{font-size:20px}.ssfact span{font-size:12px;opacity:.7}
+.sscols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:12px}
+.sscard{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02);min-width:0}
+.sscard h4{margin:0 0 10px;font-size:15px}
+.sstop{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.sstop li{display:flex;gap:10px;align-items:baseline;min-width:0}
+.ssn{width:20px;flex:none;opacity:.55;font-variant-numeric:tabular-nums}.sswho{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ssval{flex:none;font-size:13px;opacity:.8;font-variant-numeric:tabular-nums}.ssempty{opacity:.6;font-size:14px}
+.ssfeats{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}

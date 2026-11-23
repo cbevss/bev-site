@@ -963,7 +963,7 @@ ${refresh ? `<meta http-equiv="refresh" content="${refresh}">\n` : ''}<meta name
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/styles.css?v=184fbfe9de">
+<link rel="stylesheet" href="/styles.css?v=7b76a4cf96">
 </head>
 <body class="notice">
 <div class="hero">
@@ -1177,7 +1177,7 @@ const ADMIN_ROUTES = {
   '/api/admin/backup': 'GET', '/api/admin/backup/set': 'POST',
   '/api/admin/premium': 'GET', '/api/admin/premium/set': 'POST', '/api/admin/premium/gift': 'POST', '/api/admin/premium/paypal-plans': 'POST',
   '/api/admin/premium/check': 'POST', '/api/admin/perms': 'POST',
-  '/api/admin/servers': 'GET', '/api/admin/servers/notify': 'POST',
+  '/api/admin/servers': 'GET', '/api/admin/servers/notify': 'POST', '/api/admin/servers/stats': 'GET',
 };
 
 /* ---------- the inbox: what still needs setting up, which site admins can mark as done ---------- */
@@ -1611,6 +1611,15 @@ async function backupTiming(request, c, s, path) {
 
 async function adminServers(request, c, s, path) {
   const me = String(s.session.user.id);
+  if (path === '/api/admin/servers/stats') {
+    const gid = new URL(request.url).searchParams.get('guild') || '';
+    if (!/^\d{15,25}$/.test(gid)) return json({ error: 'bad_request' }, 400);
+    const r = await bot(c, '/api/admin-servers/stats?guild=' + gid);
+    if (r.error) return json({ error: r.error }, 503);
+    if (r.status === 404) return json({ error: r.data && r.data.error === 'not_found' ? 'not_found' : 'bot_outdated' }, r.data && r.data.error === 'not_found' ? 404 : 501);
+    if (r.status !== 200 || !r.data) return json({ error: 'bot_error' }, 502);
+    return json(r.data);
+  }
   let res;
   if (path === '/api/admin/servers/notify') {
     const body = await readJson(request, 2000);

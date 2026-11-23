@@ -1242,6 +1242,11 @@
           a.href = g.vanity; a.target = '_blank'; a.rel = 'noopener noreferrer';
           li.append(a);
         } else li.append(make('span', 'srvlink none', 'No custom link'));
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-label', 'See ' + g.name + '’s stats');
+        li.addEventListener('click', function (e) { if (!e.target.closest('a')) openServer(g); });
+        li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openServer(g); } });
         rows.append(li);
       });
       sortServers();
@@ -1263,6 +1268,66 @@
     items.forEach(function (li) { rows.append(li); });
   }
   $('srvsort').addEventListener('change', sortServers);
+
+  // ---------- one server's stats ----------
+  function fill(list, items, line, empty) {
+    var ol = $(list); ol.textContent = '';
+    items.forEach(function (x, i) {
+      var li = make('li');
+      var parts = line(x);
+      li.append(make('span', 'ssn', String(i + 1)), make('span', 'sswho notr', parts[0]), make('span', 'ssval', parts[1]));
+      ol.append(li);
+    });
+    if (!items.length) ol.append(make('li', 'ssempty', empty));
+  }
+  function openServer(g) {
+    var box = $('srvstats');
+    $('srvdrop').hidden = true;
+    box.hidden = false;
+    $('ssname').textContent = g.name;
+    $('ssmeta').textContent = 'Loading…';
+    $('ssfacts').textContent = '';
+    ['sslevels', 'sscmds', 'sstalk', 'sscoins', 'ssfeats'].forEach(function (k) { $(k).textContent = ''; });
+    var icon = $('ssicon'); icon.textContent = '';
+    if (g.icon) { var img = make('img'); img.src = g.icon; img.alt = ''; icon.append(img); } else icon.textContent = (Array.from(g.name.trim())[0] || '?').toUpperCase();
+    box.focus();
+    box.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    call('/api/admin/servers/stats?guild=' + encodeURIComponent(g.id)).then(function (res) {
+      if (!res.ok) {
+        $('ssmeta').textContent = res.data.error === 'not_found' ? 'BEV isn’t in this server any more.' : res.data.error === 'bot_outdated' ? 'The bot needs updating before this works.' : 'BEV didn’t answer. Try again in a minute.';
+        return;
+      }
+      var d = res.data;
+      $('ssmeta').textContent = [d.owner_name ? 'Owner ' + d.owner_name + (d.owner_user ? ' (@' + d.owner_user + ')' : '') : '', d.joined ? 'BEV joined ' + ago(d.joined) : '', d.vanity ? d.vanity.replace('https://', '') : ''].filter(Boolean).join(' • ');
+      var facts = $('ssfacts');
+      function fact(label, value) { var c = make('div', 'ssfact'); c.append(make('b', null, value), make('span', null, label)); facts.append(c); }
+      fact('Members', num(d.members));
+      fact('Commands used (7 days)', num(d.commands.week));
+      fact('Commands used (all)', num(d.commands.total));
+      fact('Messages (7 days)', num(d.activity.messages_week));
+      fact('Active members (7 days)', num(d.activity.active_week));
+      fact('Voice hours (30 days)', String(d.activity.voice_hours_month));
+      fact('Joined / left (30 days)', '+' + num(d.joins_month) + ' / −' + num(d.leaves_month));
+      fact('Features on', d.features_on.length + ' of ' + d.features_total);
+      var cases = d.moderation.cases_month || {}, total = Object.keys(cases).reduce(function (a, k) { return a + cases[k]; }, 0);
+      fact('Moderation actions (30 days)', num(total));
+      fact('Tickets open / all time', num(d.tickets.open) + ' / ' + num(d.tickets.total));
+      fact('Songs played (30 days)', num(d.music_month));
+      fact('Boosts', num(d.boosts));
+      fill('sslevels', d.levels, function (x) { return [x.name, 'Level ' + x.level + ' • ' + num(x.xp) + ' XP']; }, 'Nobody has XP yet (Leveling may be off).');
+      fill('sscmds', d.commands.top, function (x) { return ['/' + x.command, num(x.uses) + '×']; }, 'No commands counted yet.');
+      $('sscmdnote').textContent = d.commands.since ? 'Counted since ' + d.commands.since + '.' : 'BEV started counting commands with this update.';
+      fill('sstalk', d.activity.top, function (x) { return [x.name, num(x.messages)]; }, 'No messages counted in the last 30 days.');
+      fill('sscoins', d.coins, function (x) { return [x.name, num(x.coins) + ' 🪙']; }, 'Nobody has coins yet (Economy may be off).');
+      $('ssfeatsum').textContent = 'Features switched on (' + d.features_on.length + ')';
+      d.features_on.forEach(function (f) { $('ssfeats').append(make('span', 'pill', f.icon + ' ' + f.name)); });
+    });
+  }
+  $('ssback').addEventListener('click', function () {
+    $('srvstats').hidden = true;
+    $('srvdrop').hidden = false;
+    $('srvsum').focus();
+  });
   function filterServers() {
     var q = $('srvfind').value.trim().toLowerCase(), any = false;
     Array.prototype.forEach.call($('srvrows').children, function (li) { var ok = !q || li.dataset.q.indexOf(q) >= 0; li.hidden = !ok; any = any || ok; });
