@@ -2018,3 +2018,8 @@ html.langlock,html.langlock body{overflow:hidden;overscroll-behavior:none}
 .ssn{width:20px;flex:none;opacity:.55;font-variant-numeric:tabular-nums}.sswho{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ssval{flex:none;font-size:13px;opacity:.8;font-variant-numeric:tabular-nums}.ssempty{opacity:.6;font-size:14px}
 .ssfeats{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+/* Server stats: two boxes per row, so whole names fit (one per row on phones) */
+.sscols{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:700px){.sscols{grid-template-columns:minmax(0,1fr)}}
+.sswho{white-space:normal;overflow-wrap:anywhere}
+.ssuser{margin-left:6px;font-size:12px;color:var(--mut,#8B95B0);opacity:.85}

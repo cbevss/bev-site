@@ -1275,7 +1275,12 @@
     items.forEach(function (x, i) {
       var li = make('li');
       var parts = line(x);
-      li.append(make('span', 'ssn', String(i + 1)), make('span', 'sswho notr', parts[0]), make('span', 'ssval', parts[1]));
+      var cell = make('span', 'sswho notr');
+      if (Array.isArray(parts[0])) {          // [display name, @username]
+        cell.append(document.createTextNode(parts[0][0]));
+        if (parts[0][1]) cell.append(make('span', 'ssuser', parts[0][1]));
+      } else cell.textContent = parts[0];
+      li.append(make('span', 'ssn', String(i + 1)), cell, make('span', 'ssval', parts[1]));
       ol.append(li);
     });
     if (!items.length) ol.append(make('li', 'ssempty', empty));
@@ -1314,7 +1319,7 @@
       fact('Tickets open / all time', num(d.tickets.open) + ' / ' + num(d.tickets.total));
       fact('Songs played (30 days)', num(d.music_month));
       fact('Boosts', num(d.boosts));
-      function who(x) { return x.name + (x.user && x.user.toLowerCase() !== String(x.name).toLowerCase() ? ' (@' + x.user + ')' : ''); }
+      function who(x) { return [x.name, x.user && x.user.toLowerCase() !== String(x.name).toLowerCase() ? '@' + x.user : '']; }
       fill('sslevels', d.levels, function (x) { return [who(x), 'Level ' + x.level + ' • ' + num(x.xp) + ' XP total']; }, 'Nobody has XP yet (Leveling may be off).');
       fill('sscmds', d.commands.top, function (x) { return ['/' + x.command, num(x.uses) + '×']; }, 'No commands counted yet.');
       $('sscmdnote').textContent = d.commands.since ? 'Counted since ' + d.commands.since + '.' : 'BEV started counting commands with this update.';
