@@ -42,10 +42,11 @@
       var b = doc.createElement('span');
       var when = new Date(now.getTime() - (hours.length - 1 - i) * 3600000);
       var label = when.toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' });
-      if (typeof v !== 'number') { b.className = 'none'; b.title = label + ': no record'; }
+      b.dataset.when = label;
+      if (typeof v !== 'number') { b.className = 'none'; b.dataset.what = 'No record'; }
       else {
         b.className = v >= 0.99 ? 'ok' : v > 0 ? 'part' : 'off';
-        b.title = label + ': ' + (v >= 0.99 ? 'online' : v > 0 ? 'online ' + Math.round(v * 100) + '% of the hour' : 'offline');
+        b.dataset.what = v >= 0.99 ? 'Online all hour' : v > 0 ? 'Online ' + Math.round(v * 100) + '% of the hour' : 'Offline';
       }
       bars.appendChild(b);
     });
@@ -60,6 +61,59 @@
     set('uppct', text);
     bars.setAttribute('aria-label', 'BEV was ' + text + ' over the last ' + (known.length >= 168 ? '7 days' : Math.round(known.length / 24 * 10) / 10 + ' days') + '.');
     box.hidden = false;
+    wireTips();
+    if (tipBar && !tipBar.isConnected) hideTip();
+  }
+
+  // The site's own tooltip (same look as the charts), shown after 0.2s on a bar.
+  var tip = null, tipTimer = 0, tipBar = null;
+  function hideTip() {
+    root.clearTimeout(tipTimer);
+    tipBar = null;
+    if (tip) tip.hidden = true;
+  }
+  function showTip(bar) {
+    var box = doc.getElementById('uptimebox');
+    if (!tip) {
+      tip = doc.createElement('div');
+      tip.className = 'tip uptip';
+      tip.setAttribute('role', 'tooltip');
+      box.appendChild(tip);
+    }
+    var when = doc.createElement('span'), what = doc.createElement('b'), dot = doc.createElement('i');
+    when.className = 'd';
+    when.textContent = bar.dataset.when;
+    dot.className = 'updot ' + bar.className;
+    what.textContent = bar.dataset.what;
+    tip.replaceChildren(when, dot, what);
+    tip.hidden = false;
+    var b = bar.getBoundingClientRect(), r = box.getBoundingClientRect();
+    var left = b.left - r.left + b.width / 2 - tip.offsetWidth / 2;
+    tip.style.left = Math.max(8, Math.min(left, r.width - tip.offsetWidth - 8)) + 'px';
+    tip.style.top = (b.top - r.top - tip.offsetHeight - 10) + 'px';
+  }
+  function armTip(bar) {
+    if (bar === tipBar) return;
+    root.clearTimeout(tipTimer);
+    tipBar = bar;
+    // Already showing one: move straight to the next bar; otherwise wait 0.2s.
+    if (tip && !tip.hidden) showTip(bar);
+    else tipTimer = root.setTimeout(function () { if (tipBar === bar) showTip(bar); }, 200);
+  }
+  function wireTips() {
+    var bars = doc.getElementById('upbars');
+    if (!bars || bars.dataset.tips) return;
+    bars.dataset.tips = '1';
+    bars.addEventListener('pointerover', function (e) {
+      var bar = e.target.closest && e.target.closest('#upbars > span');
+      if (bar) armTip(bar);
+    });
+    bars.addEventListener('pointerleave', hideTip);
+    bars.addEventListener('pointerdown', function (e) {        // touch: tap a bar to see it
+      var bar = e.target.closest && e.target.closest('#upbars > span');
+      if (bar && e.pointerType !== 'mouse') { tipBar = bar; showTip(bar); }
+    });
+    root.addEventListener('scroll', hideTip, { passive: true });
   }
 
   function check() {
