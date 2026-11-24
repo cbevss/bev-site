@@ -515,7 +515,7 @@ async function i18nApi(request, c, url) {
 
 // The BEV assistant app's PC link: passed straight to the bot, which checks the device token itself.
 // Only the Authorization header and the JSON body go through; no cookies and never BOT_API_KEY.
-const LINK_PATH = /^\/api\/(?:link(?:\/(?:me|unlink|inbox|reply|ask))?|owner\/(?:overview|config|features|actions|action|say|presence|leave|events))$/;
+const LINK_PATH = /^\/api\/(?:link(?:\/(?:me|owners|unlink|inbox|reply|ask))?|owner\/(?:overview|config|features|actions|action|say|presence|leave|events))$/;
 async function linkProxy(request, c, url) {
   if (!c.botApiBase) return json({ error: 'not_configured' }, 503);
   if (!['GET', 'POST'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
