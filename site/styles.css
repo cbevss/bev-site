@@ -1218,6 +1218,13 @@ a.cardlink:hover .cardgo{color:#fff}
 .upbars .part{background:#F59E0B}
 .upbars .off{background:#EF4444}
 .upbars .none{background:rgba(151,164,203,.18)}
+.uptime{position:relative}
+.uptip{min-width:0;white-space:nowrap;padding:8px 12px;font-size:13px}
+.uptip[hidden]{display:none}
+.uptip .d{margin-bottom:2px;font-size:12.5px}
+.uptip b{font-size:14px;font-weight:600}
+.updot{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:2px;vertical-align:1px;background:#22C55E}
+.updot.part{background:#F59E0B}.updot.off{background:#EF4444}.updot.none{background:rgba(151,164,203,.5)}
 .upkey{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;margin-top:10px;font-size:13px;color:var(--mut)}
 .upleg{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .upleg .lg{display:inline-flex;align-items:center;gap:5px}.upleg .lg[hidden]{display:none}

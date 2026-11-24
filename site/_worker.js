@@ -23,6 +23,7 @@
  * Routes: /auth/login /auth/callback /auth/logout
  *         /api/me /api/servers /api/config /api/level-roles (GET and POST) /api/messages (POST)   (signed in)
  *         /api/leaderboard /api/status                        (public: the bot decides what is public)
+ *         /api/link/* /api/owner/*                           (BEV app PC link: passed to the bot, which checks the device token)
  *         /api/admin/state /api/admin/maintenance /api/admin/banner /api/admin/check
  *         /api/admin/alert /api/admin/alert/send                                       (site admins)
  *         /dashboard (signed in) and /admin (site admins)
@@ -512,8 +513,32 @@ async function i18nApi(request, c, url) {
   return json({ lang, t, pending });
 }
 
+// The BEV assistant app's PC link: passed straight to the bot, which checks the device token itself.
+// Only the Authorization header and the JSON body go through; no cookies and never BOT_API_KEY.
+const LINK_PATH = /^\/api\/(?:link(?:\/(?:me|unlink|inbox|reply|ask))?|owner\/(?:overview|config|features|actions|action|say|presence|leave|events))$/;
+async function linkProxy(request, c, url) {
+  if (!c.botApiBase) return json({ error: 'not_configured' }, 503);
+  if (!['GET', 'POST'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
+  const headers = { accept: 'application/json' };
+  const auth = request.headers.get('authorization');
+  if (auth && auth.length < 200) headers.authorization = auth;
+  let body;
+  if (request.method === 'POST') {
+    body = await request.text();
+    if (body.length > 64 * 1024) return json({ error: 'too_big' }, 413);
+    headers['content-type'] = 'application/json';
+  }
+  try {
+    const r = await fetch(c.botApiBase + url.pathname + url.search, { method: request.method, headers, body });
+    return new Response(await r.text(), { status: r.status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
+  } catch {
+    return json({ error: 'bot_unreachable' }, 502);
+  }
+}
+
 async function api(request, c, url, secure, s, env) {
   const path = url.pathname;
+  if (LINK_PATH.test(path)) return linkProxy(request, c, url);
   if (path === '/api/i18n') return i18nApi(request, c, url);
   if (path === '/api/premium' || path === '/api/premium/checkout' || path === '/api/premium/manage') return premiumApi(request, env, c, url, s, path);
   if (path === '/api/status' || path === '/api/leaderboard' || path === '/api/directory') return publicApi(request, c, url);
