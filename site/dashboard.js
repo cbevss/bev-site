@@ -3317,7 +3317,9 @@
       side.append(el('p', 'mlab', 'Preview'));
       side.append(messagePreview(t));
       var n = boxLength(t);
-      var count = el('p', 'help mcount' + (n > 6000 ? ' over' : ''), 'Box: ' + n.toLocaleString('en-GB') + ' of 6,000 characters');
+      // No limit: Discord takes up to 6,000 characters of boxes per message, so longer ones are sent as several messages.
+      var parts = Math.max(1, Math.ceil(((t.description || '').length) / 4000));
+      var count = el('p', 'help mcount', 'Box: ' + n.toLocaleString('en-GB') + ' characters' + (parts > 1 ? ' (sent as ' + parts + ' messages)' : ''));
       if (t.mode !== 'json') side.append(count);
       var dirty = !same(state.draft.settings[s.key], state.original.settings[s.key]);
       var on = state.original.features[f.key] === true;
