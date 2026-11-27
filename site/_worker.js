@@ -37,7 +37,7 @@ const SESSION_TTL = 2 * 60 * 60; // seconds
 const STATE_TTL = 10 * 60;
 const ID_RE = /^\d{5,25}$/;
 const KEY_RE = /^[a-z0-9_]{1,64}$/;
-const MAX_BODY = 200 * 1024; // the whole dashboard of one server fits easily
+const MAX_BODY = 1024 * 1024; // the whole dashboard of one server, long designed messages included
 const te = new TextEncoder();
 const td = new TextDecoder();
 
